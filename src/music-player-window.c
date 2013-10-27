@@ -41,6 +41,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkWidget *prev, *play, *next;
         GtkWidget *volume;
         GtkWidget *search;
+        GtkWidget *status;
 
         self->priv = music_player_window_get_instance_private(self);
 
@@ -90,6 +91,11 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_scale_set_draw_value(GTK_SCALE(volume), FALSE);
         gtk_widget_set_size_request(volume, 100, 10);
         self->volume = volume;
+
+        /* Status area */
+        status = player_status_area_new();
+        gtk_header_bar_set_custom_title(GTK_HEADER_BAR(header), status);
+        self->status = status;
 
         /* search entry */
         search = gtk_search_entry_new();

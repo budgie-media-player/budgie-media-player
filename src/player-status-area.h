@@ -44,14 +44,14 @@ struct _PlayerStatusAreaPrivate {
 
 /* PlayerStatusArea object */
 struct _PlayerStatusArea {
-        GtkEventBoxClass parent;
+        GtkEventBox parent;
 
         PlayerStatusAreaPrivate *priv;
 };
 
 /* PlayerStatusArea class definition */
 struct _PlayerStatusAreaClass {
-        GObjectClass parent_class;
+        GtkEventBoxClass parent_class;
 };
 
 

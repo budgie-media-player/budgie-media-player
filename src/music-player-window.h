@@ -26,6 +26,8 @@
 #include <glib-object.h>
 #include <gtk/gtk.h>
 
+#include "player-status-area.h"
+
 typedef struct _MusicPlayerWindow MusicPlayerWindow;
 typedef struct _MusicPlayerWindowClass   MusicPlayerWindowClass;
 typedef struct _MusicPlayerWindowPrivate MusicPlayerWindowPrivate;
@@ -49,6 +51,8 @@ struct _MusicPlayerWindow {
         GtkWidget *window;
         GtkWidget *header;
         GtkIconTheme *icon_theme;
+
+        PlayerStatusArea *status;
 
         /* Header controls */
         GtkWidget *prev;
