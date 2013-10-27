@@ -39,13 +39,23 @@ typedef struct _MusicPlayerWindowPrivate MusicPlayerWindowPrivate;
 
 /* Private storage */
 struct _MusicPlayerWindowPrivate {
-        GtkWidget *window;
-        GtkWidget *header;
+        unsigned int x; /* Reserved */
 };
 
 /* MusicPlayerWindow object */
 struct _MusicPlayerWindow {
         GObject parent;
+
+        GtkWidget *window;
+        GtkWidget *header;
+        GtkIconTheme *icon_theme;
+
+        /* Header controls */
+        GtkWidget *prev;
+        GtkWidget *play;
+        GtkWidget *next;
+        GtkWidget *volume;
+        GtkWidget *search;
 
         MusicPlayerWindowPrivate *priv;
 };
