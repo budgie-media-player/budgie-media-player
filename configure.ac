@@ -10,7 +10,9 @@ LT_INIT([disable-static])
 PKG_CHECK_MODULES([GOBJECT], [gobject-2.0 >= 2.38.0])
 PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.38.0])
 PKG_CHECK_MODULES([GTK3], [gtk+-3.0 >= 3.10.0])
- 
+# We require GStreamer 1.0
+PKG_CHECK_MODULES([GSTREAMER], [gstreamer-1.0 >= 1.0.10])
+
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES(Makefile src/Makefile)
 AC_OUTPUT

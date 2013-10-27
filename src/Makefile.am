@@ -9,7 +9,9 @@ music_player_SOURCES = \
 
 music_player_CFLAGS = \
 	$(GTK3_CFLAGS) \
+	$(GSTREAMER_CFLAGS) \
 	$(AM_CFLAGS)
 
 music_player_LDADD = \
-	$(GTK3_LIBS)
+	$(GTK3_LIBS) \
+	$(GSTREAMER_LIBS)
