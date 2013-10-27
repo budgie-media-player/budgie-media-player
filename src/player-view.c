@@ -24,6 +24,12 @@
 
 G_DEFINE_TYPE_WITH_PRIVATE(PlayerView, player_view, GTK_TYPE_BIN);
 
+/* Used only in append_track */
+struct TrackAddStore {
+        GtkListStore *model;
+        GtkTreeIter *iter;
+};
+
 /* Initialisation */
 static void player_view_class_init(PlayerViewClass *klass)
 {
@@ -99,4 +105,36 @@ GtkWidget* player_view_new(void)
 
         self = g_object_new(PLAYER_VIEW_TYPE, NULL);
         return GTK_WIDGET(self);
+}
+
+/* Append a track to our model */
+static void append_track(gpointer data, gpointer p_store)
+{
+        struct TrackAddStore* store;
+
+        /* Currently only dealing with a string */
+        gchar *track;
+
+        track = (gchar*)data;
+        store = (struct TrackAddStore*)p_store;
+
+        gtk_list_store_append(store->model, &store->iter);
+        gtk_list_store_set(store->model, &store->iter,
+                PLAYER_COLUMN_NAME, track, -1);
+}
+
+void player_view_set_list(PlayerView *self, GSList* list)
+{
+        struct TrackAddStore store;
+
+        if (!list)
+                return;
+
+        store.model = gtk_list_store_new(PLAYER_COLUMNS,
+                G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
+                G_TYPE_STRING, G_TYPE_STRING);
+        store.iter = 0;
+
+        g_slist_foreach(list, &append_track, (gpointer)&store);
+        gtk_tree_view_set_model(self->tree, store.model);
 }

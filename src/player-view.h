@@ -76,4 +76,10 @@ GType player_view_get_type(void);
 /* PlayerView methods */
 GtkWidget* player_view_new(void);
 
+/**
+ * Set the current list
+ * @param list Current list
+ */
+void player_view_set_list(PlayerView *self, GSList* list);
+
 #endif /* player_view_h */

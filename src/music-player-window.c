@@ -126,6 +126,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         self->priv->tracks = NULL;
 
         search_directory(self->priv->music_directory, &self->priv->tracks, "audio/");
+        player_view_set_list(PLAYER_VIEW(player), self->priv->tracks);
         gtk_widget_show_all(window);
 }
 
