@@ -51,6 +51,11 @@ static void music_player_window_init(MusicPlayerWindow *self)
 
         self->priv = music_player_window_get_instance_private(self);
 
+        /* TODO: Handle this better */
+        self->priv->music_directory = g_get_user_special_dir(G_USER_DIRECTORY_MUSIC);
+        if (!self->priv->music_directory)
+                g_error("No music directory configured");
+
         init_styles(self);
 
         /* Initialize our window */

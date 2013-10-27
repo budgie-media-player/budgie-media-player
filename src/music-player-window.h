@@ -53,7 +53,7 @@ typedef struct _MusicPlayerWindowPrivate MusicPlayerWindowPrivate;
 
 /* Private storage */
 struct _MusicPlayerWindowPrivate {
-        unsigned int x; /* Reserved */
+        const gchar *music_directory;
 };
 
 /* MusicPlayerWindow object */
