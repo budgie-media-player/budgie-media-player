@@ -5,6 +5,8 @@ bin_PROGRAMS = music-player
 music_player_SOURCES = \
 	music-player-window.c \
 	music-player-window.h \
+	player-status-area.c \
+	player-status-area.h \
 	main.c
 
 music_player_CFLAGS = \
