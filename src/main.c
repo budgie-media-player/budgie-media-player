@@ -28,6 +28,7 @@ int main(int argc, char **argv)
 {
         MusicPlayerWindow *window;
         gtk_init(&argc, &argv);
+        gst_init(&argc, &argv);
 
         window = music_player_window_new();
         gtk_main();

@@ -25,6 +25,7 @@
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
+#include <gst/gst.h>
 
 #include "player-status-area.h"
 #include "player-view.h"
@@ -75,6 +76,7 @@ struct _MusicPlayerWindow {
         GtkWidget *next;
         GtkWidget *volume;
         GtkWidget *search;
+        GstElement *gst_player;
 
         GtkCssProvider *css_provider;
         MusicPlayerWindowPrivate *priv;

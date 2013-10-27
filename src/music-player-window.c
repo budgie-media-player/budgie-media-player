@@ -126,6 +126,8 @@ static void music_player_window_init(MusicPlayerWindow *self)
         /* Initialise our tracks list */
         self->priv->tracks = NULL;
 
+        self->gst_player = gst_element_factory_make("playbin", "player");
+
         search_directory(self->priv->music_directory, &self->priv->tracks, "audio/");
         player_view_set_list(PLAYER_VIEW(player), self->priv->tracks);
         gtk_widget_show_all(window);
@@ -141,7 +143,7 @@ static void music_player_window_dispose(GObject *object)
         g_object_unref(self->css_provider);
         if (self->priv->tracks)
                 g_slist_free_full (self->priv->tracks, free_media_info);
-
+        g_object_unref(self->gst_player);
         /* Destruct */
         G_OBJECT_CLASS (music_player_window_parent_class)->dispose (object);
 }
