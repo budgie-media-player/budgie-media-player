@@ -7,6 +7,8 @@ music_player_SOURCES = \
 	music-player-window.h \
 	player-status-area.c \
 	player-status-area.h \
+	player-view.c \
+	player-view.h \
 	main.c
 
 music_player_CFLAGS = \
