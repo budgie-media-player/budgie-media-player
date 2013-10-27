@@ -27,7 +27,7 @@ G_DEFINE_TYPE_WITH_PRIVATE(MusicPlayerWindow, music_player_window, G_TYPE_OBJECT
 
 /* Utilities */
 static GtkWidget* new_button_with_icon(MusicPlayerWindow *self, const gchar *icon_name);
-static void init_styles(void);
+static void init_styles(MusicPlayerWindow *self);
 
 /* Initialisation */
 static void music_player_window_class_init(MusicPlayerWindowClass *klass)
@@ -47,7 +47,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
 
         self->priv = music_player_window_get_instance_private(self);
 
-        init_styles();
+        init_styles(self);
 
         /* Initialize our window */
         window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -121,6 +121,7 @@ static void music_player_window_dispose(GObject *object)
         gtk_window_destroy(self->window);
         g_object_unref(self->window);
         g_object_unref(self->icon_theme);
+        g_object_unref(self->css_provider);
 
         /* Destruct */
         G_OBJECT_CLASS (music_player_window_parent_class)->dispose (object);
@@ -154,7 +155,7 @@ static GtkWidget* new_button_with_icon(MusicPlayerWindow *self, const gchar *ico
         return button;
 }
 
-static void init_styles(void)
+static void init_styles(MusicPlayerWindow *self)
 {
         GtkCssProvider *css_provider;
         GdkScreen *screen;
@@ -165,4 +166,5 @@ static void init_styles(void)
         screen = gdk_screen_get_default();
         gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(css_provider),
                 GTK_STYLE_PROVIDER_PRIORITY_USER);
+        self->css_provider = css_provider;
 }

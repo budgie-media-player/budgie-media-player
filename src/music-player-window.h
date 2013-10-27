@@ -72,6 +72,7 @@ struct _MusicPlayerWindow {
         GtkWidget *volume;
         GtkWidget *search;
 
+        GtkCssProvider *css_provider;
         MusicPlayerWindowPrivate *priv;
 };
 
