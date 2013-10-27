@@ -36,8 +36,44 @@ static void player_view_class_init(PlayerViewClass *klass)
 static void player_view_init(PlayerView *self)
 {
         GtkWidget *scroller;
+        GtkWidget *tree;
+        GtkTreeViewColumn *column;
+        GtkCellRenderer *cell_text;
+
+        /* Create our TreeView */
+        tree = gtk_tree_view_new();
+        self->tree = tree;
+        cell_text = gtk_cell_renderer_text_new();
+
+        /* Name */
+        column = gtk_tree_view_column_new_with_attributes("Name",
+                cell_text, "text", PLAYER_COLUMN_NAME);
+        gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+        /* Time */
+        column = gtk_tree_view_column_new_with_attributes("Time",
+                cell_text, "text", PLAYER_COLUMN_TIME);
+        gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+        /* Artist */
+        column = gtk_tree_view_column_new_with_attributes("Artist",
+                cell_text, "text", PLAYER_COLUMN_ARTIST);
+        gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+        /* Album */
+        column = gtk_tree_view_column_new_with_attributes("Album",
+                cell_text, "text", PLAYER_COLUMN_ALBUM);
+        gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+        /* Genre */
+        column = gtk_tree_view_column_new_with_attributes("Genre",
+                cell_text, "text", PLAYER_COLUMN_GENRE);
+        gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 
         scroller = gtk_scrolled_window_new(NULL, NULL);
+        gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroller),
+                GTK_SHADOW_ETCHED_IN);
+        gtk_container_add(GTK_CONTAINER(scroller), tree);
         gtk_container_add(GTK_CONTAINER(self), scroller);
 }
 
