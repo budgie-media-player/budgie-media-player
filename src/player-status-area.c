@@ -27,7 +27,10 @@ G_DEFINE_TYPE_WITH_PRIVATE(PlayerStatusArea, player_status_area, GTK_TYPE_EVENT_
 /* Initialisation */
 static void player_status_area_class_init(PlayerStatusAreaClass *klass)
 {
-        /* Nothing yet */
+        GObjectClass *g_object_class;
+
+        g_object_class = G_OBJECT_CLASS(klass);
+        g_object_class->dispose = &player_status_area_dispose;
 }
 
 static void player_status_area_init(PlayerStatusArea *self)
@@ -50,8 +53,6 @@ static void player_status_area_dispose(GObject *object)
         PlayerStatusArea *self;
 
         self = PLAYER_STATUS_AREA(object);
-
-        g_object_unref(self->label);
 
         /* Destruct */
         G_OBJECT_CLASS (player_status_area_parent_class)->dispose (object);

@@ -32,7 +32,10 @@ static void init_styles(MusicPlayerWindow *self);
 /* Initialisation */
 static void music_player_window_class_init(MusicPlayerWindowClass *klass)
 {
-        /* Nothing yet */
+        GObjectClass *g_object_class;
+
+        g_object_class = G_OBJECT_CLASS(klass);
+        g_object_class->dispose = &music_player_window_dispose;
 }
 
 static void music_player_window_init(MusicPlayerWindow *self)
@@ -117,9 +120,6 @@ static void music_player_window_dispose(GObject *object)
 
         self = MUSIC_PLAYER_WINDOW(object);
 
-        /* Destroy our window */
-        gtk_window_destroy(self->window);
-        g_object_unref(self->window);
         g_object_unref(self->icon_theme);
         g_object_unref(self->css_provider);
 
