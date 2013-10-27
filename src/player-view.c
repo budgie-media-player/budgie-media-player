@@ -62,24 +62,28 @@ static void player_view_init(PlayerView *self)
         gtk_tree_view_column_set_resizable(column, TRUE);
 
         /* Time */
+        cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Time",
                 cell_text, "text", PLAYER_COLUMN_TIME);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         gtk_tree_view_column_set_resizable(column, TRUE);
 
         /* Artist */
+        cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Artist",
                 cell_text, "text", PLAYER_COLUMN_ARTIST);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         gtk_tree_view_column_set_resizable(column, TRUE);
 
         /* Album */
+        cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Album",
                 cell_text, "text", PLAYER_COLUMN_ALBUM);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         gtk_tree_view_column_set_resizable(column, TRUE);
 
         /* Genre */
+        cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Genre",
                 cell_text, "text", PLAYER_COLUMN_GENRE);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
@@ -123,6 +127,16 @@ static void append_track(gpointer data, gpointer p_store)
         gtk_list_store_append(store->model, &(store->iter));
         gtk_list_store_set(store->model, &(store->iter),
                 PLAYER_COLUMN_NAME, media->title, -1);
+
+        if (media->artist)
+                gtk_list_store_set(store->model, &(store->iter),
+                        PLAYER_COLUMN_ARTIST, media->artist, -1);
+        if (media->album)
+                gtk_list_store_set(store->model, &(store->iter),
+                        PLAYER_COLUMN_ALBUM, media->album, -1);
+        if (media->genre)
+                gtk_list_store_set(store->model, &(store->iter),
+                        PLAYER_COLUMN_GENRE, media->genre, -1);
 }
 
 void player_view_set_list(PlayerView *self, GSList* list)

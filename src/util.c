@@ -23,19 +23,63 @@
 #include <gio/gio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <id3.h>
 
 #include "util.h"
 #include "media.h"
 
+/* Set a field (by pointer) to the requested id3 value */
+static void set_field(char** out, ID3Tag *tag, ID3_FieldID id, ID3_FrameID fid)
+{
+        ID3Frame *frame = NULL;
+        ID3Field *field = NULL;
+        size_t size;
+        char *set;
+
+        frame = ID3Tag_FindFrameWithID(tag, fid);
+        if (frame == NULL)
+                goto end;
+
+        field = ID3Frame_GetField(frame, id);
+        if (field == NULL)
+                goto end;
+
+        size = ID3Field_Size(field);
+        size += 1;
+        set = malloc(size);
+        if (!set)
+                goto end;
+        ID3Field_GetASCII(field, set, size);
+        *out = set;
+end:
+        return;
+}
+
 MediaInfo* media_from_file(gchar *path, GFileInfo *file_info)
 {
         MediaInfo* media;
+        ID3Tag *tag = NULL;
+
         media = malloc(sizeof(MediaInfo));
         memset(media, 0, sizeof(MediaInfo));
 
-        media->title = g_strdup(g_file_info_get_display_name(file_info));
+        tag = ID3Tag_New();
+        ID3Tag_Link(tag, path);
+        if (tag) {
+                set_field(&(media->title), tag, ID3FN_TEXT, ID3FID_TITLE);
+
+                set_field(&(media->artist), tag, ID3FN_TEXT, ID3FID_LEADARTIST);
+
+                set_field(&(media->album), tag, ID3FN_TEXT, ID3FID_ALBUM);
+
+                set_field(&(media->genre), tag, ID3FN_TEXT, ID3FID_CONTENTTYPE);
+        }
+        if (!media->title)
+                media->title = g_strdup(g_file_info_get_display_name(file_info));
         media->path = g_strdup(path);
 
+        if (tag)
+                ID3Tag_Delete(tag);
         return media;
 }
 
