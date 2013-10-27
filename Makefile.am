@@ -1,0 +1,7 @@
+ACLOCAL_AMFLAGS= -I m4
+AM_CFLAGS= -DDATADIR=\"$(pkgdatadir)\"
+
+CLEANFILES =
+
+SUBDIRS = \
+	src
