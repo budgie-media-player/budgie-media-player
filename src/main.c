@@ -22,11 +22,18 @@
  */
 
 #include <stdlib.h>
-#include <gtk/gtk.h>
-#include <glib.h>
+#include "music-player-window.h"
 
 int main(int argc, char **argv)
-{	
+{
+        MusicPlayerWindow *window;
+        gtk_init(&argc, &argv);
+
+        window = music_player_window_new();
+        gtk_main();
+
+        g_object_unref(window);
+
         return EXIT_SUCCESS;
 }
 
