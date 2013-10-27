@@ -50,7 +50,8 @@ static void set_field(char** out, ID3Tag *tag, ID3_FieldID id, ID3_FrameID fid)
         if (!set)
                 goto end;
         ID3Field_GetASCII(field, set, size);
-        *out = set;
+        *out = g_strescape(set, NULL);
+        free(set);
 end:
         return;
 }
