@@ -35,7 +35,10 @@ static void player_view_class_init(PlayerViewClass *klass)
 
 static void player_view_init(PlayerView *self)
 {
-        /* Not yet implemented */
+        GtkWidget *scroller;
+
+        scroller = gtk_scrolled_window_new(NULL, NULL);
+        gtk_container_add(GTK_CONTAINER(self), scroller);
 }
 
 static void player_view_dispose(GObject *object)

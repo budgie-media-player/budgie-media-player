@@ -27,6 +27,7 @@
 #include <gtk/gtk.h>
 
 #include "player-status-area.h"
+#include "player-view.h"
 
 #define TEMP_CSS "PlayerStatusArea {\
     border-radius: 4px;\
@@ -64,6 +65,7 @@ struct _MusicPlayerWindow {
         GtkIconTheme *icon_theme;
 
         GtkWidget *status;
+        GtkWidget *player;
 
         /* Header controls */
         GtkWidget *prev;
