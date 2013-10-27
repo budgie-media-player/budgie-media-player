@@ -60,6 +60,7 @@ static void player_view_init(PlayerView *self)
                 cell_text, "text", PLAYER_COLUMN_NAME);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         gtk_tree_view_column_set_resizable(column, TRUE);
+        gtk_tree_view_column_set_sort_column_id(column, PLAYER_COLUMN_NAME);
 
         /* Time */
         cell_text = gtk_cell_renderer_text_new();
@@ -74,6 +75,7 @@ static void player_view_init(PlayerView *self)
                 cell_text, "text", PLAYER_COLUMN_ARTIST);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         gtk_tree_view_column_set_resizable(column, TRUE);
+        gtk_tree_view_column_set_sort_column_id(column, PLAYER_COLUMN_ARTIST);
 
         /* Album */
         cell_text = gtk_cell_renderer_text_new();
@@ -81,6 +83,7 @@ static void player_view_init(PlayerView *self)
                 cell_text, "text", PLAYER_COLUMN_ALBUM);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         gtk_tree_view_column_set_resizable(column, TRUE);
+        gtk_tree_view_column_set_sort_column_id(column, PLAYER_COLUMN_ALBUM);
 
         /* Genre */
         cell_text = gtk_cell_renderer_text_new();
@@ -88,6 +91,7 @@ static void player_view_init(PlayerView *self)
                 cell_text, "text", PLAYER_COLUMN_GENRE);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         gtk_tree_view_column_set_resizable(column, TRUE);
+        gtk_tree_view_column_set_sort_column_id(column, PLAYER_COLUMN_GENRE);
 
         scroller = gtk_scrolled_window_new(NULL, NULL);
         gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroller),
@@ -152,6 +156,8 @@ void player_view_set_list(PlayerView *self, GSList* list)
                 G_TYPE_STRING, G_TYPE_STRING);
 
         g_slist_foreach(list, &append_track, (gpointer)&store);
+        gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store.model),
+                PLAYER_COLUMN_NAME, GTK_SORT_ASCENDING);
         gtk_tree_view_set_model(GTK_TREE_VIEW(self->tree),
                 GTK_TREE_MODEL(store.model));
 }
