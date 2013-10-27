@@ -9,6 +9,8 @@ music_player_SOURCES = \
 	player-status-area.h \
 	player-view.c \
 	player-view.h \
+	util.c \
+	util.h \
 	main.c
 
 music_player_CFLAGS = \

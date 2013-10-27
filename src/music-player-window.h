@@ -28,6 +28,7 @@
 
 #include "player-status-area.h"
 #include "player-view.h"
+#include "util.h"
 
 #define TEMP_CSS "PlayerStatusArea {\
     border-radius: 4px;\
@@ -54,6 +55,7 @@ typedef struct _MusicPlayerWindowPrivate MusicPlayerWindowPrivate;
 /* Private storage */
 struct _MusicPlayerWindowPrivate {
         const gchar *music_directory;
+        GSList *tracks;
 };
 
 /* MusicPlayerWindow object */

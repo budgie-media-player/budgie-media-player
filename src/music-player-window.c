@@ -122,6 +122,10 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_widget_set_margin_right(search, 10);
         self->search = search;
 
+        /* Initialise our tracks list */
+        self->priv->tracks = NULL;
+
+        search_directory(self->priv->music_directory, &self->priv->tracks, "audio/");
         gtk_widget_show_all(window);
 }
 
@@ -133,6 +137,8 @@ static void music_player_window_dispose(GObject *object)
 
         g_object_unref(self->icon_theme);
         g_object_unref(self->css_provider);
+        if (self->priv->tracks)
+                g_slist_free_full (self->priv->tracks, g_free);
 
         /* Destruct */
         G_OBJECT_CLASS (music_player_window_parent_class)->dispose (object);
