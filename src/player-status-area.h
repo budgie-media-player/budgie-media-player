@@ -46,6 +46,8 @@ struct _PlayerStatusAreaPrivate {
 struct _PlayerStatusArea {
         GtkEventBox parent;
 
+        GtkWidget *label;
+
         PlayerStatusAreaPrivate *priv;
 };
 

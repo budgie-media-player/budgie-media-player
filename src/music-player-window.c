@@ -26,6 +26,7 @@ G_DEFINE_TYPE_WITH_PRIVATE(MusicPlayerWindow, music_player_window, G_TYPE_OBJECT
 
 /* Utilities */
 static GtkWidget* new_button_with_icon(MusicPlayerWindow *self, const gchar *icon_name);
+static void init_styles(void);
 
 /* Initialisation */
 static void music_player_window_class_init(MusicPlayerWindowClass *klass)
@@ -45,13 +46,15 @@ static void music_player_window_init(MusicPlayerWindow *self)
 
         self->priv = music_player_window_get_instance_private(self);
 
+        init_styles();
+
         /* Initialize our window */
         window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
         self->window = window;
 
         /* Set our window up */
         gtk_window_set_title(GTK_WINDOW(window), "Music Player");
-        gtk_widget_set_size_request(window, 900, 500);
+        gtk_widget_set_size_request(window, 1100, 500);
         gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
         gtk_window_set_icon_name(GTK_WINDOW(window), "gnome-music");
         gtk_window_set_wmclass(GTK_WINDOW(window), "MusicPlayer", "Music Player");
@@ -148,4 +151,17 @@ static GtkWidget* new_button_with_icon(MusicPlayerWindow *self, const gchar *ico
         gtk_container_add(GTK_CONTAINER(button), image);
 
         return button;
+}
+
+static void init_styles(void)
+{
+        GtkCssProvider *css_provider;
+        GdkScreen *screen;
+        const gchar *data = TEMP_CSS;
+
+        css_provider = gtk_css_provider_new();
+        gtk_css_provider_load_from_data(css_provider, data, strlen(data), NULL);
+        screen = gdk_screen_get_default();
+        gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(css_provider),
+                GTK_STYLE_PROVIDER_PRIORITY_USER);
 }
