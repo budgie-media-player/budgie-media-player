@@ -49,26 +49,31 @@ static void player_view_init(PlayerView *self)
         column = gtk_tree_view_column_new_with_attributes("Name",
                 cell_text, "text", PLAYER_COLUMN_NAME);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+        gtk_tree_view_column_set_resizable(column, TRUE);
 
         /* Time */
         column = gtk_tree_view_column_new_with_attributes("Time",
                 cell_text, "text", PLAYER_COLUMN_TIME);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+        gtk_tree_view_column_set_resizable(column, TRUE);
 
         /* Artist */
         column = gtk_tree_view_column_new_with_attributes("Artist",
                 cell_text, "text", PLAYER_COLUMN_ARTIST);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+        gtk_tree_view_column_set_resizable(column, TRUE);
 
         /* Album */
         column = gtk_tree_view_column_new_with_attributes("Album",
                 cell_text, "text", PLAYER_COLUMN_ALBUM);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+        gtk_tree_view_column_set_resizable(column, TRUE);
 
         /* Genre */
         column = gtk_tree_view_column_new_with_attributes("Genre",
                 cell_text, "text", PLAYER_COLUMN_GENRE);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+        gtk_tree_view_column_set_resizable(column, TRUE);
 
         scroller = gtk_scrolled_window_new(NULL, NULL);
         gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroller),
