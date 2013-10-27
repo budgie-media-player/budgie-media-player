@@ -63,7 +63,7 @@ struct _MusicPlayerWindow {
         GtkWidget *header;
         GtkIconTheme *icon_theme;
 
-        PlayerStatusArea *status;
+        GtkWidget *status;
 
         /* Header controls */
         GtkWidget *prev;
