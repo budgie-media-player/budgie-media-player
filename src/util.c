@@ -20,9 +20,41 @@
  * 
  * 
  */
+#include <gio/gio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "util.h"
-#include <gio/gio.h>
+#include "media.h"
+
+MediaInfo* media_from_file(gchar *path, GFileInfo *file_info)
+{
+        MediaInfo* media;
+        media = malloc(sizeof(MediaInfo));
+        memset(media, 0, sizeof(MediaInfo));
+
+        media->title = g_strdup(g_file_info_get_display_name(file_info));
+        media->path = g_strdup(path);
+
+        return media;
+}
+
+void free_media_info(gpointer p_info)
+{
+        MediaInfo *info;
+
+        info = (MediaInfo*)p_info;
+        if (info->title)
+                g_free(info->title);
+        if (info->artist)
+                g_free(info->artist);
+        if (info->album)
+                g_free(info->album);
+        if (info->genre)
+                g_free(info->genre);
+        if (info->path)
+                g_free(info->path);
+}
 
 void search_directory(const gchar *path, GSList **list, const gchar *mime_pattern)
 {
@@ -33,6 +65,7 @@ void search_directory(const gchar *path, GSList **list, const gchar *mime_patter
         const gchar *next_path;
         const gchar *file_mime;
         gchar *full_path = NULL;
+        MediaInfo *media;
 
         file = g_file_new_for_path(path);
         type = g_file_query_file_type(file, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL);
@@ -53,8 +86,9 @@ void search_directory(const gchar *path, GSList **list, const gchar *mime_patter
                                 /* Not exactly a regex but it'll do for now */
                                 file_mime = g_file_info_get_content_type(next_file);
                                 if (g_str_has_prefix(file_mime, mime_pattern)) {
+                                        media = media_from_file(full_path, next_file);
                                         /* Probably switch to a new struct in the future */
-                                        *list = g_slist_append(*list, g_strdup(full_path));
+                                        *list = g_slist_append(*list, media);
                                 }
                         }
                         g_free(full_path);

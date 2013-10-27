@@ -21,6 +21,7 @@
  * 
  */
 #include "music-player-window.h"
+#include "media.h"
 #include <string.h>
 
 G_DEFINE_TYPE_WITH_PRIVATE(MusicPlayerWindow, music_player_window, G_TYPE_OBJECT);
@@ -139,7 +140,7 @@ static void music_player_window_dispose(GObject *object)
         g_object_unref(self->icon_theme);
         g_object_unref(self->css_provider);
         if (self->priv->tracks)
-                g_slist_free_full (self->priv->tracks, g_free);
+                g_slist_free_full (self->priv->tracks, free_media_info);
 
         /* Destruct */
         G_OBJECT_CLASS (music_player_window_parent_class)->dispose (object);

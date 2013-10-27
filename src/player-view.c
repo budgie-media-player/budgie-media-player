@@ -20,14 +20,18 @@
  * 
  * 
  */
+#include <stdlib.h>
+#include <string.h>
+
 #include "player-view.h"
+#include "media.h"
 
 G_DEFINE_TYPE_WITH_PRIVATE(PlayerView, player_view, GTK_TYPE_BIN);
 
 /* Used only in append_track */
 struct TrackAddStore {
         GtkListStore *model;
-        GtkTreeIter *iter;
+        GtkTreeIter iter;
 };
 
 /* Initialisation */
@@ -111,21 +115,20 @@ GtkWidget* player_view_new(void)
 static void append_track(gpointer data, gpointer p_store)
 {
         struct TrackAddStore* store;
+        MediaInfo *media;
 
-        /* Currently only dealing with a string */
-        gchar *track;
-
-        track = (gchar*)data;
+        media = (MediaInfo*)data;
         store = (struct TrackAddStore*)p_store;
 
-        gtk_list_store_append(store->model, &store->iter);
-        gtk_list_store_set(store->model, &store->iter,
-                PLAYER_COLUMN_NAME, track, -1);
+        gtk_list_store_append(store->model, &(store->iter));
+        gtk_list_store_set(store->model, &(store->iter),
+                PLAYER_COLUMN_NAME, media->title, -1);
 }
 
 void player_view_set_list(PlayerView *self, GSList* list)
 {
         struct TrackAddStore store;
+        memset(&store, 0, sizeof(struct TrackAddStore));
 
         if (!list)
                 return;
@@ -133,8 +136,8 @@ void player_view_set_list(PlayerView *self, GSList* list)
         store.model = gtk_list_store_new(PLAYER_COLUMNS,
                 G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
                 G_TYPE_STRING, G_TYPE_STRING);
-        store.iter = 0;
 
         g_slist_foreach(list, &append_track, (gpointer)&store);
-        gtk_tree_view_set_model(self->tree, store.model);
+        gtk_tree_view_set_model(GTK_TREE_VIEW(self->tree),
+                GTK_TREE_MODEL(store.model));
 }

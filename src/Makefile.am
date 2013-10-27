@@ -11,6 +11,7 @@ music_player_SOURCES = \
 	player-view.h \
 	util.c \
 	util.h \
+	media.h \
 	main.c
 
 music_player_CFLAGS = \
