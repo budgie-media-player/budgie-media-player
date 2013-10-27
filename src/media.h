@@ -29,7 +29,7 @@ void free_media_info(gpointer p_info);
 
 typedef struct MediaInfo {
         gchar *title;
-        guchar *artist;
+        gchar *artist;
         gchar *album;
         gchar *genre;
         gchar *path;
