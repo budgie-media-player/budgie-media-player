@@ -57,11 +57,11 @@ struct _PlayerStatusAreaClass {
 
 /* Boilerplate GObject code */
 static void player_status_area_class_init(PlayerStatusAreaClass *klass);
-static void player_status_area_init(PlayerStatusArea *reader);
+static void player_status_area_init(PlayerStatusArea *self);
 static void player_status_area_dispose(GObject *object);
 GType player_status_area_get_type(void);
 
 /* PlayerStatusArea methods */
-PlayerStatusArea* player_status_area_new(void);
+GtkWidget* player_status_area_new(void);
 
 #endif /* player_status_area_h */

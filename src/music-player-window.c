@@ -119,10 +119,10 @@ static void music_player_window_dispose(GObject *object)
 /* Utility; return a new MusicPlayerWindow */
 MusicPlayerWindow* music_player_window_new(void)
 {
-        MusicPlayerWindow *reader;
+        MusicPlayerWindow *self;
 
-        reader = g_object_new(MUSIC_PLAYER_WINDOW_TYPE, NULL);
-        return MUSIC_PLAYER_WINDOW(reader);
+        self = g_object_new(MUSIC_PLAYER_WINDOW_TYPE, NULL);
+        return MUSIC_PLAYER_WINDOW(self);
 }
 
 static GtkWidget* new_button_with_icon(MusicPlayerWindow *self, const gchar *icon_name)

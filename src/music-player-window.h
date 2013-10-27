@@ -68,7 +68,7 @@ struct _MusicPlayerWindowClass {
 
 /* Boilerplate GObject code */
 static void music_player_window_class_init(MusicPlayerWindowClass *klass);
-static void music_player_window_init(MusicPlayerWindow *reader);
+static void music_player_window_init(MusicPlayerWindow *self);
 static void music_player_window_dispose(GObject *object);
 GType music_player_window_get_type(void);
 

@@ -46,10 +46,10 @@ static void player_status_area_dispose(GObject *object)
 }
 
 /* Utility; return a new PlayerStatusArea */
-PlayerStatusArea* player_status_area_new(void)
+GtkWidget* player_status_area_new(void)
 {
-        PlayerStatusArea *reader;
+        PlayerStatusArea *self;
 
-        reader = g_object_new(PLAYER_STATUS_AREA_TYPE, NULL);
-        return PLAYER_STATUS_AREA(reader);
+        self = g_object_new(PLAYER_STATUS_AREA_TYPE, NULL);
+        return GTK_WIDGET(self);
 }
