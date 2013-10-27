@@ -23,4 +23,4 @@ music_player_CFLAGS = \
 music_player_LDADD = \
 	$(GTK3_LIBS) \
 	$(GSTREAMER_LIBS) \
-	$(ID3_LIBS)
+	-lid3
