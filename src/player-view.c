@@ -135,12 +135,21 @@ static void append_track(gpointer data, gpointer p_store)
         if (media->artist)
                 gtk_list_store_set(store->model, &(store->iter),
                         PLAYER_COLUMN_ARTIST, media->artist, -1);
+        else
+                gtk_list_store_set(store->model, &(store->iter),
+                        PLAYER_COLUMN_ARTIST, "Unknown Artist", -1);
         if (media->album)
                 gtk_list_store_set(store->model, &(store->iter),
                         PLAYER_COLUMN_ALBUM, media->album, -1);
+        else
+                gtk_list_store_set(store->model, &(store->iter),
+                        PLAYER_COLUMN_ALBUM, "Unknown Album", -1);
         if (media->genre)
                 gtk_list_store_set(store->model, &(store->iter),
                         PLAYER_COLUMN_GENRE, media->genre, -1);
+        else
+                gtk_list_store_set(store->model, &(store->iter),
+                        PLAYER_COLUMN_GENRE, "Unknown Genre", -1);
 }
 
 void player_view_set_list(PlayerView *self, GSList* list)
