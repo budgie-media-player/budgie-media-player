@@ -26,6 +26,8 @@
 #include <glib-object.h>
 #include <gtk/gtk.h>
 
+#include "media.h"
+
 typedef struct _PlayerView PlayerView;
 typedef struct _PlayerViewClass   PlayerViewClass;
 typedef struct _PlayerViewPrivate PlayerViewPrivate;
@@ -44,6 +46,7 @@ typedef enum PlayerViewColumns {
         PLAYER_COLUMN_ARTIST,
         PLAYER_COLUMN_ALBUM,
         PLAYER_COLUMN_GENRE,
+        PLAYER_COLUMN_INFO,
         PLAYER_COLUMNS
 } PlayerViewColumns;
 
@@ -81,5 +84,11 @@ GtkWidget* player_view_new(void);
  * @param list Current list
  */
 void player_view_set_list(PlayerView *self, GSList* list);
+
+/**
+ * Get the currently selected media
+ * @return a MediaInfo representing currently selected media
+ */
+MediaInfo* player_view_get_current_selection(PlayerView *self);
 
 #endif /* player_view_h */

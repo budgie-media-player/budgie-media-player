@@ -30,6 +30,9 @@ G_DEFINE_TYPE_WITH_PRIVATE(MusicPlayerWindow, music_player_window, G_TYPE_OBJECT
 static GtkWidget* new_button_with_icon(MusicPlayerWindow *self, const gchar *icon_name);
 static void init_styles(MusicPlayerWindow *self);
 
+/* Callbacks */
+static void play_cb(GtkWidget *widget, gpointer userdata);
+
 /* Initialisation */
 static void music_player_window_class_init(MusicPlayerWindowClass *klass)
 {
@@ -92,6 +95,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
 
         play = new_button_with_icon(self, "media-playback-start");
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), play);
+        g_signal_connect(play, "clicked", G_CALLBACK(play_cb), (gpointer)self);
         self->play = play;
 
         next = new_button_with_icon(self, "media-seek-forward");
@@ -143,6 +147,10 @@ static void music_player_window_dispose(GObject *object)
         g_object_unref(self->css_provider);
         if (self->priv->tracks)
                 g_slist_free_full (self->priv->tracks, free_media_info);
+
+        if (self->priv->uri)
+                g_free(self->priv->uri);
+
         g_object_unref(self->gst_player);
         /* Destruct */
         G_OBJECT_CLASS (music_player_window_parent_class)->dispose (object);
@@ -188,4 +196,20 @@ static void init_styles(MusicPlayerWindow *self)
         gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(css_provider),
                 GTK_STYLE_PROVIDER_PRIORITY_USER);
         self->css_provider = css_provider;
+}
+
+static void play_cb(GtkWidget *widget, gpointer userdata)
+{
+        MusicPlayerWindow *self;
+        MediaInfo *media = NULL;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+        media = player_view_get_current_selection(self->player);
+        if (!media) /* Revisit */
+                return;
+        if (self->priv->uri)
+                g_free(self->priv->uri);
+        self->priv->uri = g_filename_to_uri(media->path, NULL, NULL);
+        g_object_set(self->gst_player, "uri", self->priv->uri, NULL);
+        gst_element_set_state(self->gst_player, GST_STATE_PLAYING);
 }

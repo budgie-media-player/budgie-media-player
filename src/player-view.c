@@ -24,7 +24,6 @@
 #include <string.h>
 
 #include "player-view.h"
-#include "media.h"
 
 G_DEFINE_TYPE_WITH_PRIVATE(PlayerView, player_view, GTK_TYPE_BIN);
 
@@ -152,6 +151,9 @@ static void append_track(gpointer data, gpointer p_store)
         else
                 gtk_list_store_set(store->model, &(store->iter),
                         PLAYER_COLUMN_GENRE, "Unknown Genre", -1);
+
+        gtk_list_store_set(store->model, &(store->iter),
+                PLAYER_COLUMN_INFO, media, -1);
 }
 
 void player_view_set_list(PlayerView *self, GSList* list)
@@ -164,11 +166,30 @@ void player_view_set_list(PlayerView *self, GSList* list)
 
         store.model = gtk_list_store_new(PLAYER_COLUMNS,
                 G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
-                G_TYPE_STRING, G_TYPE_STRING);
+                G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 
         g_slist_foreach(list, &append_track, (gpointer)&store);
         gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store.model),
                 PLAYER_COLUMN_NAME, GTK_SORT_ASCENDING);
         gtk_tree_view_set_model(GTK_TREE_VIEW(self->tree),
                 GTK_TREE_MODEL(store.model));
+}
+
+MediaInfo* player_view_get_current_selection(PlayerView *self)
+{
+        MediaInfo *media;
+        GtkTreeSelection *selection = NULL;
+        GtkTreeModel *model = NULL;
+        GtkTreeIter iter;
+        GValue value = G_VALUE_INIT;
+
+        selection = gtk_tree_view_get_selection(self->tree);
+        if (!gtk_tree_selection_get_selected(selection, &model, &iter))
+                return NULL;
+        gtk_tree_model_get_value(model, &iter, PLAYER_COLUMN_INFO, &value);
+
+        media = g_value_get_pointer(&value);
+        g_value_unset(&value);
+
+        return media;
 }

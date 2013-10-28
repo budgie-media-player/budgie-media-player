@@ -57,6 +57,7 @@ typedef struct _MusicPlayerWindowPrivate MusicPlayerWindowPrivate;
 struct _MusicPlayerWindowPrivate {
         const gchar *music_directory;
         GSList *tracks;
+        gchar *uri;
 };
 
 /* MusicPlayerWindow object */
