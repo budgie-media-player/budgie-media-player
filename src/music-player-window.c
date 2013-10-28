@@ -33,6 +33,8 @@ static void init_styles(MusicPlayerWindow *self);
 /* Callbacks */
 static void play_cb(GtkWidget *widget, gpointer userdata);
 static void pause_cb(GtkWidget *widget, gpointer userdata);
+static void next_cb(GtkWidget *widget, gpointer userdata);
+static void prev_cb(GtkWidget *widget, gpointer userdata);
 
 /* Initialisation */
 static void music_player_window_class_init(MusicPlayerWindowClass *klass)
@@ -90,6 +92,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         /* Media control buttons, placed on headerbar */
         prev = new_button_with_icon(self, "media-seek-backward");
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), prev);
+        g_signal_connect(prev, "clicked", G_CALLBACK(prev_cb), (gpointer)self);
         self->prev = prev;
         /* Set some left padding */
         gtk_widget_set_margin_left(prev, 20);
@@ -106,6 +109,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
 
         next = new_button_with_icon(self, "media-seek-forward");
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), next);
+        g_signal_connect(next, "clicked", G_CALLBACK(next_cb), (gpointer)self);
         self->next = next;
 
         /* volume control */
@@ -239,4 +243,34 @@ static void pause_cb(GtkWidget *widget, gpointer userdata)
         gst_element_set_state(self->gst_player, GST_STATE_PAUSED);
         gtk_widget_hide(self->pause);
         gtk_widget_show(self->play);
+}
+
+static void next_cb(GtkWidget *widget, gpointer userdata)
+{
+        MediaInfo *next = NULL;
+        MusicPlayerWindow *self;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+        next = player_view_get_next_item(self->player);
+        if (!next) /* Revisit */
+                return;
+
+        player_view_set_current_selection(self->player, next);
+        /* In future only do this if not paused */
+        play_cb(NULL, userdata);
+}
+
+static void prev_cb(GtkWidget *widget, gpointer userdata)
+{
+        MediaInfo *prev = NULL;
+        MusicPlayerWindow *self;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+        prev = player_view_get_previous_item(self->player);
+        if (!prev) /* Revisit */
+                return;
+
+        player_view_set_current_selection(self->player, prev);
+        /* In future only do this if not paused */
+        play_cb(NULL, userdata);
 }

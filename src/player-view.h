@@ -91,4 +91,23 @@ void player_view_set_list(PlayerView *self, GSList* list);
  */
 MediaInfo* player_view_get_current_selection(PlayerView *self);
 
+/**
+ * Set the current media to play
+ * @param media A MediaInfo to play
+ */
+void player_view_set_current_selection(PlayerView *self, MediaInfo *info);
+
+/**
+ * Get the next media in the queue
+ * @return a MediaInfo for the next item, or NULL
+ */
+MediaInfo* player_view_get_next_item(PlayerView *self);
+
+/**
+ * Get the previous media in the queue
+ * @return a MediaInfo for the next item, or NULL
+ */
+MediaInfo* player_view_get_previous_item(PlayerView *self);
+
+
 #endif /* player_view_h */

@@ -193,3 +193,77 @@ MediaInfo* player_view_get_current_selection(PlayerView *self)
 
         return media;
 }
+
+void player_view_set_current_selection(PlayerView *self, MediaInfo *media)
+{
+        GtkTreeModel *model;
+        GtkTreeIter iter;
+        GtkTreeIter *row = NULL;
+        gboolean found = TRUE;
+        GValue value = G_VALUE_INIT;
+        GtkTreeSelection *selection = NULL;
+        MediaInfo *test;
+
+        model = gtk_tree_view_get_model(self->tree);
+        gtk_tree_model_get_iter_first(model, &iter);
+        while (found) {
+                gtk_tree_model_get_value(model, &iter, PLAYER_COLUMN_INFO, &value);
+                test = g_value_get_pointer(&value);
+                g_value_unset(&value);
+
+                if (test == media) {
+                        row = &iter;
+                        break;
+                }
+                found = gtk_tree_model_iter_next(model, &iter);
+        }
+        if (row) {
+                selection = gtk_tree_view_get_selection(self->tree);
+                gtk_tree_selection_select_iter(selection, row);
+        }
+}
+
+MediaInfo* player_view_get_next_item(PlayerView *self)
+{
+        MediaInfo *media;
+        GtkTreeSelection *selection = NULL;
+        GtkTreeModel *model = NULL;
+        GtkTreeIter iter;
+        GValue value = G_VALUE_INIT;
+
+        selection = gtk_tree_view_get_selection(self->tree);
+        if (!gtk_tree_selection_get_selected(selection, &model, &iter))
+                return NULL;
+
+
+        if (!gtk_tree_model_iter_next(model, &iter))
+                return NULL;
+        gtk_tree_model_get_value(model, &iter, PLAYER_COLUMN_INFO, &value);
+
+        media = g_value_get_pointer(&value);
+        g_value_unset(&value);
+
+        return media;
+}
+
+MediaInfo* player_view_get_previous_item(PlayerView *self)
+{
+        MediaInfo *media;
+        GtkTreeSelection *selection = NULL;
+        GtkTreeModel *model = NULL;
+        GtkTreeIter iter;
+        GValue value = G_VALUE_INIT;
+
+        selection = gtk_tree_view_get_selection(self->tree);
+        if (!gtk_tree_selection_get_selected(selection, &model, &iter))
+                return NULL;
+
+        if (!gtk_tree_model_iter_previous(model, &iter))
+                return NULL;
+        gtk_tree_model_get_value(model, &iter, PLAYER_COLUMN_INFO, &value);
+
+        media = g_value_get_pointer(&value);
+        g_value_unset(&value);
+
+        return media;
+}
