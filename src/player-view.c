@@ -205,6 +205,7 @@ void player_view_set_current_selection(PlayerView *self, MediaInfo *media)
 {
         GtkTreeModel *model;
         GtkTreeIter iter;
+        GtkTreePath *path;
         GtkTreeIter row;
         gboolean found = TRUE;
         GValue value = G_VALUE_INIT;
@@ -229,6 +230,10 @@ void player_view_set_current_selection(PlayerView *self, MediaInfo *media)
                 }
                 found = gtk_tree_model_iter_next(model, &iter);
         }
+        path = gtk_tree_model_get_path(model, &row);
+        gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(self->tree), path, NULL,
+                TRUE, 0.5f, 0.5f);
+        gtk_tree_path_free(path);
         selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self->tree));
         gtk_tree_selection_select_iter(selection, &row);
 }
