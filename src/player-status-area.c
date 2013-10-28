@@ -44,6 +44,7 @@ static void player_status_area_init(PlayerStatusArea *self)
         label = gtk_label_new("MusicPlayer");
         gtk_container_add(GTK_CONTAINER(self), label);
         gtk_widget_set_name(label, "title");
+        gtk_misc_set_alignment(GTK_MISC(label), 0.5, 0.5);
         self->label = label;
 
         context = gtk_widget_get_style_context(label);
@@ -57,6 +58,8 @@ static void player_status_area_dispose(GObject *object)
         PlayerStatusArea *self;
 
         self = PLAYER_STATUS_AREA(object);
+        if (self->priv->title_string)
+                g_free(self->priv->title_string);
 
         /* Destruct */
         G_OBJECT_CLASS (player_status_area_parent_class)->dispose (object);
@@ -69,4 +72,17 @@ GtkWidget* player_status_area_new(void)
 
         self = g_object_new(PLAYER_STATUS_AREA_TYPE, NULL);
         return GTK_WIDGET(self);
+}
+
+void player_status_area_set_media(PlayerStatusArea *self, MediaInfo *info)
+{
+        if (self->priv->title_string)
+                g_free(self->priv->title_string);
+
+        if (info->artist)
+                self->priv->title_string = g_strdup_printf("<big>%s</big>\n<small>%s</small>",
+                        info->title, info->artist);
+        else
+                self->priv->title_string = g_strdup_printf("<big>%s</big>\n", info->title);
+        gtk_label_set_markup(GTK_LABEL(self->label), self->priv->title_string);
 }

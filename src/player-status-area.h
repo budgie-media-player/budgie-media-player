@@ -26,6 +26,8 @@
 #include <glib-object.h>
 #include <gtk/gtk.h>
 
+#include "media.h"
+
 typedef struct _PlayerStatusArea PlayerStatusArea;
 typedef struct _PlayerStatusAreaClass   PlayerStatusAreaClass;
 typedef struct _PlayerStatusAreaPrivate PlayerStatusAreaPrivate;
@@ -39,7 +41,7 @@ typedef struct _PlayerStatusAreaPrivate PlayerStatusAreaPrivate;
 
 /* Private storage */
 struct _PlayerStatusAreaPrivate {
-        unsigned int x; /* Reserved */
+        gchar *title_string;
 };
 
 /* PlayerStatusArea object */
@@ -65,5 +67,7 @@ GType player_status_area_get_type(void);
 
 /* PlayerStatusArea methods */
 GtkWidget* player_status_area_new(void);
+
+void player_status_area_set_media(PlayerStatusArea *self, MediaInfo *info);
 
 #endif /* player_status_area_h */

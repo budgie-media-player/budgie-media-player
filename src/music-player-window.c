@@ -244,6 +244,9 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         player_view_set_current_selection(PLAYER_VIEW(self->player), media);
         gtk_widget_hide(self->play);
         gtk_widget_show(self->pause);
+
+        /* Update status label */
+        player_status_area_set_media(PLAYER_STATUS_AREA(self->status), media);
 }
 
 static void pause_cb(GtkWidget *widget, gpointer userdata)
