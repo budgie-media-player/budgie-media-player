@@ -210,7 +210,7 @@ static void init_styles(MusicPlayerWindow *self)
 {
         GtkCssProvider *css_provider;
         GdkScreen *screen;
-        const gchar *data = TEMP_CSS;
+        const gchar *data = PLAYER_CSS;
 
         css_provider = gtk_css_provider_new();
         gtk_css_provider_load_from_data(css_provider, data, strlen(data), NULL);

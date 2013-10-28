@@ -31,7 +31,7 @@
 #include "player-view.h"
 #include "util.h"
 
-#define TEMP_CSS "PlayerStatusArea {\
+#define PLAYER_CSS "PlayerStatusArea {\
     border-radius: 4px;\
     border-width: 1px;\
     background-image: linear-gradient(to bottom,\
