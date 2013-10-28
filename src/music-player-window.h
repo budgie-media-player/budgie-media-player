@@ -58,6 +58,7 @@ struct _MusicPlayerWindowPrivate {
         const gchar *music_directory;
         GSList *tracks;
         gchar *uri;
+        gulong volume_id;
 };
 
 /* MusicPlayerWindow object */

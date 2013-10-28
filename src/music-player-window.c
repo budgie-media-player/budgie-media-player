@@ -35,6 +35,8 @@ static void play_cb(GtkWidget *widget, gpointer userdata);
 static void pause_cb(GtkWidget *widget, gpointer userdata);
 static void next_cb(GtkWidget *widget, gpointer userdata);
 static void prev_cb(GtkWidget *widget, gpointer userdata);
+static void volume_cb(GtkWidget *widget, gpointer userdata);
+static gboolean refresh_cb(gpointer userdata);
 
 /* GStreamer callbacks */
 static void _gst_eos_cb (GstBus *bus, GstMessage *msg, gpointer userdata);
@@ -118,11 +120,13 @@ static void music_player_window_init(MusicPlayerWindow *self)
 
         /* volume control */
         volume = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,
-                0, 100, 1);
+                0.0, 1.0, 1.0/100);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), volume);
         gtk_scale_set_draw_value(GTK_SCALE(volume), FALSE);
         gtk_widget_set_size_request(volume, 100, 10);
         gtk_widget_set_can_focus(volume, FALSE);
+        self->priv->volume_id = g_signal_connect(volume, "value-changed",
+                G_CALLBACK(volume_cb), (gpointer)self);
         self->volume = volume;
 
         /* Status area */
@@ -150,11 +154,14 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gst_bus_add_signal_watch(bus);
         g_signal_connect(bus, "message::eos", G_CALLBACK(_gst_eos_cb), (gpointer)self);
         g_object_unref(bus);
+        gst_element_set_state(self->gst_player, GST_STATE_NULL);
 
         search_directory(self->priv->music_directory, &self->priv->tracks, "audio/");
         player_view_set_list(PLAYER_VIEW(player), self->priv->tracks);
         gtk_widget_show_all(window);
         gtk_widget_hide(pause);
+
+        g_timeout_add(1000, refresh_cb, (gpointer)self);
 }
 
 static void music_player_window_dispose(GObject *object)
@@ -290,6 +297,33 @@ static void prev_cb(GtkWidget *widget, gpointer userdata)
         player_view_set_current_selection(PLAYER_VIEW(self->player), prev);
         /* In future only do this if not paused */
         play_cb(NULL, userdata);
+}
+
+static void volume_cb(GtkWidget *widget, gpointer userdata)
+{
+        MusicPlayerWindow *self;
+        gdouble volume_level;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+        volume_level = gtk_range_get_value(GTK_RANGE(self->volume));
+        g_object_set(self->gst_player, "volume", volume_level, NULL);
+}
+
+static gboolean refresh_cb(gpointer userdata) {
+        MusicPlayerWindow *self;
+        gdouble volume_level;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+        g_object_get(self->gst_player, "volume", &volume_level, NULL);
+
+        /* Don't cause events for this, endless volume battle */
+        g_signal_handler_block(self->volume, self->priv->volume_id);
+        gtk_range_set_value(GTK_RANGE(self->volume), volume_level);
+
+        /* Reenable events */
+        g_signal_handler_unblock(self->volume, self->priv->volume_id);
+
+        return TRUE;
 }
 
 /* GStreamer callbacks */
