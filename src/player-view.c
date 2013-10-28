@@ -216,16 +216,16 @@ void player_view_set_current_selection(PlayerView *self, MediaInfo *media)
             
         gtk_tree_model_get_iter_first(model, &iter);
         while (found) {
-                gtk_tree_model_get_value(model, &iter, PLAYER_COLUMN_INFO, &value);
+                gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, PLAYER_COLUMN_INFO, &value);
                 test = g_value_get_pointer(&value);
                 g_value_unset(&value);
 
                 if (test == media) {
                         row = iter;
-                        gtk_list_store_set(model, &iter,
+                        gtk_list_store_set(GTK_LIST_STORE(model), &iter,
                                 PLAYER_COLUMN_STATUS, PLAY_CHAR, -1);
                 } else {
-                        gtk_list_store_set(model, &iter,
+                        gtk_list_store_set(GTK_LIST_STORE(model), &iter,
                                 PLAYER_COLUMN_STATUS, "", -1);
                 }
                 found = gtk_tree_model_iter_next(model, &iter);
