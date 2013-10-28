@@ -1,5 +1,5 @@
 AC_INIT([Music Player], 1, [ikey.doherty@gmail.com])
-AM_INIT_AUTOMAKE([foreign -Wno-portability])
+AM_INIT_AUTOMAKE([foreign -Wno-portability no-dist-gzip dist-xz])
 AC_PROG_CC
 LT_PREREQ(2.2)
 AC_CONFIG_HEADERS([config.h])
