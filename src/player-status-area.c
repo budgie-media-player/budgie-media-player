@@ -36,6 +36,7 @@ static void player_status_area_class_init(PlayerStatusAreaClass *klass)
 static void player_status_area_init(PlayerStatusArea *self)
 {
         GtkWidget *label;
+        GtkStyleContext *context;
 
         self->priv = player_status_area_get_instance_private(self);
 
@@ -44,6 +45,9 @@ static void player_status_area_init(PlayerStatusArea *self)
         gtk_container_add(GTK_CONTAINER(self), label);
         gtk_widget_set_name(label, "title");
         self->label = label;
+
+        context = gtk_widget_get_style_context(label);
+        gtk_style_context_add_class(context, "dim-label");
 
         gtk_widget_set_size_request(GTK_WIDGET(self), 300, 70);
 }

@@ -35,8 +35,8 @@
     border-radius: 4px;\
     border-width: 1px;\
     background-image: linear-gradient(to bottom,\
-                                      shade(shade(#cecece, 1.02), 1.05),\
-                                      shade(shade(#cecece, 1.02), 0.97)\
+                                      shade(shade(@theme_bg_color, 0.89), 1.05),\
+                                      shade(shade(@theme_bg_color, 0.96), 0.97)\
                                       );\
 }\
 #title {\
