@@ -56,13 +56,13 @@ static void player_view_init(PlayerView *self)
 
         /* Playing column */
         column = gtk_tree_view_column_new_with_attributes("",
-                cell_text, "markup", PLAYER_COLUMN_STATUS);
+                cell_text, "markup", PLAYER_COLUMN_STATUS, NULL);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 
         /* Name */
         cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Name",
-                cell_text, "text", PLAYER_COLUMN_NAME);
+                cell_text, "text", PLAYER_COLUMN_NAME, NULL);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         g_object_set(cell_text, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
         gtk_tree_view_column_set_resizable(column, TRUE);
@@ -71,14 +71,14 @@ static void player_view_init(PlayerView *self)
         /* Time */
         cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Time",
-                cell_text, "text", PLAYER_COLUMN_TIME);
+                cell_text, "text", PLAYER_COLUMN_TIME, NULL);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         gtk_tree_view_column_set_resizable(column, TRUE);
 
         /* Artist */
         cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Artist",
-                cell_text, "text", PLAYER_COLUMN_ARTIST);
+                cell_text, "text", PLAYER_COLUMN_ARTIST, NULL);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         gtk_tree_view_column_set_resizable(column, TRUE);
         gtk_tree_view_column_set_sort_column_id(column, PLAYER_COLUMN_ARTIST);
@@ -86,7 +86,7 @@ static void player_view_init(PlayerView *self)
         /* Album */
         cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Album",
-                cell_text, "text", PLAYER_COLUMN_ALBUM);
+                cell_text, "text", PLAYER_COLUMN_ALBUM, NULL);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         gtk_tree_view_column_set_resizable(column, TRUE);
         gtk_tree_view_column_set_sort_column_id(column, PLAYER_COLUMN_ALBUM);
@@ -94,7 +94,7 @@ static void player_view_init(PlayerView *self)
         /* Genre */
         cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Genre",
-                cell_text, "text", PLAYER_COLUMN_GENRE);
+                cell_text, "text", PLAYER_COLUMN_GENRE, NULL);
         g_object_set(cell_text, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         gtk_tree_view_column_set_resizable(column, TRUE);
