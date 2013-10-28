@@ -32,6 +32,7 @@ static void init_styles(MusicPlayerWindow *self);
 
 /* Callbacks */
 static void play_cb(GtkWidget *widget, gpointer userdata);
+static void pause_cb(GtkWidget *widget, gpointer userdata);
 
 /* Initialisation */
 static void music_player_window_class_init(MusicPlayerWindowClass *klass)
@@ -47,7 +48,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkWidget *window;
         GtkWidget *header;
         /* header buttons */
-        GtkWidget *prev, *play, *next;
+        GtkWidget *prev, *play, *pause, *next;
         GtkWidget *volume;
         GtkWidget *search;
         GtkWidget *status;
@@ -98,6 +99,11 @@ static void music_player_window_init(MusicPlayerWindow *self)
         g_signal_connect(play, "clicked", G_CALLBACK(play_cb), (gpointer)self);
         self->play = play;
 
+        pause = new_button_with_icon(self, "media-playback-pause");
+        gtk_header_bar_pack_start(GTK_HEADER_BAR(header), pause);
+        g_signal_connect(pause, "clicked", G_CALLBACK(pause_cb), (gpointer)self);
+        self->pause = pause;
+
         next = new_button_with_icon(self, "media-seek-forward");
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), next);
         self->next = next;
@@ -135,6 +141,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         search_directory(self->priv->music_directory, &self->priv->tracks, "audio/");
         player_view_set_list(PLAYER_VIEW(player), self->priv->tracks);
         gtk_widget_show_all(window);
+        gtk_widget_hide(pause);
 }
 
 static void music_player_window_dispose(GObject *object)
@@ -202,14 +209,34 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
 {
         MusicPlayerWindow *self;
         MediaInfo *media = NULL;
+        gchar *uri;
 
         self = MUSIC_PLAYER_WINDOW(userdata);
         media = player_view_get_current_selection(self->player);
         if (!media) /* Revisit */
                 return;
+
+        uri = g_filename_to_uri(media->path, NULL, NULL);
+        if (g_strcmp0(uri, self->priv->uri) != 0) {
+                /* Media change between pausing */
+                gst_element_set_state(self->gst_player, GST_STATE_NULL);
+        }
         if (self->priv->uri)
                 g_free(self->priv->uri);
-        self->priv->uri = g_filename_to_uri(media->path, NULL, NULL);
+        self->priv->uri = uri;
         g_object_set(self->gst_player, "uri", self->priv->uri, NULL);
         gst_element_set_state(self->gst_player, GST_STATE_PLAYING);
+        gtk_widget_hide(self->play);
+        gtk_widget_show(self->pause);
+}
+
+static void pause_cb(GtkWidget *widget, gpointer userdata)
+{
+        MusicPlayerWindow *self;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+
+        gst_element_set_state(self->gst_player, GST_STATE_PAUSED);
+        gtk_widget_hide(self->pause);
+        gtk_widget_show(self->play);
 }

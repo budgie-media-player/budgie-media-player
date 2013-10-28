@@ -74,6 +74,7 @@ struct _MusicPlayerWindow {
         /* Header controls */
         GtkWidget *prev;
         GtkWidget *play;
+        GtkWidget *pause;
         GtkWidget *next;
         GtkWidget *volume;
         GtkWidget *search;
