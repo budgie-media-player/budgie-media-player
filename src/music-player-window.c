@@ -36,6 +36,9 @@ static void pause_cb(GtkWidget *widget, gpointer userdata);
 static void next_cb(GtkWidget *widget, gpointer userdata);
 static void prev_cb(GtkWidget *widget, gpointer userdata);
 
+/* GStreamer callbacks */
+static void _gst_eos_cb (GstBus *bus, GstMessage *msg, gpointer userdata);
+
 /* Initialisation */
 static void music_player_window_class_init(MusicPlayerWindowClass *klass)
 {
@@ -55,6 +58,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkWidget *search;
         GtkWidget *status;
         GtkWidget *player;
+        GstBus *bus;
 
         self->priv = music_player_window_get_instance_private(self);
 
@@ -141,6 +145,10 @@ static void music_player_window_init(MusicPlayerWindow *self)
         self->priv->tracks = NULL;
 
         self->gst_player = gst_element_factory_make("playbin", "player");
+        bus = gst_element_get_bus(self->gst_player);
+        gst_bus_add_signal_watch(bus);
+        g_signal_connect(bus, "message::eos", G_CALLBACK(_gst_eos_cb), (gpointer)self);
+        g_object_unref(bus);
 
         search_directory(self->priv->music_directory, &self->priv->tracks, "audio/");
         player_view_set_list(PLAYER_VIEW(player), self->priv->tracks);
@@ -273,4 +281,11 @@ static void prev_cb(GtkWidget *widget, gpointer userdata)
         player_view_set_current_selection(PLAYER_VIEW(self->player), prev);
         /* In future only do this if not paused */
         play_cb(NULL, userdata);
+}
+
+/* GStreamer callbacks */
+static void _gst_eos_cb (GstBus *bus, GstMessage *msg, gpointer userdata)
+{
+        /* Skip to next track */
+        next_cb(NULL, userdata);
 }
