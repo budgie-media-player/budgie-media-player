@@ -122,6 +122,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), volume);
         gtk_scale_set_draw_value(GTK_SCALE(volume), FALSE);
         gtk_widget_set_size_request(volume, 100, 10);
+        gtk_widget_set_can_focus(volume, FALSE);
         self->volume = volume;
 
         /* Status area */
@@ -198,6 +199,7 @@ static GtkWidget* new_button_with_icon(MusicPlayerWindow *self, const gchar *ico
 
         /* Create the button */
         button = gtk_button_new();
+        gtk_widget_set_can_focus(button, FALSE);
         gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
         gtk_container_add(GTK_CONTAINER(button), image);
 
