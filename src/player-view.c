@@ -54,7 +54,13 @@ static void player_view_init(PlayerView *self)
         self->tree = tree;
         cell_text = gtk_cell_renderer_text_new();
 
+        /* Playing column */
+        column = gtk_tree_view_column_new_with_attributes("",
+                cell_text, "markup", PLAYER_COLUMN_STATUS);
+        gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
         /* Name */
+        cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Name",
                 cell_text, "text", PLAYER_COLUMN_NAME);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
@@ -165,6 +171,7 @@ void player_view_set_list(PlayerView *self, GSList* list)
                 return;
 
         store.model = gtk_list_store_new(PLAYER_COLUMNS,
+                G_TYPE_STRING, /* Playing char */
                 G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
                 G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 
@@ -198,13 +205,14 @@ void player_view_set_current_selection(PlayerView *self, MediaInfo *media)
 {
         GtkTreeModel *model;
         GtkTreeIter iter;
-        GtkTreeIter *row = NULL;
+        GtkTreeIter row;
         gboolean found = TRUE;
         GValue value = G_VALUE_INIT;
         GtkTreeSelection *selection = NULL;
         MediaInfo *test;
 
         model = gtk_tree_view_get_model(GTK_TREE_VIEW(self->tree));
+            
         gtk_tree_model_get_iter_first(model, &iter);
         while (found) {
                 gtk_tree_model_get_value(model, &iter, PLAYER_COLUMN_INFO, &value);
@@ -212,15 +220,17 @@ void player_view_set_current_selection(PlayerView *self, MediaInfo *media)
                 g_value_unset(&value);
 
                 if (test == media) {
-                        row = &iter;
-                        break;
+                        row = iter;
+                        gtk_list_store_set(model, &iter,
+                                PLAYER_COLUMN_STATUS, PLAY_CHAR, -1);
+                } else {
+                        gtk_list_store_set(model, &iter,
+                                PLAYER_COLUMN_STATUS, "", -1);
                 }
                 found = gtk_tree_model_iter_next(model, &iter);
         }
-        if (row) {
-                selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self->tree));
-                gtk_tree_selection_select_iter(selection, row);
-        }
+        selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self->tree));
+        gtk_tree_selection_select_iter(selection, &row);
 }
 
 MediaInfo* player_view_get_next_item(PlayerView *self)

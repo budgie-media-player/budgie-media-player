@@ -39,9 +39,12 @@ typedef struct _PlayerViewPrivate PlayerViewPrivate;
 #define IS_PLAYER_VIEW_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), PLAYER_VIEW_TYPE))
 #define PLAYER_VIEW_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), PLAYER_VIEW_TYPE, PlayerViewClass))
 
+#define PLAY_CHAR "<span size='x-large'>\u25B6</span>"
+
 /* TreeView columns */
 typedef enum PlayerViewColumns {
-        PLAYER_COLUMN_NAME = 0,
+        PLAYER_COLUMN_STATUS = 0,
+        PLAYER_COLUMN_NAME,
         PLAYER_COLUMN_TIME,
         PLAYER_COLUMN_ARTIST,
         PLAYER_COLUMN_ALBUM,

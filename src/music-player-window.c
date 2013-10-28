@@ -238,6 +238,7 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         self->priv->uri = uri;
         g_object_set(self->gst_player, "uri", self->priv->uri, NULL);
         gst_element_set_state(self->gst_player, GST_STATE_PLAYING);
+        player_view_set_current_selection(PLAYER_VIEW(self->player), media);
         gtk_widget_hide(self->play);
         gtk_widget_show(self->pause);
 }
@@ -263,6 +264,7 @@ static void next_cb(GtkWidget *widget, gpointer userdata)
         if (!next) /* Revisit */
                 return;
 
+        gst_element_set_state(self->gst_player, GST_STATE_NULL);
         player_view_set_current_selection(PLAYER_VIEW(self->player), next);
         /* In future only do this if not paused */
         play_cb(NULL, userdata);
@@ -278,6 +280,7 @@ static void prev_cb(GtkWidget *widget, gpointer userdata)
         if (!prev) /* Revisit */
                 return;
 
+        gst_element_set_state(self->gst_player, GST_STATE_NULL);
         player_view_set_current_selection(PLAYER_VIEW(self->player), prev);
         /* In future only do this if not paused */
         play_cb(NULL, userdata);
