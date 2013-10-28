@@ -216,7 +216,7 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         gchar *uri;
 
         self = MUSIC_PLAYER_WINDOW(userdata);
-        media = player_view_get_current_selection(self->player);
+        media = player_view_get_current_selection(PLAYER_VIEW(self->player));
         if (!media) /* Revisit */
                 return;
 
@@ -251,11 +251,11 @@ static void next_cb(GtkWidget *widget, gpointer userdata)
         MusicPlayerWindow *self;
 
         self = MUSIC_PLAYER_WINDOW(userdata);
-        next = player_view_get_next_item(self->player);
+        next = player_view_get_next_item(PLAYER_VIEW(self->player));
         if (!next) /* Revisit */
                 return;
 
-        player_view_set_current_selection(self->player, next);
+        player_view_set_current_selection(PLAYER_VIEW(self->player), next);
         /* In future only do this if not paused */
         play_cb(NULL, userdata);
 }
@@ -266,11 +266,11 @@ static void prev_cb(GtkWidget *widget, gpointer userdata)
         MusicPlayerWindow *self;
 
         self = MUSIC_PLAYER_WINDOW(userdata);
-        prev = player_view_get_previous_item(self->player);
+        prev = player_view_get_previous_item(PLAYER_VIEW(self->player));
         if (!prev) /* Revisit */
                 return;
 
-        player_view_set_current_selection(self->player, prev);
+        player_view_set_current_selection(PLAYER_VIEW(self->player), prev);
         /* In future only do this if not paused */
         play_cb(NULL, userdata);
 }

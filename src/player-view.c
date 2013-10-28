@@ -183,7 +183,7 @@ MediaInfo* player_view_get_current_selection(PlayerView *self)
         GtkTreeIter iter;
         GValue value = G_VALUE_INIT;
 
-        selection = gtk_tree_view_get_selection(self->tree);
+        selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self->tree));
         if (!gtk_tree_selection_get_selected(selection, &model, &iter))
                 return NULL;
         gtk_tree_model_get_value(model, &iter, PLAYER_COLUMN_INFO, &value);
@@ -204,7 +204,7 @@ void player_view_set_current_selection(PlayerView *self, MediaInfo *media)
         GtkTreeSelection *selection = NULL;
         MediaInfo *test;
 
-        model = gtk_tree_view_get_model(self->tree);
+        model = gtk_tree_view_get_model(GTK_TREE_VIEW(self->tree));
         gtk_tree_model_get_iter_first(model, &iter);
         while (found) {
                 gtk_tree_model_get_value(model, &iter, PLAYER_COLUMN_INFO, &value);
@@ -218,7 +218,7 @@ void player_view_set_current_selection(PlayerView *self, MediaInfo *media)
                 found = gtk_tree_model_iter_next(model, &iter);
         }
         if (row) {
-                selection = gtk_tree_view_get_selection(self->tree);
+                selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self->tree));
                 gtk_tree_selection_select_iter(selection, row);
         }
 }
@@ -231,7 +231,7 @@ MediaInfo* player_view_get_next_item(PlayerView *self)
         GtkTreeIter iter;
         GValue value = G_VALUE_INIT;
 
-        selection = gtk_tree_view_get_selection(self->tree);
+        selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self->tree));
         if (!gtk_tree_selection_get_selected(selection, &model, &iter))
                 return NULL;
 
@@ -254,7 +254,7 @@ MediaInfo* player_view_get_previous_item(PlayerView *self)
         GtkTreeIter iter;
         GValue value = G_VALUE_INIT;
 
-        selection = gtk_tree_view_get_selection(self->tree);
+        selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self->tree));
         if (!gtk_tree_selection_get_selected(selection, &model, &iter))
                 return NULL;
 
