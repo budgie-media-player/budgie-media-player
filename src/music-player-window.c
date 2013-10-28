@@ -158,7 +158,7 @@ static void music_player_window_dispose(GObject *object)
         if (self->priv->uri)
                 g_free(self->priv->uri);
 
-        g_object_unref(self->gst_player);
+        gst_object_unref(self->gst_player);
         /* Destruct */
         G_OBJECT_CLASS (music_player_window_parent_class)->dispose (object);
 }
