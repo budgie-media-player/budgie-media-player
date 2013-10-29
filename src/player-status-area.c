@@ -21,6 +21,7 @@
  * 
  */
 #include "player-status-area.h"
+#include <gst/gst.h>
 
 G_DEFINE_TYPE_WITH_PRIVATE(PlayerStatusArea, player_status_area, GTK_TYPE_EVENT_BOX);
 
@@ -36,19 +37,31 @@ static void player_status_area_class_init(PlayerStatusAreaClass *klass)
 static void player_status_area_init(PlayerStatusArea *self)
 {
         GtkWidget *label;
+        GtkWidget *time_label;
         GtkStyleContext *context;
+        GtkWidget *box;
 
         self->priv = player_status_area_get_instance_private(self);
 
-        /* Construct our dummy label */
+        box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+
+        /* Construct our main label */
         label = gtk_label_new("MusicPlayer");
-        gtk_container_add(GTK_CONTAINER(self), label);
+        gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
         gtk_widget_set_name(label, "title");
         gtk_misc_set_alignment(GTK_MISC(label), 0.5, 0.5);
         self->label = label;
 
         context = gtk_widget_get_style_context(label);
         gtk_style_context_add_class(context, "dim-label");
+
+        time_label = gtk_label_new("");
+        context = gtk_widget_get_style_context(time_label);
+        gtk_style_context_add_class(context, "dim-label");
+        gtk_box_pack_start(GTK_BOX(box), time_label, FALSE, FALSE, 0);
+        self->time_label = time_label;
+
+        gtk_container_add(GTK_CONTAINER(self), box);
 
         gtk_widget_set_size_request(GTK_WIDGET(self), 300, 70);
 }
@@ -60,6 +73,8 @@ static void player_status_area_dispose(GObject *object)
         self = PLAYER_STATUS_AREA(object);
         if (self->priv->title_string)
                 g_free(self->priv->title_string);
+        if (self->priv->time_string)
+                g_free(self->priv->time_string);
 
         /* Destruct */
         G_OBJECT_CLASS (player_status_area_parent_class)->dispose (object);
@@ -85,4 +100,16 @@ void player_status_area_set_media(PlayerStatusArea *self, MediaInfo *info)
         else
                 self->priv->title_string = g_strdup_printf("<big>%s</big>\n", info->title);
         gtk_label_set_markup(GTK_LABEL(self->label), self->priv->title_string);
+}
+
+void player_status_area_set_media_time(PlayerStatusArea *self, gint64 max, gint64 current)
+{
+        if (self->priv->time_string)
+                g_free(self->priv->time_string);
+
+        gint64 remaining;
+
+        remaining = (max - current)/GST_SECOND;
+        self->priv->time_string = g_strdup_printf("-%d", remaining);
+        gtk_label_set_markup(GTK_LABEL(self->time_label), self->priv->time_string);
 }

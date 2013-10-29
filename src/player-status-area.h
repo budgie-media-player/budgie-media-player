@@ -42,6 +42,7 @@ typedef struct _PlayerStatusAreaPrivate PlayerStatusAreaPrivate;
 /* Private storage */
 struct _PlayerStatusAreaPrivate {
         gchar *title_string;
+        gchar *time_string;
 };
 
 /* PlayerStatusArea object */
@@ -49,6 +50,7 @@ struct _PlayerStatusArea {
         GtkEventBox parent;
 
         GtkWidget *label;
+        GtkWidget *time_label;
 
         PlayerStatusAreaPrivate *priv;
 };
@@ -69,5 +71,13 @@ GType player_status_area_get_type(void);
 GtkWidget* player_status_area_new(void);
 
 void player_status_area_set_media(PlayerStatusArea *self, MediaInfo *info);
+
+
+/**
+ * Set the time information for the current item
+ * @param max Total duration
+ * @param current Time passed
+ */
+void player_status_area_set_media_time(PlayerStatusArea *self, gint64 max, gint64 current);
 
 #endif /* player_status_area_h */

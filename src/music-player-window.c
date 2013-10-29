@@ -149,12 +149,14 @@ static void music_player_window_init(MusicPlayerWindow *self)
         /* Initialise our tracks list */
         self->priv->tracks = NULL;
 
+        /* Initialise gstreamer */
         self->gst_player = gst_element_factory_make("playbin", "player");
         bus = gst_element_get_bus(self->gst_player);
         gst_bus_add_signal_watch(bus);
         g_signal_connect(bus, "message::eos", G_CALLBACK(_gst_eos_cb), (gpointer)self);
         g_object_unref(bus);
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
+        self->priv->duration = GST_CLOCK_TIME_NONE;
 
         search_directory(self->priv->music_directory, &self->priv->tracks, "audio/");
         player_view_set_list(PLAYER_VIEW(player), self->priv->tracks);
@@ -234,6 +236,7 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         gchar *uri;
 
         self = MUSIC_PLAYER_WINDOW(userdata);
+        self->priv->duration = GST_CLOCK_TIME_NONE;
         media = player_view_get_current_selection(PLAYER_VIEW(self->player));
         if (!media) /* Revisit */
                 return;
@@ -254,6 +257,7 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
 
         /* Update status label */
         player_status_area_set_media(PLAYER_STATUS_AREA(self->status), media);
+        refresh_cb(self);
 }
 
 static void pause_cb(GtkWidget *widget, gpointer userdata)
@@ -312,6 +316,8 @@ static void volume_cb(GtkWidget *widget, gpointer userdata)
 static gboolean refresh_cb(gpointer userdata) {
         MusicPlayerWindow *self;
         gdouble volume_level;
+        gint64 track_current;
+        GstFormat fmt = GST_FORMAT_TIME;
 
         self = MUSIC_PLAYER_WINDOW(userdata);
         g_object_get(self->gst_player, "volume", &volume_level, NULL);
@@ -323,6 +329,20 @@ static gboolean refresh_cb(gpointer userdata) {
         /* Reenable events */
         g_signal_handler_unblock(self->volume, self->priv->volume_id);
 
+        /* Get media duration */
+        if (!GST_CLOCK_TIME_IS_VALID (self->priv->duration)) {
+                if (!gst_element_query_duration (self->gst_player, fmt, &self->priv->duration)) {
+                        /* Not able to get the clock time, fix when
+                         * we have added bus-state */
+                        self->priv->duration = GST_CLOCK_TIME_NONE;
+                        return TRUE;
+                }
+        }
+        if (!gst_element_query_position (self->gst_player, fmt, &track_current))
+                return TRUE;
+
+        player_status_area_set_media_time(PLAYER_STATUS_AREA(self->status),
+                self->priv->duration, track_current);
         return TRUE;
 }
 

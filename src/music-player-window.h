@@ -59,6 +59,7 @@ struct _MusicPlayerWindowPrivate {
         GSList *tracks;
         gchar *uri;
         gulong volume_id;
+        gint64 duration;
 };
 
 /* MusicPlayerWindow object */
