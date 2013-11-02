@@ -166,10 +166,12 @@ static void music_player_window_init(MusicPlayerWindow *self)
         /* repeat */
         repeat = new_button_with_icon(self, "media-playlist-repeat", TRUE);
         gtk_box_pack_start(GTK_BOX(control_box), repeat, FALSE, FALSE, 0);
+        gtk_widget_set_sensitive(repeat, FALSE);
 
         /* random */
         random = new_button_with_icon(self, "media-playlist-shuffle", TRUE);
         gtk_box_pack_start(GTK_BOX(control_box), random, FALSE, FALSE, 0);
+        gtk_widget_set_sensitive(random, FALSE);
 
         /* Player */
         player = player_view_new();
