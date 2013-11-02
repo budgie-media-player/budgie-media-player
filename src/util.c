@@ -57,6 +57,8 @@ static void set_field(char** out, ID3Tag *tag, ID3_FieldID id, ID3_FrameID fid)
         *out = g_strescape(set, NULL);
         free(set);
 end:
+        if (!frame || !field)
+                *out = NULL;
         return;
 }
 

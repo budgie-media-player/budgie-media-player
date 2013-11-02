@@ -129,10 +129,14 @@ static gboolean media_db_serialize(MediaInfo *info, uint8_t **target)
         unsigned int offset = 0;
 
         /* 4 member fields */
-        size = strlen(info->title)+1;
-        size += strlen(info->artist)+1;
-        size += strlen(info->album)+1;
-        size += strlen(info->genre)+1;
+        if (info->title)
+                size = strlen(info->title)+1;
+        if (info->artist)
+                size += strlen(info->artist)+1;
+        if (info->album)
+                size += strlen(info->album)+1;
+        if (info->genre)
+                size += strlen(info->genre)+1;
 
         /* 4 size fields */
         size += sizeof(unsigned int)*4;
@@ -142,28 +146,48 @@ static gboolean media_db_serialize(MediaInfo *info, uint8_t **target)
                 goto end;
 
         /* Title */
-        length = strlen(info->title)+1;
+        if (info->title)
+                length = strlen(info->title)+1;
+        else
+                length = 0;
         memcpy(data, &length, sizeof(unsigned int));
         offset += sizeof(unsigned int);
-        memcpy(data+offset, info->title, length);
+        if (info->title)
+                memcpy(data+offset, info->title, length);
+        offset += length;
 
         /* Artist */
-        length = strlen(info->artist)+1;
+        if (info->artist)
+                length = strlen(info->artist)+1;
+        else
+                length = 0;
         memcpy(data+offset, &length, sizeof(unsigned int));
         offset += sizeof(unsigned int);
-        memcpy(data+offset, info->artist, length);
+        if (info->artist)
+                memcpy(data+offset, info->artist, length);
+        offset += length;
 
         /* Album */
-        length = strlen(info->album)+1;
+        if (info->album)
+                length = strlen(info->album)+1;
+        else
+                length = 0;
         memcpy(data+offset, &length, sizeof(unsigned int));
         offset += sizeof(unsigned int);
-        memcpy(data+offset, info->album, length);
+        if (info->album)
+                memcpy(data+offset, info->album, length);
+        offset += length;
 
         /* Genre */
-        length = strlen(info->genre)+1;
+        if (info->genre)
+                length = strlen(info->genre)+1;
+        else
+                length = 0;
         memcpy(data+offset, &length, sizeof(unsigned int));
         offset += sizeof(unsigned int);
-        memcpy(data+offset, info->genre, length);
+        if (info->genre)
+                memcpy(data+offset, info->genre, length);
+        offset += length;
 
         ret = TRUE;
         *target = data;
