@@ -20,9 +20,17 @@
  * 
  * 
  */
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+#include <malloc.h>
+
 #include "media-db.h"
 
 G_DEFINE_TYPE_WITH_PRIVATE(MediaDB, media_db, G_TYPE_OBJECT);
+
+/* Private utilities */
+static gboolean media_db_serialize(MediaInfo *info, uint8_t **target);
 
 /* MediaInfo API */
 void free_media_info(gpointer p_info)
@@ -93,12 +101,74 @@ MediaDB* media_db_new(void)
 void media_db_store_media(MediaDB *self, MediaInfo *info)
 {
         datum value;
+        uint8_t *store = NULL;
+
         /* Path is the unique key */
         datum key = { (char*)info->path, strlen(info->path)+1 };
 
-        /* This isn't going to work, as we need to serialize */
-        value.dptr = (char*)info;
-        value.dsize = sizeof(value.dptr);
+        if (!media_db_serialize(info, &store)) {
+                g_warning("Unable to serialize data!");
+                goto end;
+        }
+        value.dptr = (char*)store;
+        value.dsize = malloc_usable_size(store);;
 
         gdbm_store(self->priv->db, key, value, GDBM_REPLACE);
+end:
+        if (store)
+                free(store);
+}
+
+/** PRIVATE **/
+static gboolean media_db_serialize(MediaInfo *info, uint8_t **target)
+{
+        uint8_t* data = NULL;
+        gboolean ret = FALSE;
+        unsigned int length;
+        unsigned int size;
+        unsigned int offset = 0;
+
+        /* 4 member fields */
+        size = strlen(info->title)+1;
+        size += strlen(info->artist)+1;
+        size += strlen(info->album)+1;
+        size += strlen(info->genre)+1;
+
+        /* 4 size fields */
+        size += sizeof(unsigned int)*4;
+
+        data = malloc(size);
+        if (!data)
+                goto end;
+
+        /* Title */
+        length = strlen(info->title)+1;
+        memcpy(data, &length, sizeof(unsigned int));
+        offset += sizeof(unsigned int);
+        memcpy(data+offset, info->title, length);
+
+        /* Artist */
+        length = strlen(info->artist)+1;
+        memcpy(data+offset, &length, sizeof(unsigned int));
+        offset += sizeof(unsigned int);
+        memcpy(data+offset, info->artist, length);
+
+        /* Album */
+        length = strlen(info->album)+1;
+        memcpy(data+offset, &length, sizeof(unsigned int));
+        offset += sizeof(unsigned int);
+        memcpy(data+offset, info->album, length);
+
+        /* Genre */
+        length = strlen(info->genre)+1;
+        memcpy(data+offset, &length, sizeof(unsigned int));
+        offset += sizeof(unsigned int);
+        memcpy(data+offset, info->genre, length);
+
+        ret = TRUE;
+        *target = data;
+end:
+        if (!ret && data)
+                free(data);
+        return ret;
 }
