@@ -20,18 +20,23 @@
  * 
  * 
  */
-#include "music-player-window.h"
+#include "config.h"
+
 #include <string.h>
+
+#include "music-player-window.h"
 
 G_DEFINE_TYPE_WITH_PRIVATE(MusicPlayerWindow, music_player_window, G_TYPE_OBJECT);
 
 /* Utilities */
 static GtkWidget* new_button_with_icon(MusicPlayerWindow *self,
                                        const gchar *icon_name,
-                                       gboolean toolbar);
+                                       gboolean toolbar,
+                                       gboolean toggle);
 static void init_styles(MusicPlayerWindow *self);
 
 /* Callbacks */
+static void about_cb(GtkWidget *widget, gpointer userdata);
 static void play_cb(GtkWidget *widget, gpointer userdata);
 static void pause_cb(GtkWidget *widget, gpointer userdata);
 static void next_cb(GtkWidget *widget, gpointer userdata);
@@ -58,6 +63,8 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkWidget *control_box;
         GtkToolItem *control_item;
         GtkWidget *repeat, *random;
+        GtkWidget *about;
+        GtkToolItem *about_item;
         /* header buttons */
         GtkWidget *prev, *play, *pause, *next;
         GtkWidget *volume;
@@ -108,24 +115,24 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_window_set_titlebar(GTK_WINDOW(window), header);
 
         /* Media control buttons, placed on headerbar */
-        prev = new_button_with_icon(self, "media-seek-backward", FALSE);
+        prev = new_button_with_icon(self, "media-seek-backward", FALSE, FALSE);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), prev);
         g_signal_connect(prev, "clicked", G_CALLBACK(prev_cb), (gpointer)self);
         self->prev = prev;
         /* Set some left padding */
         gtk_widget_set_margin_left(prev, 20);
 
-        play = new_button_with_icon(self, "media-playback-start", FALSE);
+        play = new_button_with_icon(self, "media-playback-start", FALSE, FALSE);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), play);
         g_signal_connect(play, "clicked", G_CALLBACK(play_cb), (gpointer)self);
         self->play = play;
 
-        pause = new_button_with_icon(self, "media-playback-pause", FALSE);
+        pause = new_button_with_icon(self, "media-playback-pause", FALSE, FALSE);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), pause);
         g_signal_connect(pause, "clicked", G_CALLBACK(pause_cb), (gpointer)self);
         self->pause = pause;
 
-        next = new_button_with_icon(self, "media-seek-forward", FALSE);
+        next = new_button_with_icon(self, "media-seek-forward", FALSE, FALSE);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), next);
         g_signal_connect(next, "clicked", G_CALLBACK(next_cb), (gpointer)self);
         self->next = next;
@@ -168,14 +175,21 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(control_item));
 
         /* repeat */
-        repeat = new_button_with_icon(self, "media-playlist-repeat", TRUE);
+        repeat = new_button_with_icon(self, "media-playlist-repeat", TRUE, TRUE);
         gtk_box_pack_start(GTK_BOX(control_box), repeat, FALSE, FALSE, 0);
         gtk_widget_set_sensitive(repeat, FALSE);
 
         /* random */
-        random = new_button_with_icon(self, "media-playlist-shuffle", TRUE);
+        random = new_button_with_icon(self, "media-playlist-shuffle", TRUE, TRUE);
         gtk_box_pack_start(GTK_BOX(control_box), random, FALSE, FALSE, 0);
         gtk_widget_set_sensitive(random, FALSE);
+
+        /* about */
+        about = new_button_with_icon(self, "help-about-symbolic", TRUE, FALSE);
+        about_item = gtk_tool_item_new();
+        g_signal_connect(about, "clicked", G_CALLBACK(about_cb), (gpointer)self);
+        gtk_container_add(GTK_CONTAINER(about_item), about);
+        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(about_item));
 
         /* Player */
         player = player_view_new();
@@ -203,7 +217,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         self->priv->duration = GST_CLOCK_TIME_NONE;
 
-        search_directory(self->priv->music_directory, &self->priv->tracks, "audio/");
+        self->priv->tracks = media_db_get_all_media(self->db);
         player_view_set_list(PLAYER_VIEW(player), self->priv->tracks);
         gtk_widget_show_all(window);
         gtk_widget_hide(pause);
@@ -244,7 +258,8 @@ MusicPlayerWindow* music_player_window_new(void)
 
 static GtkWidget* new_button_with_icon(MusicPlayerWindow *self,
                                        const gchar *icon_name,
-                                       gboolean toolbar)
+                                       gboolean toolbar,
+                                       gboolean toggle)
 {
         GtkWidget *button;
         GtkWidget *image;
@@ -258,7 +273,7 @@ static GtkWidget* new_button_with_icon(MusicPlayerWindow *self,
         image = gtk_image_new_from_pixbuf(pixbuf);
 
         /* Create the button */
-        if (toolbar)
+        if (toggle)
                 button = gtk_toggle_button_new();
         else
                 button = gtk_button_new();
@@ -284,6 +299,29 @@ static void init_styles(MusicPlayerWindow *self)
         self->css_provider = css_provider;
 }
 
+static void about_cb(GtkWidget *widget, gpointer userdata)
+{
+        MusicPlayerWindow *self;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+
+        const gchar* authors[] = {
+                "Ikey Doherty <ikey.doherty@gmail.com>",
+                NULL
+        };
+        const gchar* comments = "Simple Media Player. No frills.";
+        const gchar* copyright = "Copyright (C) Ikey Doherty 2013";
+        gtk_show_about_dialog(GTK_WINDOW(self->window),
+                "authors", authors,
+                "comments", comments,
+                "copyright", copyright,
+                "logo-icon-name", "gnome-music",
+                "program-name", PACKAGE_NAME,
+                "license-type", GTK_LICENSE_GPL_2_0,
+                "version", PACKAGE_VERSION,
+                "website", "https://github.com/ikeydoherty/music-player",
+                NULL);
+}
 static void play_cb(GtkWidget *widget, gpointer userdata)
 {
         MusicPlayerWindow *self;
