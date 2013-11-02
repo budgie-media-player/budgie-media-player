@@ -77,6 +77,6 @@ GType media_db_get_type(void);
 
 /* MediaDB methods */
 MediaDB* media_db_new(void);
-
+void media_db_store_media(MediaDB *self, MediaInfo *info);
 
 #endif /* media_db_h */

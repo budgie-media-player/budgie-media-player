@@ -89,3 +89,16 @@ MediaDB* media_db_new(void)
         self = g_object_new(MEDIA_DB_TYPE, NULL);
         return MEDIA_DB(self);
 }
+
+void media_db_store_media(MediaDB *self, MediaInfo *info)
+{
+        datum value;
+        /* Path is the unique key */
+        datum key = { (char*)info->path, strlen(info->path)+1 };
+
+        /* This isn't going to work, as we need to serialize */
+        value.dptr = (char*)info;
+        value.dsize = sizeof(value.dptr);
+
+        gdbm_store(self->priv->db, key, value, GDBM_REPLACE);
+}
