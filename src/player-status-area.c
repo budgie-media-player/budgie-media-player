@@ -20,8 +20,10 @@
  * 
  * 
  */
-#include "player-status-area.h"
 #include <gst/gst.h>
+
+#include "player-status-area.h"
+#include "util.h"
 
 G_DEFINE_TYPE_WITH_PRIVATE(PlayerStatusArea, player_status_area, GTK_TYPE_EVENT_BOX);
 
@@ -110,6 +112,6 @@ void player_status_area_set_media_time(PlayerStatusArea *self, gint64 max, gint6
         gint64 remaining;
 
         remaining = (max - current)/GST_SECOND;
-        self->priv->time_string = g_strdup_printf("-%d", remaining);
+        self->priv->time_string = format_seconds(remaining, TRUE);
         gtk_label_set_markup(GTK_LABEL(self->time_label), self->priv->time_string);
 }
