@@ -27,7 +27,9 @@
 G_DEFINE_TYPE_WITH_PRIVATE(MusicPlayerWindow, music_player_window, G_TYPE_OBJECT);
 
 /* Utilities */
-static GtkWidget* new_button_with_icon(MusicPlayerWindow *self, const gchar *icon_name);
+static GtkWidget* new_button_with_icon(MusicPlayerWindow *self,
+                                       const gchar *icon_name,
+                                       gboolean toolbar);
 static void init_styles(MusicPlayerWindow *self);
 
 /* Callbacks */
@@ -54,6 +56,9 @@ static void music_player_window_init(MusicPlayerWindow *self)
 {
         GtkWidget *window;
         GtkWidget *header;
+        GtkWidget *control_box;
+        GtkToolItem *control_item;
+        GtkWidget *repeat, *random;
         /* header buttons */
         GtkWidget *prev, *play, *pause, *next;
         GtkWidget *volume;
@@ -99,24 +104,24 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_window_set_titlebar(GTK_WINDOW(window), header);
 
         /* Media control buttons, placed on headerbar */
-        prev = new_button_with_icon(self, "media-seek-backward");
+        prev = new_button_with_icon(self, "media-seek-backward", FALSE);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), prev);
         g_signal_connect(prev, "clicked", G_CALLBACK(prev_cb), (gpointer)self);
         self->prev = prev;
         /* Set some left padding */
         gtk_widget_set_margin_left(prev, 20);
 
-        play = new_button_with_icon(self, "media-playback-start");
+        play = new_button_with_icon(self, "media-playback-start", FALSE);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), play);
         g_signal_connect(play, "clicked", G_CALLBACK(play_cb), (gpointer)self);
         self->play = play;
 
-        pause = new_button_with_icon(self, "media-playback-pause");
+        pause = new_button_with_icon(self, "media-playback-pause", FALSE);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), pause);
         g_signal_connect(pause, "clicked", G_CALLBACK(pause_cb), (gpointer)self);
         self->pause = pause;
 
-        next = new_button_with_icon(self, "media-seek-forward");
+        next = new_button_with_icon(self, "media-seek-forward", FALSE);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), next);
         g_signal_connect(next, "clicked", G_CALLBACK(next_cb), (gpointer)self);
         self->next = next;
@@ -143,10 +148,28 @@ static void music_player_window_init(MusicPlayerWindow *self)
 
         /* toolbar */
         toolbar = gtk_toolbar_new();
-        gtk_box_pack_start(GTK_BOX(layout), toolbar, FALSE, FALSE, 0);
+        gtk_box_pack_end(GTK_BOX(layout), toolbar, FALSE, FALSE, 0);
         style = gtk_widget_get_style_context(toolbar);
         gtk_style_context_add_class(style, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
         self->toolbar = toolbar;
+
+        /* Our media controls */
+        control_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        style = gtk_widget_get_style_context(control_box);
+        gtk_style_context_add_class(style, GTK_STYLE_CLASS_LINKED);
+        gtk_style_context_add_class(style, GTK_STYLE_CLASS_RAISED);
+        control_item = gtk_tool_item_new();
+        gtk_tool_item_set_expand(control_item, TRUE);
+        gtk_container_add(GTK_CONTAINER(control_item), control_box);
+        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(control_item));
+
+        /* repeat */
+        repeat = new_button_with_icon(self, "media-playlist-repeat", TRUE);
+        gtk_box_pack_start(GTK_BOX(control_box), repeat, FALSE, FALSE, 0);
+
+        /* random */
+        random = new_button_with_icon(self, "media-playlist-shuffle", TRUE);
+        gtk_box_pack_start(GTK_BOX(control_box), random, FALSE, FALSE, 0);
 
         /* Player */
         player = player_view_new();
@@ -209,21 +232,29 @@ MusicPlayerWindow* music_player_window_new(void)
         return MUSIC_PLAYER_WINDOW(self);
 }
 
-static GtkWidget* new_button_with_icon(MusicPlayerWindow *self, const gchar *icon_name)
+static GtkWidget* new_button_with_icon(MusicPlayerWindow *self,
+                                       const gchar *icon_name,
+                                       gboolean toolbar)
 {
         GtkWidget *button;
         GtkWidget *image;
         GdkPixbuf *pixbuf;
+        gint size;
 
+        size = toolbar ? 16: 48;
         /* Load the image */
         pixbuf = gtk_icon_theme_load_icon(self->icon_theme, icon_name,
-                48, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
+                size, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
         image = gtk_image_new_from_pixbuf(pixbuf);
 
         /* Create the button */
-        button = gtk_button_new();
+        if (toolbar)
+                button = gtk_toggle_button_new();
+        else
+                button = gtk_button_new();
         gtk_widget_set_can_focus(button, FALSE);
-        gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+        if (!toolbar)
+                gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
         gtk_container_add(GTK_CONTAINER(button), image);
 
         return button;
