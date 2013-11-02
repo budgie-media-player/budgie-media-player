@@ -35,6 +35,10 @@ static GtkWidget* new_button_with_icon(MusicPlayerWindow *self,
                                        gboolean toggle);
 static void init_styles(MusicPlayerWindow *self);
 
+static void store_media(gpointer data1, gpointer data2);
+static gboolean load_media_t(gpointer data);
+static gpointer load_media(gpointer data);
+
 /* Callbacks */
 static void about_cb(GtkWidget *widget, gpointer userdata);
 static void play_cb(GtkWidget *widget, gpointer userdata);
@@ -76,6 +80,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkStyleContext *style;
         GstBus *bus;
         GtkSettings *settings;
+        guint length;
 
         self->priv = music_player_window_get_instance_private(self);
 
@@ -218,11 +223,17 @@ static void music_player_window_init(MusicPlayerWindow *self)
         self->priv->duration = GST_CLOCK_TIME_NONE;
 
         self->priv->tracks = media_db_get_all_media(self->db);
-        player_view_set_list(PLAYER_VIEW(player), self->priv->tracks);
-        gtk_widget_show_all(window);
-        gtk_widget_hide(pause);
 
         g_timeout_add(1000, refresh_cb, (gpointer)self);
+
+        length = g_slist_length(self->priv->tracks);
+        player_view_set_list(PLAYER_VIEW(self->player), self->priv->tracks);
+        /* Start thread from idle queue */
+        if (length == 0)
+                g_idle_add(load_media_t, (gpointer)self);
+
+        gtk_widget_show_all(window);
+        gtk_widget_hide(pause);
 }
 
 static void music_player_window_dispose(GObject *object)
@@ -444,4 +455,44 @@ static void _gst_eos_cb (GstBus *bus, GstMessage *msg, gpointer userdata)
 {
         /* Skip to next track */
         next_cb(NULL, userdata);
+}
+
+static void store_media(gpointer data1, gpointer data2)
+{
+        MediaInfo *info;
+        MusicPlayerWindow *self;
+
+        info = (MediaInfo*)data1;
+        self = MUSIC_PLAYER_WINDOW(data2);
+
+        media_db_store_media(self->db, info);
+}
+
+static gboolean load_media_t(gpointer data)
+{
+        GThread *thread;
+
+        thread = g_thread_new("reload-media", &load_media, data);
+
+        return FALSE;
+}
+
+static gpointer load_media(gpointer data)
+{
+        MusicPlayerWindow *self;
+        GSList *tracks = NULL;
+
+        self = MUSIC_PLAYER_WINDOW(data);
+        search_directory(self->priv->music_directory,
+                &tracks, "audio/");
+        g_slist_foreach(tracks, store_media, (gpointer)self);
+        /* Reset tracks */
+        if (self->priv->tracks)
+                g_slist_free_full (self->priv->tracks, free_media_info);
+        g_slist_free_full(tracks, free_media_info);
+        /* Use mediadb's tracks, not our own list */
+        self->priv->tracks = media_db_get_all_media(self->db);
+        player_view_set_list(PLAYER_VIEW(self->player), self->priv->tracks);
+
+        return NULL;
 }
