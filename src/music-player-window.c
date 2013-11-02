@@ -89,6 +89,9 @@ static void music_player_window_init(MusicPlayerWindow *self)
         self->priv->music_directory = g_get_user_special_dir(G_USER_DIRECTORY_MUSIC);
         if (!self->priv->music_directory)
                 g_error("No music directory configured");
+        self->priv->video_directory = g_get_user_special_dir(G_USER_DIRECTORY_VIDEOS);
+        if (!self->priv->video_directory)
+                g_error("No video directory configured");
 
         init_styles(self);
 
@@ -504,6 +507,8 @@ static gpointer load_media(gpointer data)
         self = MUSIC_PLAYER_WINDOW(data);
         search_directory(self->priv->music_directory,
                 &tracks, "audio/");
+        search_directory(self->priv->video_directory,
+                &tracks, "video/");
         g_slist_foreach(tracks, store_media, (gpointer)self);
         /* Reset tracks */
         if (self->priv->tracks)
