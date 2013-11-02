@@ -21,7 +21,6 @@
  * 
  */
 #include "music-player-window.h"
-#include "media.h"
 #include <string.h>
 
 G_DEFINE_TYPE_WITH_PRIVATE(MusicPlayerWindow, music_player_window, G_TYPE_OBJECT);

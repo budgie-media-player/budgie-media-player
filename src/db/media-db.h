@@ -58,6 +58,17 @@ struct _MediaDBClass {
 };
 
 
+/* MediaInfo API */
+void free_media_info(gpointer p_info);
+
+typedef struct MediaInfo {
+        gchar *title;
+        gchar *artist;
+        gchar *album;
+        gchar *genre;
+        gchar *path;
+} MediaInfo;
+
 /* Boilerplate GObject code */
 static void media_db_class_init(MediaDBClass *klass);
 static void media_db_init(MediaDB *self);

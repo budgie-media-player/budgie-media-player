@@ -26,7 +26,7 @@
 #include <id3.h>
 
 #include "util.h"
-#include "media.h"
+#include "db/media-db.h"
 
 /* Unneeded constants but improve readability */
 #define MINUTE 60
@@ -86,23 +86,6 @@ MediaInfo* media_from_file(gchar *path, GFileInfo *file_info)
         if (tag)
                 ID3Tag_Delete(tag);
         return media;
-}
-
-void free_media_info(gpointer p_info)
-{
-        MediaInfo *info;
-
-        info = (MediaInfo*)p_info;
-        if (info->title)
-                g_free(info->title);
-        if (info->artist)
-                g_free(info->artist);
-        if (info->album)
-                g_free(info->album);
-        if (info->genre)
-                g_free(info->genre);
-        if (info->path)
-                g_free(info->path);
 }
 
 void search_directory(const gchar *path, GSList **list, const gchar *mime_pattern)

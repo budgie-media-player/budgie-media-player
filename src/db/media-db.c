@@ -24,6 +24,24 @@
 
 G_DEFINE_TYPE_WITH_PRIVATE(MediaDB, media_db, G_TYPE_OBJECT);
 
+/* MediaInfo API */
+void free_media_info(gpointer p_info)
+{
+        MediaInfo *info;
+
+        info = (MediaInfo*)p_info;
+        if (info->title)
+                g_free(info->title);
+        if (info->artist)
+                g_free(info->artist);
+        if (info->album)
+                g_free(info->album);
+        if (info->genre)
+                g_free(info->genre);
+        if (info->path)
+                g_free(info->path);
+}
+
 /* Initialisation */
 static void media_db_class_init(MediaDBClass *klass)
 {
