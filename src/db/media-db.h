@@ -36,9 +36,11 @@ typedef struct _MediaDBPrivate MediaDBPrivate;
 #define IS_MEDIA_DB_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), MEDIA_DB_TYPE))
 #define MEDIA_DB_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), MEDIA_DB_TYPE, MediaDBClass))
 
+#define CONFIG_NAME "idmp-1.db"
+
 /* Private storage */
 struct _MediaDBPrivate {
-        unsigned int x; /* Reserved */
+        gchar *storage_path;
 };
 
 /* MediaDB object */

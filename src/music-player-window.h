@@ -30,6 +30,7 @@
 #include "player-status-area.h"
 #include "player-view.h"
 #include "util.h"
+#include "db/media-db.h"
 
 #define PLAYER_CSS "PlayerStatusArea {\
     border-radius: 4px;\
@@ -69,6 +70,8 @@ struct _MusicPlayerWindow {
         GtkWidget *window;
         GtkWidget *header;
         GtkIconTheme *icon_theme;
+
+        MediaDB *db;
 
         GtkWidget *status;
         GtkWidget *player;

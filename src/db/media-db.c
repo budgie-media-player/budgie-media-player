@@ -22,7 +22,7 @@
  */
 #include "media-db.h"
 
-G_DEFINE_TYPE_WITH_PRIVATE(MediaDB, media_db, MEDIA_DB_TYPE);
+G_DEFINE_TYPE_WITH_PRIVATE(MediaDB, media_db, G_TYPE_OBJECT);
 
 /* Initialisation */
 static void media_db_class_init(MediaDBClass *klass)
@@ -35,7 +35,13 @@ static void media_db_class_init(MediaDBClass *klass)
 
 static void media_db_init(MediaDB *self)
 {
-        /*TODO: Implement */
+        const gchar *config;
+        self->priv = media_db_get_instance_private(self);
+
+        /* Our storage location */
+        config = g_get_user_config_dir();
+        self->priv->storage_path = g_strdup_printf("%s/%s", config,
+                CONFIG_NAME);
 }
 
 static void media_db_dispose(GObject *object)
@@ -43,6 +49,8 @@ static void media_db_dispose(GObject *object)
         MediaDB *self;
 
         self = MEDIA_DB(object);
+        if (self->priv->storage_path)
+                g_free(self->priv->storage_path);
 
         /* Destruct */
         G_OBJECT_CLASS (media_db_parent_class)->dispose (object);

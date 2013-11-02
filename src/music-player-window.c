@@ -188,6 +188,8 @@ static void music_player_window_init(MusicPlayerWindow *self)
         /* Initialise our tracks list */
         self->priv->tracks = NULL;
 
+        self->db = media_db_new();
+
         /* Initialise gstreamer */
         self->gst_player = gst_element_factory_make("playbin", "player");
         bus = gst_element_get_bus(self->gst_player);
@@ -218,6 +220,8 @@ static void music_player_window_dispose(GObject *object)
 
         if (self->priv->uri)
                 g_free(self->priv->uri);
+
+        g_object_unref(self->db);
 
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         gst_object_unref(self->gst_player);
