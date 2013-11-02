@@ -72,6 +72,7 @@ struct _MusicPlayerWindow {
 
         GtkWidget *status;
         GtkWidget *player;
+        GtkWidget *toolbar;
 
         /* Header controls */
         GtkWidget *prev;

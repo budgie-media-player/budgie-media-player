@@ -60,6 +60,9 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkWidget *search;
         GtkWidget *status;
         GtkWidget *player;
+        GtkWidget *toolbar;
+        GtkWidget *layout;
+        GtkStyleContext *style;
         GstBus *bus;
 
         self->priv = music_player_window_get_instance_private(self);
@@ -134,9 +137,20 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_header_bar_set_custom_title(GTK_HEADER_BAR(header), status);
         self->status = status;
 
+        /* main layout */
+        layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        gtk_container_add(GTK_CONTAINER(window), layout);
+
+        /* toolbar */
+        toolbar = gtk_toolbar_new();
+        gtk_box_pack_start(GTK_BOX(layout), toolbar, FALSE, FALSE, 0);
+        style = gtk_widget_get_style_context(toolbar);
+        gtk_style_context_add_class(style, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
+        self->toolbar = toolbar;
+
         /* Player */
         player = player_view_new();
-        gtk_container_add(GTK_CONTAINER(window), player);
+        gtk_box_pack_start(GTK_BOX(layout), player, TRUE, TRUE, 0);
         self->player = player;
 
         /* search entry */
