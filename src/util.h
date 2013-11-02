@@ -30,3 +30,13 @@
  * @param mime_pattern Prefix mime to find (i.e. audio/)
  */
 void search_directory(const gchar *dir, GSList **list, const gchar *mime_pattern);
+
+/**
+ * Convert seconds into human readable time
+ *
+ * The caller must free the returned string using g_free
+ * @param time Seconds to convert
+ * @param remaining Whether this is the remaining time (prefix with -)
+ * @return a string representation of the time
+ */
+gchar *format_seconds(gint64 time, gboolean remaining);

@@ -28,6 +28,10 @@
 #include "util.h"
 #include "media.h"
 
+/* Unneeded constants but improve readability */
+#define MINUTE 60
+#define HOUR MINUTE*60
+
 /* Set a field (by pointer) to the requested id3 value */
 static void set_field(char** out, ID3Tag *tag, ID3_FieldID id, ID3_FrameID fid)
 {
@@ -145,4 +149,34 @@ void search_directory(const gchar *path, GSList **list, const gchar *mime_patter
         }
 
         g_object_unref(file);
+}
+
+gchar *format_seconds(gint64 time, gboolean remaining)
+{
+        guint seconds = 0;
+        guint minutes = 0;
+        guint hours = 0;
+        gchar *ret;
+        gchar *prefix;
+
+        if (remaining)
+                prefix = "-";
+        else
+                prefix = "";
+
+        while (time >= HOUR) {
+                time -= HOUR;
+                hours++;
+        }
+        while (time >= MINUTE) {
+                time -= MINUTE;
+                minutes++;
+        }
+        seconds = time;
+
+        if (hours > 0)
+                ret = g_strdup_printf("%s%02d:%02d:%02d", prefix, hours, minutes, seconds);
+        else
+                ret = g_strdup_printf("%s%02d:%02d", prefix, minutes, seconds);
+        return ret;
 }
