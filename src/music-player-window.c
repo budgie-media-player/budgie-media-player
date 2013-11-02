@@ -68,6 +68,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkWidget *layout;
         GtkStyleContext *style;
         GstBus *bus;
+        GtkSettings *settings;
 
         self->priv = music_player_window_get_instance_private(self);
 
@@ -81,6 +82,10 @@ static void music_player_window_init(MusicPlayerWindow *self)
         /* Initialize our window */
         window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
         self->window = window;
+        settings = gtk_widget_get_settings(window);
+        g_object_set(settings,
+                "gtk-application-prefer-dark-theme", TRUE, NULL);
+        g_object_unref(settings);
 
         /* Set our window up */
         gtk_window_set_title(GTK_WINDOW(window), "Music Player");
