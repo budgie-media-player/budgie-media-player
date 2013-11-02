@@ -2,6 +2,21 @@
 
 bin_PROGRAMS = music-player
 
+lib_LTLIBRARIES = \
+	libmediadb.la
+
+libmediadb_la_SOURCES = \
+	db/media-db.h \
+	db/media-db.c
+
+libmediadb_la_CFLAGS = \
+	$(GIO_CFLAGS) \
+	$(AM_CFLAGS)
+
+libmediadb_la_LIBADD = \
+	$(GIO_LIBS) \
+	-lgdbm
+
 music_player_SOURCES = \
 	music-player-window.c \
 	music-player-window.h \
@@ -23,4 +38,5 @@ music_player_CFLAGS = \
 music_player_LDADD = \
 	$(GTK3_LIBS) \
 	$(GSTREAMER_LIBS) \
-	-lid3
+	-lid3 \
+	libmediadb.la
