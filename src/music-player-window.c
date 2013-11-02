@@ -46,6 +46,7 @@ static void pause_cb(GtkWidget *widget, gpointer userdata);
 static void next_cb(GtkWidget *widget, gpointer userdata);
 static void prev_cb(GtkWidget *widget, gpointer userdata);
 static void volume_cb(GtkWidget *widget, gpointer userdata);
+static void repeat_cb(GtkWidget *widget, gpointer userdata);
 static gboolean refresh_cb(gpointer userdata);
 
 /* GStreamer callbacks */
@@ -182,12 +183,13 @@ static void music_player_window_init(MusicPlayerWindow *self)
         /* repeat */
         repeat = new_button_with_icon(self, "media-playlist-repeat", TRUE, TRUE);
         gtk_box_pack_start(GTK_BOX(control_box), repeat, FALSE, FALSE, 0);
-        gtk_widget_set_sensitive(repeat, FALSE);
+        g_signal_connect(repeat, "clicked", G_CALLBACK(repeat_cb), (gpointer)self);
 
         /* random */
         random = new_button_with_icon(self, "media-playlist-shuffle", TRUE, TRUE);
         gtk_box_pack_start(GTK_BOX(control_box), random, FALSE, FALSE, 0);
         gtk_widget_set_sensitive(random, FALSE);
+        self->priv->repeat = FALSE;
 
         /* about */
         about = new_button_with_icon(self, "help-about-symbolic", TRUE, FALSE);
@@ -450,11 +452,28 @@ static gboolean refresh_cb(gpointer userdata) {
         return TRUE;
 }
 
+static void repeat_cb(GtkWidget *widget, gpointer userdata)
+{
+        MusicPlayerWindow *self;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+        self->priv->repeat = !self->priv->repeat;
+}
+
 /* GStreamer callbacks */
 static void _gst_eos_cb (GstBus *bus, GstMessage *msg, gpointer userdata)
 {
+        MusicPlayerWindow *self;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
         /* Skip to next track */
-        next_cb(NULL, userdata);
+        if (!self->priv->repeat) {
+                next_cb(NULL, userdata);
+                return;
+        }
+        gst_element_set_state(self->gst_player, GST_STATE_NULL);
+        /* repeat the same track again */
+        play_cb(NULL, (gpointer)self);
 }
 
 static void store_media(gpointer data1, gpointer data2)

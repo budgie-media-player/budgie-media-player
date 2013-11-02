@@ -61,6 +61,7 @@ struct _MusicPlayerWindowPrivate {
         gchar *uri;
         gulong volume_id;
         gint64 duration;
+        gboolean repeat;
 };
 
 /* MusicPlayerWindow object */
