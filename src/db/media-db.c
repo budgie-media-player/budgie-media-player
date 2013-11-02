@@ -31,6 +31,7 @@ G_DEFINE_TYPE_WITH_PRIVATE(MediaDB, media_db, G_TYPE_OBJECT);
 
 /* Private utilities */
 static gboolean media_db_serialize(MediaInfo *info, uint8_t **target);
+static gboolean media_db_deserialize(uint8_t* source, MediaInfo **target);
 
 /* MediaInfo API */
 void free_media_info(gpointer p_info)
@@ -119,6 +120,28 @@ end:
                 free(store);
 }
 
+MediaInfo* media_db_get_media(MediaDB *self, gchar *path)
+{
+        datum value;
+        MediaInfo *ret = NULL;
+        uint8_t* store = NULL;
+        datum key = { (char*)path, strlen(path)+1 };
+
+        memset(&value, 0, sizeof(datum));
+        value = gdbm_fetch(self->priv->db, key);
+        if (value.dsize < 0 || value.dptr == NULL)
+                goto end;
+        store = (uint8_t*)value.dptr;
+
+        if (!media_db_deserialize(store, &ret)) {
+                g_message("Unable to deserialize");
+                goto end;
+        }
+end:
+        if (store)
+                free(store);
+        return ret;
+}
 /** PRIVATE **/
 static gboolean media_db_serialize(MediaInfo *info, uint8_t **target)
 {
@@ -195,4 +218,81 @@ end:
         if (!ret && data)
                 free(data);
         return ret;
+}
+
+static gboolean media_db_deserialize(uint8_t* source, MediaInfo **target)
+{
+        MediaInfo *ret = NULL;
+        gchar *title = NULL;
+        gchar *artist = NULL;
+        gchar *album = NULL;
+        gchar *genre = NULL;
+        unsigned int title_len, artist_len;
+        unsigned int album_len, genre_len;
+        unsigned int offset = 0;
+        gboolean op = FALSE;
+
+        ret = malloc(sizeof(MediaInfo));
+        if (!ret)
+                goto end;
+
+        /* Title */
+        memcpy(&title_len, source, sizeof(unsigned int));
+        offset += sizeof(unsigned int);
+        if (title_len > 0) {
+                title = malloc(title_len);
+                memcpy(title, source+offset, title_len);
+        }
+        offset += title_len;
+
+        /* Artist */
+        memcpy(&artist_len, source+offset, sizeof(unsigned int));
+        offset += sizeof(unsigned int);
+        if (artist_len > 0) {
+                artist = malloc(artist_len);
+                memcpy(artist, source+offset, artist_len);
+        }
+        offset += artist_len;
+
+        /* Album */
+        memcpy(&album_len, source+offset, sizeof(unsigned int));
+        offset += sizeof(unsigned int);
+        if (album_len > 0) {
+                album = malloc(album_len);
+                memcpy(album, source+offset, album_len);
+        }
+        offset += album_len;
+
+        /* Genre */
+        memcpy(&genre_len, source+offset, sizeof(unsigned int));
+        offset += sizeof(unsigned int);
+        if (genre_len > 0) {
+                genre = malloc(genre_len);
+                memcpy(genre, source+offset, genre_len);
+        }
+        offset += genre_len;
+
+        /* Copy the data instead of exposing internals */
+        if (title)
+                ret->title = g_strdup(title);
+        if (artist)
+                ret->artist = g_strdup(artist);
+        if (album)
+                ret->album = g_strdup(album);
+        if (genre)
+                ret->genre = g_strdup(genre);
+
+        op = TRUE;
+        *target = ret;
+
+end:
+        if (title)
+                free(title);
+        if (artist)
+                free(artist);
+        if (album)
+                free(album);
+        if (genre)
+                free(genre);
+        return op;
 }
