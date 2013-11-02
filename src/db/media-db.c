@@ -137,9 +137,29 @@ MediaInfo* media_db_get_media(MediaDB *self, gchar *path)
                 g_message("Unable to deserialize");
                 goto end;
         }
+        ret->path = g_strdup(path);
 end:
         if (store)
                 free(store);
+        return ret;
+}
+
+GSList* media_db_get_all_media(MediaDB* self)
+{
+        datum key, nextkey;
+        GSList* ret = NULL;
+        char *path;
+        MediaInfo *cur = NULL;
+
+        key = gdbm_firstkey(self->priv->db);
+        while (key.dptr) {
+                path = (char*)key.dptr;
+                cur = media_db_get_media(self, path);
+                ret = g_slist_append(ret, cur);
+                nextkey = gdbm_nextkey(self->priv->db, key);
+                free(key.dptr);
+                key = nextkey;
+        }
         return ret;
 }
 /** PRIVATE **/
@@ -236,6 +256,7 @@ static gboolean media_db_deserialize(uint8_t* source, MediaInfo **target)
         if (!ret)
                 goto end;
 
+        memset(ret, 0, sizeof(MediaInfo));
         /* Title */
         memcpy(&title_len, source, sizeof(unsigned int));
         offset += sizeof(unsigned int);

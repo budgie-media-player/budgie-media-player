@@ -79,5 +79,5 @@ GType media_db_get_type(void);
 MediaDB* media_db_new(void);
 void media_db_store_media(MediaDB *self, MediaInfo *info);
 MediaInfo* media_db_get_media(MediaDB *self, gchar *path);
-
+GSList* media_db_get_all_media(MediaDB* self);
 #endif /* media_db_h */
