@@ -24,6 +24,7 @@
 #define media_db_h
 
 #include <glib-object.h>
+#include <gdbm.h>
 
 typedef struct _MediaDB MediaDB;
 typedef struct _MediaDBClass   MediaDBClass;
@@ -41,6 +42,7 @@ typedef struct _MediaDBPrivate MediaDBPrivate;
 /* Private storage */
 struct _MediaDBPrivate {
         gchar *storage_path;
+        GDBM_FILE db;
 };
 
 /* MediaDB object */

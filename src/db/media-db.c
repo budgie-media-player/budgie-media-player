@@ -42,6 +42,12 @@ static void media_db_init(MediaDB *self)
         config = g_get_user_config_dir();
         self->priv->storage_path = g_strdup_printf("%s/%s", config,
                 CONFIG_NAME);
+
+        /* Open the database */
+        self->priv->db = gdbm_open(self->priv->storage_path, 0,
+                GDBM_WRCREAT, 0600, NULL);
+        if (!self->priv->db)
+                g_error("Failed to initialise database!");
 }
 
 static void media_db_dispose(GObject *object)
@@ -52,6 +58,7 @@ static void media_db_dispose(GObject *object)
         if (self->priv->storage_path)
                 g_free(self->priv->storage_path);
 
+        gdbm_close(self->priv->db);
         /* Destruct */
         G_OBJECT_CLASS (media_db_parent_class)->dispose (object);
 }
