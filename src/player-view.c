@@ -68,12 +68,12 @@ static void player_view_init(PlayerView *self)
         gtk_tree_view_column_set_resizable(column, TRUE);
         gtk_tree_view_column_set_sort_column_id(column, PLAYER_COLUMN_NAME);
 
-        /* Time */
+        /* Time not yet handled
         cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Time",
                 cell_text, "text", PLAYER_COLUMN_TIME, NULL);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-        gtk_tree_view_column_set_resizable(column, TRUE);
+        gtk_tree_view_column_set_resizable(column, TRUE);*/
 
         /* Artist */
         cell_text = gtk_cell_renderer_text_new();
