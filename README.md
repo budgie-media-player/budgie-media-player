@@ -19,6 +19,8 @@ Features
  * Supports audio & video
  * Modern UI design
  * Client side decorations
+ * Random/shuffle function, that is actually *random*. Not the track
+   you just played.
 
 Authors
 ----
