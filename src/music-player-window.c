@@ -211,6 +211,8 @@ static void music_player_window_init(MusicPlayerWindow *self)
 
         /* Stack */
         stack = gtk_stack_new();
+        gtk_stack_set_transition_type(GTK_STACK(stack),
+                GTK_STACK_TRANSITION_TYPE_CROSSFADE);
         self->stack = stack;
         gtk_box_pack_start(GTK_BOX(layout), stack, TRUE, TRUE, 0);
 
