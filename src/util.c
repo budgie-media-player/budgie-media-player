@@ -62,7 +62,7 @@ end:
         return;
 }
 
-MediaInfo* media_from_file(gchar *path, GFileInfo *file_info, gchar *file_mime)
+MediaInfo* media_from_file(gchar *path, GFileInfo *file_info, const gchar *file_mime)
 {
         MediaInfo* media;
         ID3Tag *tag = NULL;

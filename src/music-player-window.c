@@ -563,13 +563,13 @@ static gboolean draw_cb (GtkWidget *widget, cairo_t *cr, gpointer userdata) {
         MusicPlayerWindow *self;
 
         self = MUSIC_PLAYER_WINDOW(userdata);
-        window = gtk_widget_get_window (widget);
+        window = gtk_widget_get_window(widget);
 
-        gtk_widget_get_allocation (widget, &allocation);
-        cairo_set_source_rgb (cr, 0, 0, 0);
-        cairo_rectangle (cr, 0, 0, allocation.width, allocation.height);
-        cairo_fill (cr);
-        gst_video_overlay_expose(self->gst_player);
+        gtk_widget_get_allocation(widget, &allocation);
+        cairo_set_source_rgb(cr, 0, 0, 0);
+        cairo_rectangle(cr, 0, 0, allocation.width, allocation.height);
+        cairo_fill(cr);
+        gst_video_overlay_expose(GST_VIDEO_OVERLAY(self->gst_player));
         return FALSE;
 }
 
