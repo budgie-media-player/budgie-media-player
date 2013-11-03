@@ -282,3 +282,32 @@ MediaInfo* player_view_get_previous_item(PlayerView *self)
 
         return media;
 }
+
+MediaInfo *player_view_get_random_item(PlayerView *self)
+{
+        guint32 rand;
+        guint length;
+        GtkTreeModel *model = NULL;
+        GtkTreeIter iter;
+        int i;
+        MediaInfo *media = NULL;
+        GValue value = G_VALUE_INIT;
+        GRand *random;
+
+        random = g_rand_new();
+
+        model = gtk_tree_view_get_model(GTK_TREE_VIEW(self->tree));
+        length = gtk_tree_model_iter_n_children(model, NULL);
+        rand = g_rand_int_range(random, 0, length);
+        g_rand_free(random);
+
+        gtk_tree_model_get_iter_first(model, &iter);
+        for (i = 0; i < rand; i++) {
+                gtk_tree_model_iter_next(model, &iter);
+        }
+        gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, PLAYER_COLUMN_INFO, &value);
+        media = g_value_get_pointer(&value);
+        g_value_unset(&value);
+
+        return media;
+}

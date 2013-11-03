@@ -63,6 +63,7 @@ struct _MusicPlayerWindowPrivate {
         gulong volume_id;
         gint64 duration;
         gboolean repeat;
+        gboolean random;
         guintptr window_handle;
 };
 

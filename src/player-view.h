@@ -112,5 +112,11 @@ MediaInfo* player_view_get_next_item(PlayerView *self);
  */
 MediaInfo* player_view_get_previous_item(PlayerView *self);
 
+/**
+ * Get a random track/media
+ * @return a random MediaInfo
+ */
+MediaInfo *player_view_get_random_item(PlayerView *self);
+
 
 #endif /* player_view_h */
