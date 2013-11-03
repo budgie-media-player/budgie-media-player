@@ -357,8 +357,8 @@ static void about_cb(GtkWidget *widget, gpointer userdata)
                 "Ikey Doherty <ikey.doherty@gmail.com>",
                 NULL
         };
-        const gchar* comments = "Simple Media Player. No frills.";
-        const gchar* copyright = "Copyright (C) Ikey Doherty 2013";
+        const gchar* comments = "Modern, Lightweight and distraction free media experience.";
+        const gchar* copyright = "Copyright \u00A9 Ikey Doherty 2013";
         gtk_show_about_dialog(GTK_WINDOW(self->window),
                 "authors", authors,
                 "comments", comments,
