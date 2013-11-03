@@ -55,7 +55,7 @@ static void realize_cb(GtkWidget *widget, gpointer userdata);
 static gboolean refresh_cb(gpointer userdata);
 
 /* GStreamer callbacks */
-static void _gst_eos_cb (GstBus *bus, GstMessage *msg, gpointer userdata);
+static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
 
 /* Initialisation */
 static void music_player_window_class_init(MusicPlayerWindowClass *klass)
@@ -280,7 +280,7 @@ static void music_player_window_dispose(GObject *object)
         g_object_unref(self->icon_theme);
         g_object_unref(self->css_provider);
         if (self->priv->tracks)
-                g_slist_free_full (self->priv->tracks, free_media_info);
+                g_slist_free_full(self->priv->tracks, free_media_info);
 
         if (self->priv->uri)
                 g_free(self->priv->uri);
@@ -290,7 +290,7 @@ static void music_player_window_dispose(GObject *object)
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         gst_object_unref(self->gst_player);
         /* Destruct */
-        G_OBJECT_CLASS (music_player_window_parent_class)->dispose (object);
+        G_OBJECT_CLASS(music_player_window_parent_class)->dispose(object);
 }
 
 /* Utility; return a new MusicPlayerWindow */
@@ -476,14 +476,14 @@ static gboolean refresh_cb(gpointer userdata) {
 
         /* Get media duration */
         if (!GST_CLOCK_TIME_IS_VALID (self->priv->duration)) {
-                if (!gst_element_query_duration (self->gst_player, fmt, &self->priv->duration)) {
+                if (!gst_element_query_duration(self->gst_player, fmt, &self->priv->duration)) {
                         /* Not able to get the clock time, fix when
                          * we have added bus-state */
                         self->priv->duration = GST_CLOCK_TIME_NONE;
                         return TRUE;
                 }
         }
-        if (!gst_element_query_position (self->gst_player, fmt, &track_current))
+        if (!gst_element_query_position(self->gst_player, fmt, &track_current))
                 return TRUE;
 
         player_status_area_set_media_time(PLAYER_STATUS_AREA(self->status),
@@ -500,7 +500,7 @@ static void repeat_cb(GtkWidget *widget, gpointer userdata)
 }
 
 /* GStreamer callbacks */
-static void _gst_eos_cb (GstBus *bus, GstMessage *msg, gpointer userdata)
+static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata)
 {
         MusicPlayerWindow *self;
 
@@ -557,7 +557,7 @@ static gpointer load_media(gpointer data)
         return NULL;
 }
 
-static gboolean draw_cb (GtkWidget *widget, cairo_t *cr, gpointer userdata) {
+static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata) {
         GtkAllocation allocation;
         GdkWindow *window;
         MusicPlayerWindow *self;

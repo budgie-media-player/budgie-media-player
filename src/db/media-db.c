@@ -89,7 +89,7 @@ static void media_db_dispose(GObject *object)
 
         gdbm_close(self->priv->db);
         /* Destruct */
-        G_OBJECT_CLASS (media_db_parent_class)->dispose (object);
+        G_OBJECT_CLASS(media_db_parent_class)->dispose(object);
 }
 
 /* Utility; return a new MediaDB */
