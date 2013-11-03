@@ -67,6 +67,7 @@ typedef struct MediaInfo {
         gchar *album;
         gchar *genre;
         gchar *path;
+        gchar *mime;
 } MediaInfo;
 
 /* Boilerplate GObject code */

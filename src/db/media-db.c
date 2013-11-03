@@ -49,6 +49,8 @@ void free_media_info(gpointer p_info)
                 g_free(info->genre);
         if (info->path)
                 g_free(info->path);
+        if (info->mime)
+                g_free(info->mime);
 }
 
 /* Initialisation */
@@ -171,7 +173,7 @@ static gboolean media_db_serialize(MediaInfo *info, uint8_t **target)
         unsigned int size;
         unsigned int offset = 0;
 
-        /* 4 member fields */
+        /* 5 member fields */
         if (info->title)
                 size = strlen(info->title)+1;
         if (info->artist)
@@ -180,9 +182,10 @@ static gboolean media_db_serialize(MediaInfo *info, uint8_t **target)
                 size += strlen(info->album)+1;
         if (info->genre)
                 size += strlen(info->genre)+1;
+        size += strlen(info->mime)+1;
 
-        /* 4 size fields */
-        size += sizeof(unsigned int)*4;
+        /* 5 size fields */
+        size += sizeof(unsigned int)*5;
 
         data = malloc(size);
         if (!data)
@@ -232,6 +235,13 @@ static gboolean media_db_serialize(MediaInfo *info, uint8_t **target)
                 memcpy(data+offset, info->genre, length);
         offset += length;
 
+        /* Mime */
+        length = strlen(info->mime)+1;
+        memcpy(data+offset, &length, sizeof(unsigned int));
+        offset += sizeof(unsigned int);
+        memcpy(data+offset, info->mime, length);
+
+
         ret = TRUE;
         *target = data;
 end:
@@ -247,8 +257,10 @@ static gboolean media_db_deserialize(uint8_t* source, MediaInfo **target)
         gchar *artist = NULL;
         gchar *album = NULL;
         gchar *genre = NULL;
+        gchar *mime = NULL;
         unsigned int title_len, artist_len;
         unsigned int album_len, genre_len;
+        unsigned int mime_len;
         unsigned int offset = 0;
         gboolean op = FALSE;
 
@@ -293,6 +305,13 @@ static gboolean media_db_deserialize(uint8_t* source, MediaInfo **target)
         }
         offset += genre_len;
 
+        /* Mime */
+        memcpy(&mime_len, source+offset, sizeof(unsigned int));
+        offset += sizeof(unsigned int);
+        mime = malloc(mime_len);
+        memcpy(mime, source+offset, mime_len);
+
+        offset += mime_len; /* Reserved */
         /* Copy the data instead of exposing internals */
         if (title)
                 ret->title = g_strdup(title);
@@ -303,6 +322,7 @@ static gboolean media_db_deserialize(uint8_t* source, MediaInfo **target)
         if (genre)
                 ret->genre = g_strdup(genre);
 
+        ret->mime = g_strdup(mime);
         op = TRUE;
         *target = ret;
 
@@ -315,5 +335,7 @@ end:
                 free(album);
         if (genre)
                 free(genre);
+        if (mime)
+                free(mime);
         return op;
 }

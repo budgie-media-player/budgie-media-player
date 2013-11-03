@@ -62,7 +62,7 @@ end:
         return;
 }
 
-MediaInfo* media_from_file(gchar *path, GFileInfo *file_info)
+MediaInfo* media_from_file(gchar *path, GFileInfo *file_info, gchar *file_mime)
 {
         MediaInfo* media;
         ID3Tag *tag = NULL;
@@ -84,6 +84,7 @@ MediaInfo* media_from_file(gchar *path, GFileInfo *file_info)
         if (!media->title)
                 media->title = g_strdup(g_file_info_get_display_name(file_info));
         media->path = g_strdup(path);
+        media->mime = g_strdup(file_mime);
 
         if (tag)
                 ID3Tag_Delete(tag);
@@ -120,7 +121,7 @@ void search_directory(const gchar *path, GSList **list, const gchar *mime_patter
                                 /* Not exactly a regex but it'll do for now */
                                 file_mime = g_file_info_get_content_type(next_file);
                                 if (g_str_has_prefix(file_mime, mime_pattern)) {
-                                        media = media_from_file(full_path, next_file);
+                                        media = media_from_file(full_path, next_file, file_mime);
                                         /* Probably switch to a new struct in the future */
                                         *list = g_slist_append(*list, media);
                                 }

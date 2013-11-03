@@ -377,9 +377,13 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         media = player_view_get_current_selection(PLAYER_VIEW(self->player));
         if (!media) /* Revisit */
                 return;
-        /* When we can determine audio vs video
-        gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "video"); */
 
+        /* Switch to video view for video content */
+        if (g_str_has_prefix(media->mime, "video/"))
+                gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "video");
+        else
+                gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "player");
+        
         uri = g_filename_to_uri(media->path, NULL, NULL);
         if (g_strcmp0(uri, self->priv->uri) != 0) {
                 /* Media change between pausing */
