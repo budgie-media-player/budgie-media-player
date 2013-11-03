@@ -1,4 +1,4 @@
-AC_INIT([Music Player], 1, [ikey.doherty@gmail.com])
+AC_INIT([Music Player], 1, [ikey.doherty@gmail.com], [music-player], [http://ikeydoherty.github.io/music-player/])
 AM_INIT_AUTOMAKE([foreign -Wno-portability no-dist-gzip dist-xz])
 AC_PROG_CC
 AC_PROG_CC_STDC

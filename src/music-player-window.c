@@ -367,7 +367,7 @@ static void about_cb(GtkWidget *widget, gpointer userdata)
                 "program-name", PACKAGE_NAME,
                 "license-type", GTK_LICENSE_GPL_2_0,
                 "version", PACKAGE_VERSION,
-                "website", "https://github.com/ikeydoherty/music-player",
+                "website", PACKAGE_URL,
                 NULL);
 }
 static void play_cb(GtkWidget *widget, gpointer userdata)
