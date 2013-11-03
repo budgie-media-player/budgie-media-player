@@ -13,6 +13,7 @@ PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.38.0])
 PKG_CHECK_MODULES([GTK3], [gtk+-3.0 >= 3.10.0])
 # We require GStreamer 1.0
 PKG_CHECK_MODULES([GSTREAMER], [gstreamer-1.0 >= 1.0.10])
+PKG_CHECK_MODULES([GSTREAMER_VIDEO], [gstreamer-video-1.0 >= 1.0.10])
 
 # Use id3tag to check audio tags.
 AC_CHECK_HEADERS([id3.h], [music_player_found_id3_headers=yes; break;])

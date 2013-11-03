@@ -63,6 +63,7 @@ struct _MusicPlayerWindowPrivate {
         gulong volume_id;
         gint64 duration;
         gboolean repeat;
+        guintptr window_handle;
 };
 
 /* MusicPlayerWindow object */
@@ -72,6 +73,9 @@ struct _MusicPlayerWindow {
         GtkWidget *window;
         GtkWidget *header;
         GtkIconTheme *icon_theme;
+
+        GtkWidget *video;
+        GtkWidget *stack;
 
         MediaDB *db;
 

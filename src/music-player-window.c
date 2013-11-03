@@ -23,6 +23,9 @@
 #include "config.h"
 
 #include <string.h>
+#include <gdk/gdkx.h>
+#include <gst/video/videooverlay.h>
+#include <gst/gstbus.h>
 
 #include "music-player-window.h"
 
@@ -47,6 +50,8 @@ static void next_cb(GtkWidget *widget, gpointer userdata);
 static void prev_cb(GtkWidget *widget, gpointer userdata);
 static void volume_cb(GtkWidget *widget, gpointer userdata);
 static void repeat_cb(GtkWidget *widget, gpointer userdata);
+static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata);
+static void realize_cb(GtkWidget *widget, gpointer userdata);
 static gboolean refresh_cb(gpointer userdata);
 
 /* GStreamer callbacks */
@@ -65,6 +70,8 @@ static void music_player_window_init(MusicPlayerWindow *self)
 {
         GtkWidget *window;
         GtkWidget *header;
+        GtkWidget *video;
+        GtkWidget *stack;
         GtkWidget *control_box;
         GtkToolItem *control_item;
         GtkWidget *repeat, *random;
@@ -81,6 +88,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkStyleContext *style;
         GstBus *bus;
         GtkSettings *settings;
+        GdkVisual *visual;
         guint length;
 
         self->priv = music_player_window_get_instance_private(self);
@@ -99,6 +107,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
         self->window = window;
         settings = gtk_widget_get_settings(window);
+        visual = gtk_widget_get_visual(window);
         g_object_set(settings,
                 "gtk-application-prefer-dark-theme", TRUE, NULL);
         g_object_unref(settings);
@@ -117,7 +126,6 @@ static void music_player_window_init(MusicPlayerWindow *self)
         /* Create client side decorations */
         header = gtk_header_bar_new();
         self->header = header;
-        gtk_header_bar_set_title(GTK_HEADER_BAR(header), "Music Player");
 
         /* Always show the close button */
         gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(header), TRUE);
@@ -201,10 +209,25 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_container_add(GTK_CONTAINER(about_item), about);
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(about_item));
 
+        /* Stack */
+        stack = gtk_stack_new();
+        self->stack = stack;
+        gtk_box_pack_start(GTK_BOX(layout), stack, TRUE, TRUE, 0);
+
         /* Player */
         player = player_view_new();
-        gtk_box_pack_start(GTK_BOX(layout), player, TRUE, TRUE, 0);
         self->player = player;
+        gtk_stack_add_named(GTK_STACK(stack), player, "player");
+
+        /* Video */
+        video = gtk_event_box_new();
+        self->video = video;
+        gtk_widget_set_double_buffered(video, FALSE);
+        self->priv->window_handle = 0;
+        gtk_stack_add_named(GTK_STACK(stack), video, "video");
+        gtk_widget_set_visual(video, visual);
+        g_signal_connect(video, "realize", G_CALLBACK(realize_cb), (gpointer)self);
+        g_signal_connect(video, "draw", G_CALLBACK(draw_cb), (gpointer)self);
 
         /* search entry */
         search = gtk_search_entry_new();
@@ -221,6 +244,8 @@ static void music_player_window_init(MusicPlayerWindow *self)
         /* Initialise gstreamer */
         self->gst_player = gst_element_factory_make("playbin", "player");
         bus = gst_element_get_bus(self->gst_player);
+
+        gst_bus_enable_sync_message_emission(bus);
         gst_bus_add_signal_watch(bus);
         g_signal_connect(bus, "message::eos", G_CALLBACK(_gst_eos_cb), (gpointer)self);
         g_object_unref(bus);
@@ -237,7 +262,10 @@ static void music_player_window_init(MusicPlayerWindow *self)
         if (length == 0)
                 g_idle_add(load_media_t, (gpointer)self);
 
+        gtk_widget_realize(window);
         gtk_widget_show_all(window);
+
+        gtk_header_bar_set_title(GTK_HEADER_BAR(header), "Music Player");
         gtk_widget_hide(pause);
 }
 
@@ -349,6 +377,8 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         media = player_view_get_current_selection(PLAYER_VIEW(self->player));
         if (!media) /* Revisit */
                 return;
+        /* When we can determine audio vs video
+        gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "video"); */
 
         uri = g_filename_to_uri(media->path, NULL, NULL);
         if (g_strcmp0(uri, self->priv->uri) != 0) {
@@ -519,4 +549,34 @@ static gpointer load_media(gpointer data)
         player_view_set_list(PLAYER_VIEW(self->player), self->priv->tracks);
 
         return NULL;
+}
+
+static gboolean draw_cb (GtkWidget *widget, cairo_t *cr, gpointer userdata) {
+        GtkAllocation allocation;
+        GdkWindow *window;
+        MusicPlayerWindow *self;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+        window = gtk_widget_get_window (widget);
+
+        gtk_widget_get_allocation (widget, &allocation);
+        cairo_set_source_rgb (cr, 0, 0, 0);
+        cairo_rectangle (cr, 0, 0, allocation.width, allocation.height);
+        cairo_fill (cr);
+        gst_video_overlay_expose(self->gst_player);
+        return FALSE;
+}
+
+
+static void realize_cb(GtkWidget *widg, gpointer userdata)
+{
+        MusicPlayerWindow *self;
+        GdkWindow *window;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+        window = gtk_widget_get_window(self->video);
+        if (!gdk_window_ensure_native(window))
+                g_error("Unable to initialize video");
+        self->priv->window_handle = GDK_WINDOW_XID(window);
+        gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(self->gst_player), self->priv->window_handle);
 }
