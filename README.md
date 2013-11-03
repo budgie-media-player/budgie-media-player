@@ -1,5 +1,4 @@
-Simple Music Player using GTK3.10. Tries to be pretty. Probably not very
-useful for some time yet. Written in C. Now supports video.
+Simple Music Player using GTK3.10 written in C
 
 See http://ikeydoherty.github.io/music-player/ for roadmap and features
 
