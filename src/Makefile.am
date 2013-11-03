@@ -2,7 +2,7 @@
 
 bin_PROGRAMS = music-player
 
-lib_LTLIBRARIES = \
+noinst_LTLIBRARIES = \
 	libmediadb.la
 
 libmediadb_la_SOURCES = \
