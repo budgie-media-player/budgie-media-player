@@ -78,6 +78,7 @@ struct _MusicPlayerWindow {
         GtkWidget *video;
         GtkWidget *stack;
         GtkWidget *reload;
+        GtkWidget *full_screen;
 
         MediaDB *db;
 

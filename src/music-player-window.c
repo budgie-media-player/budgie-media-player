@@ -55,6 +55,7 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata);
 static void realize_cb(GtkWidget *widget, gpointer userdata);
 static gboolean refresh_cb(gpointer userdata);
 static void reload_cb(GtkWidget *widget, gpointer userdata);
+static void full_screen_cb(GtkWidget *widget, gpointer userdata);
 
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
@@ -79,6 +80,8 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkWidget *repeat, *random;
         GtkWidget *reload;
         GtkToolItem *reload_item;
+        GtkWidget *full_screen;
+        GtkToolItem *full_screen_item;
         GtkWidget *about;
         GtkToolItem *about_item;
         /* header buttons */
@@ -222,6 +225,14 @@ static void music_player_window_init(MusicPlayerWindow *self)
                 FALSE);
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(separator));
 
+        /* full screen */
+        full_screen = new_button_with_icon(self, "view-fullscreen-symbolic", TRUE, TRUE);
+        full_screen_item = gtk_tool_item_new();
+        self->full_screen = full_screen;
+        gtk_container_add(GTK_CONTAINER(full_screen_item), full_screen);
+        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(full_screen_item));
+        g_signal_connect(full_screen, "clicked", G_CALLBACK(full_screen_cb), (gpointer)self);
+
         /* about */
         about = new_button_with_icon(self, "help-about-symbolic", TRUE, FALSE);
         about_item = gtk_tool_item_new();
@@ -288,6 +299,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_widget_show_all(window);
 
         gtk_header_bar_set_title(GTK_HEADER_BAR(header), "Music Player");
+        gtk_widget_hide(full_screen);
         gtk_widget_hide(pause);
 }
 
@@ -401,11 +413,14 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
                 return;
 
         /* Switch to video view for video content */
-        if (g_str_has_prefix(media->mime, "video/"))
+        if (g_str_has_prefix(media->mime, "video/")) {
                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "video");
-        else
+                gtk_widget_set_visible(self->full_screen, TRUE);
+        } else {
                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "player");
-        
+                gtk_widget_set_visible(self->full_screen, FALSE);
+        }
+
         uri = g_filename_to_uri(media->path, NULL, NULL);
         if (g_strcmp0(uri, self->priv->uri) != 0) {
                 /* Media change between pausing */
@@ -538,6 +553,18 @@ static void reload_cb(GtkWidget *widget, gpointer userdata)
         g_idle_add(load_media_t, userdata);
 }
 
+static void full_screen_cb(GtkWidget *widget, gpointer userdata)
+{
+        MusicPlayerWindow *self;
+        gboolean full;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+        full = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+        if (full)
+                gtk_window_fullscreen(GTK_WINDOW(self->window));
+        else
+                gtk_window_unfullscreen(GTK_WINDOW(self->window));
+}
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata)
 {
