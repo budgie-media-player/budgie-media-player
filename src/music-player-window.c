@@ -76,12 +76,13 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkWidget *video;
         GtkWidget *stack;
         GtkWidget *control_box;
+        GtkWidget *control_video_box;
         GtkToolItem *control_item;
+        GtkToolItem *control_video_item;
         GtkWidget *repeat, *random;
         GtkWidget *reload;
         GtkToolItem *reload_item;
         GtkWidget *full_screen;
-        GtkToolItem *full_screen_item;
         GtkWidget *about;
         GtkToolItem *about_item;
         /* header buttons */
@@ -91,7 +92,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkWidget *status;
         GtkWidget *player;
         GtkWidget *toolbar;
-        GtkToolItem *separator;
+        GtkToolItem *separator1, *separator2;
         GtkWidget *layout;
         GtkStyleContext *style;
         GstBus *bus;
@@ -210,6 +211,33 @@ static void music_player_window_init(MusicPlayerWindow *self)
         g_signal_connect(random, "clicked", G_CALLBACK(random_cb), (gpointer)self);
         self->priv->random = FALSE;
 
+        /* Visual separation between generic media and video controls */
+        separator1 = gtk_separator_tool_item_new();
+        gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator1), FALSE);
+        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(separator1));
+
+        /* Our video controls */
+        control_video_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        style = gtk_widget_get_style_context(control_video_box);
+        gtk_style_context_add_class(style, GTK_STYLE_CLASS_LINKED);
+        gtk_style_context_add_class(style, GTK_STYLE_CLASS_RAISED);
+        control_video_item = gtk_tool_item_new();
+        gtk_container_add(GTK_CONTAINER(control_video_item), control_video_box);
+        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(control_video_item));
+        
+        /* full screen */
+        full_screen = new_button_with_icon(self, "view-fullscreen-symbolic", TRUE, TRUE);
+        self->full_screen = full_screen;
+        gtk_container_add(GTK_CONTAINER(control_video_box), full_screen);
+        g_signal_connect(full_screen, "clicked", G_CALLBACK(full_screen_cb), (gpointer)self);
+
+        /* separator (shift following items to right hand side */
+        separator2 = gtk_separator_tool_item_new();
+        gtk_tool_item_set_expand(separator2, TRUE);
+        gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator2),
+                FALSE);
+        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(separator2));
+
         /* reload */
         reload = new_button_with_icon(self, "view-refresh", TRUE, FALSE);
         reload_item = gtk_tool_item_new();
@@ -217,21 +245,6 @@ static void music_player_window_init(MusicPlayerWindow *self)
         g_signal_connect(reload, "clicked", G_CALLBACK(reload_cb), (gpointer)self);
         gtk_container_add(GTK_CONTAINER(reload_item), reload);
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(reload_item));
-
-        /* separator (shift following items to right hand side */
-        separator = gtk_separator_tool_item_new();
-        gtk_tool_item_set_expand(separator, TRUE);
-        gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator),
-                FALSE);
-        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(separator));
-
-        /* full screen */
-        full_screen = new_button_with_icon(self, "view-fullscreen-symbolic", TRUE, TRUE);
-        full_screen_item = gtk_tool_item_new();
-        self->full_screen = full_screen;
-        gtk_container_add(GTK_CONTAINER(full_screen_item), full_screen);
-        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(full_screen_item));
-        g_signal_connect(full_screen, "clicked", G_CALLBACK(full_screen_cb), (gpointer)self);
 
         /* about */
         about = new_button_with_icon(self, "help-about-symbolic", TRUE, FALSE);
