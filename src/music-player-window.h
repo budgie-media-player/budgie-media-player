@@ -64,6 +64,7 @@ struct _MusicPlayerWindowPrivate {
         gint64 duration;
         gboolean repeat;
         gboolean random;
+        gboolean full_screen;
         guintptr window_handle;
 };
 

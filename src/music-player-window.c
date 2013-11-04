@@ -57,6 +57,7 @@ static gboolean refresh_cb(gpointer userdata);
 static void reload_cb(GtkWidget *widget, gpointer userdata);
 static void full_screen_cb(GtkWidget *widget, gpointer userdata);
 static void aspect_cb(GtkWidget *widget, gpointer userdata);
+static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpointer userdata);
 
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
@@ -282,6 +283,13 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_widget_set_visual(video, visual);
         g_signal_connect(video, "realize", G_CALLBACK(realize_cb), (gpointer)self);
         g_signal_connect(video, "draw", G_CALLBACK(draw_cb), (gpointer)self);
+
+        /* Hook up events for video box */
+        g_signal_connect(video, "motion-notify-event",
+                G_CALLBACK(motion_notify_cb), (gpointer)self);
+        gtk_widget_set_events (video, gtk_widget_get_events (video) |
+             GDK_LEAVE_NOTIFY_MASK | GDK_POINTER_MOTION_MASK |
+             GDK_POINTER_MOTION_HINT_MASK);
 
         /* search entry */
         search = gtk_search_entry_new();
@@ -581,10 +589,14 @@ static void full_screen_cb(GtkWidget *widget, gpointer userdata)
 
         self = MUSIC_PLAYER_WINDOW(userdata);
         full = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-        if (full)
+        self->priv->full_screen = full;
+        if (full) {
                 gtk_window_fullscreen(GTK_WINDOW(self->window));
-        else
+                gtk_widget_hide(self->toolbar);
+        } else {
                 gtk_window_unfullscreen(GTK_WINDOW(self->window));
+                gtk_widget_show(self->toolbar);
+        }
 }
 
 static void aspect_cb(GtkWidget *widget, gpointer userdata)
@@ -691,4 +703,32 @@ static void realize_cb(GtkWidget *widg, gpointer userdata)
                 g_error("Unable to initialize video");
         self->priv->window_handle = GDK_WINDOW_XID(window);
         gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(self->gst_player), self->priv->window_handle);
+}
+
+static gboolean hide_bar(gpointer udata)
+{
+        MusicPlayerWindow *self;
+
+        self = MUSIC_PLAYER_WINDOW(udata);
+
+        if (self->priv->full_screen)
+                gtk_widget_hide(self->toolbar);
+        else
+                gtk_widget_show(self->toolbar);
+        return FALSE;
+}
+
+static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpointer userdata)
+{
+        MusicPlayerWindow *self;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+        if (gtk_widget_get_visible(self->toolbar))
+                return FALSE;
+        if (!self->priv->full_screen)
+                return FALSE;
+
+        gtk_widget_show(self->toolbar);
+        g_timeout_add(3000, hide_bar, userdata);
+        return FALSE;
 }
