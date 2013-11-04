@@ -56,6 +56,7 @@ static void realize_cb(GtkWidget *widget, gpointer userdata);
 static gboolean refresh_cb(gpointer userdata);
 static void reload_cb(GtkWidget *widget, gpointer userdata);
 static void full_screen_cb(GtkWidget *widget, gpointer userdata);
+static void aspect_cb(GtkWidget *widget, gpointer userdata);
 
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
@@ -83,6 +84,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkWidget *reload;
         GtkToolItem *reload_item;
         GtkWidget *full_screen;
+        GtkWidget *aspect;
         GtkWidget *about;
         GtkToolItem *about_item;
         /* header buttons */
@@ -218,6 +220,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
 
         /* Our video controls */
         control_video_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        self->video_controls = control_video_box;
         style = gtk_widget_get_style_context(control_video_box);
         gtk_style_context_add_class(style, GTK_STYLE_CLASS_LINKED);
         gtk_style_context_add_class(style, GTK_STYLE_CLASS_RAISED);
@@ -227,9 +230,14 @@ static void music_player_window_init(MusicPlayerWindow *self)
         
         /* full screen */
         full_screen = new_button_with_icon(self, "view-fullscreen-symbolic", TRUE, TRUE);
-        self->full_screen = full_screen;
         gtk_container_add(GTK_CONTAINER(control_video_box), full_screen);
         g_signal_connect(full_screen, "clicked", G_CALLBACK(full_screen_cb), (gpointer)self);
+
+        /* Force aspect ratio - enabled by default */
+        aspect = new_button_with_icon(self, "window-maximize-symbolic", TRUE, TRUE);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(aspect), TRUE);
+        gtk_container_add(GTK_CONTAINER(control_video_box), aspect);
+        g_signal_connect(aspect, "clicked", G_CALLBACK(aspect_cb), (gpointer)self);
 
         /* separator (shift following items to right hand side */
         separator2 = gtk_separator_tool_item_new();
@@ -312,7 +320,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_widget_show_all(window);
 
         gtk_header_bar_set_title(GTK_HEADER_BAR(header), "Music Player");
-        gtk_widget_hide(full_screen);
+        gtk_widget_hide(control_video_box);
         gtk_widget_hide(pause);
 }
 
@@ -428,10 +436,10 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         /* Switch to video view for video content */
         if (g_str_has_prefix(media->mime, "video/")) {
                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "video");
-                gtk_widget_set_visible(self->full_screen, TRUE);
+                gtk_widget_set_visible(self->video_controls, TRUE);
         } else {
                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "player");
-                gtk_widget_set_visible(self->full_screen, FALSE);
+                gtk_widget_set_visible(self->video_controls, FALSE);
         }
 
         uri = g_filename_to_uri(media->path, NULL, NULL);
@@ -578,6 +586,19 @@ static void full_screen_cb(GtkWidget *widget, gpointer userdata)
         else
                 gtk_window_unfullscreen(GTK_WINDOW(self->window));
 }
+
+static void aspect_cb(GtkWidget *widget, gpointer userdata)
+{
+        MusicPlayerWindow *self;
+        gboolean force_aspect;
+
+        self = MUSIC_PLAYER_WINDOW(userdata);
+        force_aspect = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+        g_object_set(self->gst_player, "force-aspect-ratio", force_aspect, NULL);
+        /* Otherwise we get dirty regions on our drawing area */
+        gtk_widget_queue_draw(self->window);
+}
+
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata)
 {
