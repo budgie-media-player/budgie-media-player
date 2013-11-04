@@ -54,6 +54,7 @@ static void random_cb(GtkWidget *widget, gpointer userdata);
 static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata);
 static void realize_cb(GtkWidget *widget, gpointer userdata);
 static gboolean refresh_cb(gpointer userdata);
+static void reload_cb(GtkWidget *widget, gpointer userdata);
 
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
@@ -76,6 +77,8 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkWidget *control_box;
         GtkToolItem *control_item;
         GtkWidget *repeat, *random;
+        GtkWidget *reload;
+        GtkToolItem *reload_item;
         GtkWidget *about;
         GtkToolItem *about_item;
         /* header buttons */
@@ -85,6 +88,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GtkWidget *status;
         GtkWidget *player;
         GtkWidget *toolbar;
+        GtkToolItem *separator;
         GtkWidget *layout;
         GtkStyleContext *style;
         GstBus *bus;
@@ -188,7 +192,6 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_style_context_add_class(style, GTK_STYLE_CLASS_LINKED);
         gtk_style_context_add_class(style, GTK_STYLE_CLASS_RAISED);
         control_item = gtk_tool_item_new();
-        gtk_tool_item_set_expand(control_item, TRUE);
         gtk_container_add(GTK_CONTAINER(control_item), control_box);
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(control_item));
 
@@ -203,6 +206,21 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_box_pack_start(GTK_BOX(control_box), random, FALSE, FALSE, 0);
         g_signal_connect(random, "clicked", G_CALLBACK(random_cb), (gpointer)self);
         self->priv->random = FALSE;
+
+        /* reload */
+        reload = new_button_with_icon(self, "view-refresh", TRUE, FALSE);
+        reload_item = gtk_tool_item_new();
+        self->reload = reload;
+        g_signal_connect(reload, "clicked", G_CALLBACK(reload_cb), (gpointer)self);
+        gtk_container_add(GTK_CONTAINER(reload_item), reload);
+        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(reload_item));
+
+        /* separator (shift following items to right hand side */
+        separator = gtk_separator_tool_item_new();
+        gtk_tool_item_set_expand(separator, TRUE);
+        gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator),
+                FALSE);
+        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(separator));
 
         /* about */
         about = new_button_with_icon(self, "help-about-symbolic", TRUE, FALSE);
@@ -515,6 +533,11 @@ static void random_cb(GtkWidget *widget, gpointer userdata)
         self->priv->random = !self->priv->random;
 }
 
+static void reload_cb(GtkWidget *widget, gpointer userdata)
+{
+        g_idle_add(load_media_t, userdata);
+}
+
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata)
 {
@@ -544,7 +567,11 @@ static void store_media(gpointer data1, gpointer data2)
 
 static gboolean load_media_t(gpointer data)
 {
+        MusicPlayerWindow *self;
         GThread *thread;
+
+        self = MUSIC_PLAYER_WINDOW(data);
+        gtk_widget_set_sensitive(self->reload, FALSE);
 
         thread = g_thread_new("reload-media", &load_media, data);
 
@@ -569,6 +596,8 @@ static gpointer load_media(gpointer data)
         /* Use mediadb's tracks, not our own list */
         self->priv->tracks = media_db_get_all_media(self->db);
         player_view_set_list(PLAYER_VIEW(self->player), self->priv->tracks);
+
+        gtk_widget_set_sensitive(self->reload, TRUE);
 
         return NULL;
 }
