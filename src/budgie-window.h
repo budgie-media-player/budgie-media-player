@@ -1,5 +1,5 @@
 /*
- * music-player-window.h
+ * budgie-window.h
  * 
  * Copyright 2013 Ikey Doherty <ikey.doherty@gmail.com>
  * 
@@ -20,8 +20,8 @@
  * 
  * 
  */
-#ifndef music_player_window_h
-#define music_player_window_h
+#ifndef budgie_window_h
+#define budgie_window_h
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
@@ -43,19 +43,19 @@
 #title {\
     text-shadow: 0 1px shade(#cecece, 1.2);\
 }"
-typedef struct _MusicPlayerWindow MusicPlayerWindow;
-typedef struct _MusicPlayerWindowClass   MusicPlayerWindowClass;
-typedef struct _MusicPlayerWindowPrivate MusicPlayerWindowPrivate;
+typedef struct _BudgieWindow BudgieWindow;
+typedef struct _BudgieWindowClass   BudgieWindowClass;
+typedef struct _BudgieWindowPrivate BudgieWindowPrivate;
 
-#define MUSIC_PLAYER_WINDOW_TYPE (music_player_window_get_type())
-#define MUSIC_PLAYER_WINDOW(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), MUSIC_PLAYER_WINDOW_TYPE, MusicPlayerWindow))
-#define IS_MUSIC_PLAYER_WINDOW(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MUSIC_PLAYER_WINDOW_TYPE))
-#define MUSIC_PLAYER_WINDOW_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), MUSIC_PLAYER_WINDOW_TYPE, MusicPlayerWindowClass))
-#define IS_MUSIC_PLAYER_WINDOW_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), MUSIC_PLAYER_WINDOW_TYPE))
-#define MUSIC_PLAYER_WINDOW_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), MUSIC_PLAYER_WINDOW_TYPE, MusicPlayerWindowClass))
+#define BUDGIE_WINDOW_TYPE (budgie_window_get_type())
+#define BUDGIE_WINDOW(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), BUDGIE_WINDOW_TYPE, BudgieWindow))
+#define IS_BUDGIE_WINDOW(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), BUDGIE_WINDOW_TYPE))
+#define BUDGIE_WINDOW_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), BUDGIE_WINDOW_TYPE, BudgieWindowClass))
+#define IS_BUDGIE_WINDOW_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), BUDGIE_WINDOW_TYPE))
+#define BUDGIE_WINDOW_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), BUDGIE_WINDOW_TYPE, BudgieWindowClass))
 
 /* Private storage */
-struct _MusicPlayerWindowPrivate {
+struct _BudgieWindowPrivate {
         const gchar *music_directory;
         const gchar *video_directory;
         GSList *tracks;
@@ -68,8 +68,8 @@ struct _MusicPlayerWindowPrivate {
         guintptr window_handle;
 };
 
-/* MusicPlayerWindow object */
-struct _MusicPlayerWindow {
+/* BudgieWindow object */
+struct _BudgieWindow {
         GObject parent;
 
         GtkWidget *window;
@@ -97,22 +97,22 @@ struct _MusicPlayerWindow {
         GstElement *gst_player;
 
         GtkCssProvider *css_provider;
-        MusicPlayerWindowPrivate *priv;
+        BudgieWindowPrivate *priv;
 };
 
-/* MusicPlayerWindow class definition */
-struct _MusicPlayerWindowClass {
+/* BudgieWindow class definition */
+struct _BudgieWindowClass {
         GObjectClass parent_class;
 };
 
 
 /* Boilerplate GObject code */
-static void music_player_window_class_init(MusicPlayerWindowClass *klass);
-static void music_player_window_init(MusicPlayerWindow *self);
-static void music_player_window_dispose(GObject *object);
-GType music_player_window_get_type(void);
+static void budgie_window_class_init(BudgieWindowClass *klass);
+static void budgie_window_init(BudgieWindow *self);
+static void budgie_window_dispose(GObject *object);
+GType budgie_window_get_type(void);
 
-/* MusicPlayerWindow methods */
-MusicPlayerWindow* music_player_window_new(void);
+/* BudgieWindow methods */
+BudgieWindow* budgie_window_new(void);
 
-#endif /* music_player_window_h */
+#endif /* budgie_window_h */

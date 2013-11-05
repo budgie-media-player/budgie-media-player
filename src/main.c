@@ -22,15 +22,15 @@
  */
 
 #include <stdlib.h>
-#include "music-player-window.h"
+#include "budgie-window.h"
 
 int main(int argc, char **argv)
 {
-        MusicPlayerWindow *window;
+        BudgieWindow *window;
         gtk_init(&argc, &argv);
         gst_init(&argc, &argv);
 
-        window = music_player_window_new();
+        window = budgie_window_new();
         gtk_main();
 
         g_object_unref(window);

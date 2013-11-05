@@ -1,5 +1,5 @@
 /*
- * music-player-window.c
+ * budgie-window.c
  * 
  * Copyright 2013 Ikey Doherty <ikey.doherty@gmail.com>
  * 
@@ -27,16 +27,16 @@
 #include <gst/video/videooverlay.h>
 #include <gst/gstbus.h>
 
-#include "music-player-window.h"
+#include "budgie-window.h"
 
-G_DEFINE_TYPE_WITH_PRIVATE(MusicPlayerWindow, music_player_window, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE(BudgieWindow, budgie_window, G_TYPE_OBJECT);
 
 /* Utilities */
-static GtkWidget* new_button_with_icon(MusicPlayerWindow *self,
+static GtkWidget* new_button_with_icon(BudgieWindow *self,
                                        const gchar *icon_name,
                                        gboolean toolbar,
                                        gboolean toggle);
-static void init_styles(MusicPlayerWindow *self);
+static void init_styles(BudgieWindow *self);
 
 static void store_media(gpointer data1, gpointer data2);
 static gboolean load_media_t(gpointer data);
@@ -63,15 +63,15 @@ static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpoin
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
 
 /* Initialisation */
-static void music_player_window_class_init(MusicPlayerWindowClass *klass)
+static void budgie_window_class_init(BudgieWindowClass *klass)
 {
         GObjectClass *g_object_class;
 
         g_object_class = G_OBJECT_CLASS(klass);
-        g_object_class->dispose = &music_player_window_dispose;
+        g_object_class->dispose = &budgie_window_dispose;
 }
 
-static void music_player_window_init(MusicPlayerWindow *self)
+static void budgie_window_init(BudgieWindow *self)
 {
         GtkWidget *window;
         GtkWidget *header;
@@ -103,7 +103,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         GdkVisual *visual;
         guint length;
 
-        self->priv = music_player_window_get_instance_private(self);
+        self->priv = budgie_window_get_instance_private(self);
 
         /* TODO: Handle this better */
         self->priv->music_directory = g_get_user_special_dir(G_USER_DIRECTORY_MUSIC);
@@ -129,7 +129,7 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_widget_set_size_request(window, 1100, 500);
         gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
         gtk_window_set_icon_name(GTK_WINDOW(window), "gnome-music");
-        gtk_window_set_wmclass(GTK_WINDOW(window), "MusicPlayer", "Music Player");
+        gtk_window_set_wmclass(GTK_WINDOW(window), "Budgie", "Budgie");
         g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
         /* Icon theme for button utility */
@@ -327,16 +327,16 @@ static void music_player_window_init(MusicPlayerWindow *self)
         gtk_widget_realize(window);
         gtk_widget_show_all(window);
 
-        gtk_header_bar_set_title(GTK_HEADER_BAR(header), "Music Player");
+        gtk_header_bar_set_title(GTK_HEADER_BAR(header), "Budgie");
         gtk_widget_hide(control_video_box);
         gtk_widget_hide(pause);
 }
 
-static void music_player_window_dispose(GObject *object)
+static void budgie_window_dispose(GObject *object)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
-        self = MUSIC_PLAYER_WINDOW(object);
+        self = BUDGIE_WINDOW(object);
 
         g_object_unref(self->icon_theme);
         g_object_unref(self->css_provider);
@@ -351,19 +351,19 @@ static void music_player_window_dispose(GObject *object)
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         gst_object_unref(self->gst_player);
         /* Destruct */
-        G_OBJECT_CLASS(music_player_window_parent_class)->dispose(object);
+        G_OBJECT_CLASS(budgie_window_parent_class)->dispose(object);
 }
 
-/* Utility; return a new MusicPlayerWindow */
-MusicPlayerWindow* music_player_window_new(void)
+/* Utility; return a new BudgieWindow */
+BudgieWindow* budgie_window_new(void)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
-        self = g_object_new(MUSIC_PLAYER_WINDOW_TYPE, NULL);
-        return MUSIC_PLAYER_WINDOW(self);
+        self = g_object_new(BUDGIE_WINDOW_TYPE, NULL);
+        return BUDGIE_WINDOW(self);
 }
 
-static GtkWidget* new_button_with_icon(MusicPlayerWindow *self,
+static GtkWidget* new_button_with_icon(BudgieWindow *self,
                                        const gchar *icon_name,
                                        gboolean toolbar,
                                        gboolean toggle)
@@ -392,7 +392,7 @@ static GtkWidget* new_button_with_icon(MusicPlayerWindow *self,
         return button;
 }
 
-static void init_styles(MusicPlayerWindow *self)
+static void init_styles(BudgieWindow *self)
 {
         GtkCssProvider *css_provider;
         GdkScreen *screen;
@@ -408,9 +408,9 @@ static void init_styles(MusicPlayerWindow *self)
 
 static void about_cb(GtkWidget *widget, gpointer userdata)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
 
         const gchar* authors[] = {
                 "Ikey Doherty <ikey.doherty@gmail.com>",
@@ -431,11 +431,11 @@ static void about_cb(GtkWidget *widget, gpointer userdata)
 }
 static void play_cb(GtkWidget *widget, gpointer userdata)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
         MediaInfo *media = NULL;
         gchar *uri;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         self->priv->duration = GST_CLOCK_TIME_NONE;
         media = player_view_get_current_selection(PLAYER_VIEW(self->player));
         if (!media) /* Revisit */
@@ -471,9 +471,9 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
 
 static void pause_cb(GtkWidget *widget, gpointer userdata)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
 
         gst_element_set_state(self->gst_player, GST_STATE_PAUSED);
         gtk_widget_hide(self->pause);
@@ -483,9 +483,9 @@ static void pause_cb(GtkWidget *widget, gpointer userdata)
 static void next_cb(GtkWidget *widget, gpointer userdata)
 {
         MediaInfo *next = NULL;
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         if (!self->priv->random)
                 next = player_view_get_next_item(PLAYER_VIEW(self->player));
         else
@@ -502,9 +502,9 @@ static void next_cb(GtkWidget *widget, gpointer userdata)
 static void prev_cb(GtkWidget *widget, gpointer userdata)
 {
         MediaInfo *prev = NULL;
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         if (!self->priv->random)
                 prev = player_view_get_previous_item(PLAYER_VIEW(self->player));
         else
@@ -520,21 +520,21 @@ static void prev_cb(GtkWidget *widget, gpointer userdata)
 
 static void volume_cb(GtkWidget *widget, gpointer userdata)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
         gdouble volume_level;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         volume_level = gtk_range_get_value(GTK_RANGE(self->volume));
         g_object_set(self->gst_player, "volume", volume_level, NULL);
 }
 
 static gboolean refresh_cb(gpointer userdata) {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
         gdouble volume_level;
         gint64 track_current;
         GstFormat fmt = GST_FORMAT_TIME;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         g_object_get(self->gst_player, "volume", &volume_level, NULL);
 
         /* Don't cause events for this, endless volume battle */
@@ -563,17 +563,17 @@ static gboolean refresh_cb(gpointer userdata) {
 
 static void repeat_cb(GtkWidget *widget, gpointer userdata)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         self->priv->repeat = !self->priv->repeat;
 }
 
 static void random_cb(GtkWidget *widget, gpointer userdata)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         self->priv->random = !self->priv->random;
 }
 
@@ -584,10 +584,10 @@ static void reload_cb(GtkWidget *widget, gpointer userdata)
 
 static void full_screen_cb(GtkWidget *widget, gpointer userdata)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
         gboolean full;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         full = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
         self->priv->full_screen = full;
         if (full) {
@@ -601,10 +601,10 @@ static void full_screen_cb(GtkWidget *widget, gpointer userdata)
 
 static void aspect_cb(GtkWidget *widget, gpointer userdata)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
         gboolean force_aspect;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         force_aspect = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
         g_object_set(self->gst_player, "force-aspect-ratio", force_aspect, NULL);
         /* Otherwise we get dirty regions on our drawing area */
@@ -614,9 +614,9 @@ static void aspect_cb(GtkWidget *widget, gpointer userdata)
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         /* Skip to next track */
         if (!self->priv->repeat) {
                 next_cb(NULL, userdata);
@@ -630,20 +630,20 @@ static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata)
 static void store_media(gpointer data1, gpointer data2)
 {
         MediaInfo *info;
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
         info = (MediaInfo*)data1;
-        self = MUSIC_PLAYER_WINDOW(data2);
+        self = BUDGIE_WINDOW(data2);
 
         media_db_store_media(self->db, info);
 }
 
 static gboolean load_media_t(gpointer data)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
         GThread *thread;
 
-        self = MUSIC_PLAYER_WINDOW(data);
+        self = BUDGIE_WINDOW(data);
         gtk_widget_set_sensitive(self->reload, FALSE);
 
         thread = g_thread_new("reload-media", &load_media, data);
@@ -653,10 +653,10 @@ static gboolean load_media_t(gpointer data)
 
 static gpointer load_media(gpointer data)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
         GSList *tracks = NULL;
 
-        self = MUSIC_PLAYER_WINDOW(data);
+        self = BUDGIE_WINDOW(data);
         search_directory(self->priv->music_directory,
                 &tracks, "audio/");
         search_directory(self->priv->video_directory,
@@ -678,9 +678,9 @@ static gpointer load_media(gpointer data)
 static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata) {
         GtkAllocation allocation;
         GdkWindow *window;
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         window = gtk_widget_get_window(widget);
 
         gtk_widget_get_allocation(widget, &allocation);
@@ -694,10 +694,10 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata) {
 
 static void realize_cb(GtkWidget *widg, gpointer userdata)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
         GdkWindow *window;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         window = gtk_widget_get_window(self->video);
         if (!gdk_window_ensure_native(window))
                 g_error("Unable to initialize video");
@@ -707,9 +707,9 @@ static void realize_cb(GtkWidget *widg, gpointer userdata)
 
 static gboolean hide_bar(gpointer udata)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
-        self = MUSIC_PLAYER_WINDOW(udata);
+        self = BUDGIE_WINDOW(udata);
 
         if (self->priv->full_screen)
                 gtk_widget_hide(self->toolbar);
@@ -720,9 +720,9 @@ static gboolean hide_bar(gpointer udata)
 
 static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpointer userdata)
 {
-        MusicPlayerWindow *self;
+        BudgieWindow *self;
 
-        self = MUSIC_PLAYER_WINDOW(userdata);
+        self = BUDGIE_WINDOW(userdata);
         if (gtk_widget_get_visible(self->toolbar))
                 return FALSE;
         if (!self->priv->full_screen)

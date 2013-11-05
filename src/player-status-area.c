@@ -48,7 +48,7 @@ static void player_status_area_init(PlayerStatusArea *self)
         box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
         /* Construct our main label */
-        label = gtk_label_new("MusicPlayer");
+        label = gtk_label_new("Budgie");
         gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
         gtk_widget_set_name(label, "title");
         gtk_misc_set_alignment(GTK_MISC(label), 0.5, 0.5);

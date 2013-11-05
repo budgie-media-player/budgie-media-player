@@ -1,6 +1,6 @@
 -include $(top_srcdir)/Makefile.am
 
-bin_PROGRAMS = music-player
+bin_PROGRAMS = budgie
 
 noinst_LTLIBRARIES = \
 	libmediadb.la
@@ -17,9 +17,9 @@ libmediadb_la_LIBADD = \
 	$(GIO_LIBS) \
 	-lgdbm
 
-music_player_SOURCES = \
-	music-player-window.c \
-	music-player-window.h \
+budgie_SOURCES = \
+	budgie-window.c \
+	budgie-window.h \
 	player-status-area.c \
 	player-status-area.h \
 	player-view.c \
@@ -28,14 +28,14 @@ music_player_SOURCES = \
 	util.h \
 	main.c
 
-music_player_CFLAGS = \
+budgie_CFLAGS = \
 	$(GTK3_CFLAGS) \
 	$(GSTREAMER_CFLAGS) \
 	$(GSTREAMER_VIDEO_CFLAGS) \
 	$(ID3_FLAGS) \
 	$(AM_CFLAGS)
 
-music_player_LDADD = \
+budgie_LDADD = \
 	$(GTK3_LIBS) \
 	$(GSTREAMER_LIBS) \
 	$(GSTREAMER_VIDEO_LIBS) \
