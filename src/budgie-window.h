@@ -80,6 +80,7 @@ struct _BudgieWindow {
         GtkWidget *stack;
         GtkWidget *reload;
         GtkWidget *video_controls;
+        GtkWidget *full_screen;
 
         MediaDB *db;
 

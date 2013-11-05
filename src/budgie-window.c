@@ -58,6 +58,7 @@ static void reload_cb(GtkWidget *widget, gpointer userdata);
 static void full_screen_cb(GtkWidget *widget, gpointer userdata);
 static void aspect_cb(GtkWidget *widget, gpointer userdata);
 static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpointer userdata);
+static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata);
 
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
@@ -233,6 +234,7 @@ static void budgie_window_init(BudgieWindow *self)
         full_screen = new_button_with_icon(self, "view-fullscreen-symbolic", TRUE, TRUE);
         gtk_container_add(GTK_CONTAINER(control_video_box), full_screen);
         g_signal_connect(full_screen, "clicked", G_CALLBACK(full_screen_cb), (gpointer)self);
+        self->full_screen = full_screen;
 
         /* Force aspect ratio - enabled by default */
         aspect = new_button_with_icon(self, "window-maximize-symbolic", TRUE, TRUE);
@@ -275,7 +277,7 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_stack_add_named(GTK_STACK(stack), player, "player");
 
         /* Video */
-        video = gtk_event_box_new();
+        video = gtk_drawing_area_new();
         self->video = video;
         gtk_widget_set_double_buffered(video, FALSE);
         self->priv->window_handle = 0;
@@ -287,9 +289,11 @@ static void budgie_window_init(BudgieWindow *self)
         /* Hook up events for video box */
         g_signal_connect(video, "motion-notify-event",
                 G_CALLBACK(motion_notify_cb), (gpointer)self);
+        g_signal_connect(window, "key-release-event",
+                G_CALLBACK(key_cb), (gpointer)self);
         gtk_widget_set_events (video, gtk_widget_get_events (video) |
              GDK_LEAVE_NOTIFY_MASK | GDK_POINTER_MOTION_MASK |
-             GDK_POINTER_MOTION_HINT_MASK);
+             GDK_POINTER_MOTION_HINT_MASK | GDK_KEY_RELEASE_MASK);
 
         /* search entry */
         search = gtk_search_entry_new();
@@ -731,4 +735,21 @@ static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpoin
         gtk_widget_show(self->toolbar);
         g_timeout_add(3000, hide_bar, userdata);
         return FALSE;
+}
+
+static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata)
+{
+        BudgieWindow *self;
+
+        self = BUDGIE_WINDOW(userdata);
+        if (event->keyval != GDK_KEY_Escape)
+                return FALSE;
+
+        if (!self->priv->full_screen)
+                return FALSE;
+        gtk_window_unfullscreen(GTK_WINDOW(self->window));
+        gtk_widget_show(self->toolbar);
+        self->priv->full_screen = FALSE;
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self->full_screen), FALSE);
+        return TRUE;
 }
