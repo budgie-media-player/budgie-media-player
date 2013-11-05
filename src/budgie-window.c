@@ -96,6 +96,7 @@ static void budgie_window_init(BudgieWindow *self)
         GtkWidget *status;
         GtkWidget *player;
         GtkWidget *toolbar;
+        GtkWidget *south_reveal;
         GtkToolItem *separator1, *separator2;
         GtkWidget *layout;
         GtkStyleContext *style;
@@ -187,12 +188,16 @@ static void budgie_window_init(BudgieWindow *self)
         layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
         gtk_container_add(GTK_CONTAINER(window), layout);
 
+        /* Toolbar revealer */
+        south_reveal = gtk_revealer_new();
+        self->south_reveal = south_reveal;
+        gtk_box_pack_end(GTK_BOX(layout), south_reveal, FALSE, FALSE, 0);
+
         /* toolbar */
         toolbar = gtk_toolbar_new();
-        gtk_box_pack_end(GTK_BOX(layout), toolbar, FALSE, FALSE, 0);
+        gtk_container_add(GTK_CONTAINER(south_reveal), toolbar);
         style = gtk_widget_get_style_context(toolbar);
         gtk_style_context_add_class(style, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
-        self->toolbar = toolbar;
 
         /* Our media controls */
         control_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -330,6 +335,9 @@ static void budgie_window_init(BudgieWindow *self)
 
         gtk_widget_realize(window);
         gtk_widget_show_all(window);
+
+        /* Show the toolbar */
+        gtk_revealer_set_reveal_child(GTK_REVEALER(south_reveal), TRUE);
 
         gtk_header_bar_set_title(GTK_HEADER_BAR(header), "Budgie");
         gtk_widget_hide(control_video_box);
@@ -596,10 +604,10 @@ static void full_screen_cb(GtkWidget *widget, gpointer userdata)
         self->priv->full_screen = full;
         if (full) {
                 gtk_window_fullscreen(GTK_WINDOW(self->window));
-                gtk_widget_hide(self->toolbar);
+                gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), FALSE);
         } else {
                 gtk_window_unfullscreen(GTK_WINDOW(self->window));
-                gtk_widget_show(self->toolbar);
+                gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), TRUE);
         }
 }
 
@@ -680,17 +688,9 @@ static gpointer load_media(gpointer data)
 }
 
 static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata) {
-        GtkAllocation allocation;
-        GdkWindow *window;
         BudgieWindow *self;
 
         self = BUDGIE_WINDOW(userdata);
-        window = gtk_widget_get_window(widget);
-
-        gtk_widget_get_allocation(widget, &allocation);
-        cairo_set_source_rgb(cr, 0, 0, 0);
-        cairo_rectangle(cr, 0, 0, allocation.width, allocation.height);
-        cairo_fill(cr);
         gst_video_overlay_expose(GST_VIDEO_OVERLAY(self->gst_player));
         return FALSE;
 }
@@ -716,9 +716,9 @@ static gboolean hide_bar(gpointer udata)
         self = BUDGIE_WINDOW(udata);
 
         if (self->priv->full_screen)
-                gtk_widget_hide(self->toolbar);
+                gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), FALSE);
         else
-                gtk_widget_show(self->toolbar);
+                gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), TRUE);
         return FALSE;
 }
 
@@ -727,12 +727,12 @@ static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpoin
         BudgieWindow *self;
 
         self = BUDGIE_WINDOW(userdata);
-        if (gtk_widget_get_visible(self->toolbar))
+        if (gtk_revealer_get_child_revealed(GTK_REVEALER(self->south_reveal)))
                 return FALSE;
         if (!self->priv->full_screen)
                 return FALSE;
 
-        gtk_widget_show(self->toolbar);
+        gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), TRUE);
         g_timeout_add(3000, hide_bar, userdata);
         return FALSE;
 }
@@ -748,7 +748,7 @@ static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata)
         if (!self->priv->full_screen)
                 return FALSE;
         gtk_window_unfullscreen(GTK_WINDOW(self->window));
-        gtk_widget_show(self->toolbar);
+        gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), TRUE);
         self->priv->full_screen = FALSE;
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self->full_screen), FALSE);
         return TRUE;

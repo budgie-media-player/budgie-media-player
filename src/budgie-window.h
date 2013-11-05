@@ -86,7 +86,7 @@ struct _BudgieWindow {
 
         GtkWidget *status;
         GtkWidget *player;
-        GtkWidget *toolbar;
+        GtkWidget *south_reveal;
 
         /* Header controls */
         GtkWidget *prev;
