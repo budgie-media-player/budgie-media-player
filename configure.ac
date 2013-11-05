@@ -1,4 +1,4 @@
-AC_INIT([Budgie], 1, [ikey.doherty@gmail.com], [budgie], [http://ikeydoherty.github.io/music-player/])
+AC_INIT([Budgie], 1, [ikey.doherty@gmail.com], [budgie], [http://ikeydoherty.github.io/budgie/])
 AM_INIT_AUTOMAKE([foreign -Wno-portability no-dist-gzip dist-xz])
 AC_PROG_CC
 AC_PROG_CC_STDC
