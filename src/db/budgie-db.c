@@ -25,13 +25,13 @@
 #include <stdlib.h>
 #include <malloc.h>
 
-#include "media-db.h"
+#include "budgie-db.h"
 
-G_DEFINE_TYPE_WITH_PRIVATE(MediaDB, media_db, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE(BudgieDB, budgie_db, G_TYPE_OBJECT);
 
 /* Private utilities */
-static gboolean media_db_serialize(MediaInfo *info, uint8_t **target);
-static gboolean media_db_deserialize(uint8_t* source, MediaInfo **target);
+static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target);
+static gboolean budgie_db_deserialize(uint8_t* source, MediaInfo **target);
 
 /* MediaInfo API */
 void free_media_info(gpointer p_info)
@@ -54,18 +54,18 @@ void free_media_info(gpointer p_info)
 }
 
 /* Initialisation */
-static void media_db_class_init(MediaDBClass *klass)
+static void budgie_db_class_init(BudgieDBClass *klass)
 {
         GObjectClass *g_object_class;
 
         g_object_class = G_OBJECT_CLASS(klass);
-        g_object_class->dispose = &media_db_dispose;
+        g_object_class->dispose = &budgie_db_dispose;
 }
 
-static void media_db_init(MediaDB *self)
+static void budgie_db_init(BudgieDB *self)
 {
         const gchar *config;
-        self->priv = media_db_get_instance_private(self);
+        self->priv = budgie_db_get_instance_private(self);
 
         /* Our storage location */
         config = g_get_user_config_dir();
@@ -79,29 +79,29 @@ static void media_db_init(MediaDB *self)
                 g_error("Failed to initialise database!");
 }
 
-static void media_db_dispose(GObject *object)
+static void budgie_db_dispose(GObject *object)
 {
-        MediaDB *self;
+        BudgieDB *self;
 
-        self = MEDIA_DB(object);
+        self = BUDGIE_DB(object);
         if (self->priv->storage_path)
                 g_free(self->priv->storage_path);
 
         gdbm_close(self->priv->db);
         /* Destruct */
-        G_OBJECT_CLASS(media_db_parent_class)->dispose(object);
+        G_OBJECT_CLASS(budgie_db_parent_class)->dispose(object);
 }
 
-/* Utility; return a new MediaDB */
-MediaDB* media_db_new(void)
+/* Utility; return a new BudgieDB */
+BudgieDB* budgie_db_new(void)
 {
-        MediaDB *self;
+        BudgieDB *self;
 
-        self = g_object_new(MEDIA_DB_TYPE, NULL);
-        return MEDIA_DB(self);
+        self = g_object_new(BUDGIE_DB_TYPE, NULL);
+        return BUDGIE_DB(self);
 }
 
-void media_db_store_media(MediaDB *self, MediaInfo *info)
+void budgie_db_store_media(BudgieDB *self, MediaInfo *info)
 {
         datum value;
         uint8_t *store = NULL;
@@ -109,7 +109,7 @@ void media_db_store_media(MediaDB *self, MediaInfo *info)
         /* Path is the unique key */
         datum key = { (char*)info->path, strlen(info->path)+1 };
 
-        if (!media_db_serialize(info, &store)) {
+        if (!budgie_db_serialize(info, &store)) {
                 g_warning("Unable to serialize data!");
                 goto end;
         }
@@ -122,7 +122,7 @@ end:
                 free(store);
 }
 
-MediaInfo* media_db_get_media(MediaDB *self, gchar *path)
+MediaInfo* budgie_db_get_media(BudgieDB *self, gchar *path)
 {
         datum value;
         MediaInfo *ret = NULL;
@@ -135,7 +135,7 @@ MediaInfo* media_db_get_media(MediaDB *self, gchar *path)
                 goto end;
         store = (uint8_t*)value.dptr;
 
-        if (!media_db_deserialize(store, &ret)) {
+        if (!budgie_db_deserialize(store, &ret)) {
                 g_message("Unable to deserialize");
                 goto end;
         }
@@ -146,7 +146,7 @@ end:
         return ret;
 }
 
-GSList* media_db_get_all_media(MediaDB* self)
+GSList* budgie_db_get_all_media(BudgieDB* self)
 {
         datum key, nextkey;
         GSList* ret = NULL;
@@ -156,7 +156,7 @@ GSList* media_db_get_all_media(MediaDB* self)
         key = gdbm_firstkey(self->priv->db);
         while (key.dptr) {
                 path = (char*)key.dptr;
-                cur = media_db_get_media(self, path);
+                cur = budgie_db_get_media(self, path);
                 ret = g_slist_append(ret, cur);
                 nextkey = gdbm_nextkey(self->priv->db, key);
                 free(key.dptr);
@@ -165,7 +165,7 @@ GSList* media_db_get_all_media(MediaDB* self)
         return ret;
 }
 /** PRIVATE **/
-static gboolean media_db_serialize(MediaInfo *info, uint8_t **target)
+static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target)
 {
         uint8_t* data = NULL;
         gboolean ret = FALSE;
@@ -250,7 +250,7 @@ end:
         return ret;
 }
 
-static gboolean media_db_deserialize(uint8_t* source, MediaInfo **target)
+static gboolean budgie_db_deserialize(uint8_t* source, MediaInfo **target)
 {
         MediaInfo *ret = NULL;
         gchar *title = NULL;

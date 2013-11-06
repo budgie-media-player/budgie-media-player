@@ -30,7 +30,7 @@
 #include "player-status-area.h"
 #include "player-view.h"
 #include "util.h"
-#include "db/media-db.h"
+#include "db/budgie-db.h"
 
 #define PLAYER_CSS "PlayerStatusArea {\
     border-radius: 4px;\
@@ -82,7 +82,7 @@ struct _BudgieWindow {
         GtkWidget *video_controls;
         GtkWidget *full_screen;
 
-        MediaDB *db;
+        BudgieDB *db;
 
         GtkWidget *status;
         GtkWidget *player;

@@ -26,7 +26,7 @@
 #include <id3.h>
 
 #include "util.h"
-#include "db/media-db.h"
+#include "db/budgie-db.h"
 
 /* Unneeded constants but improve readability */
 #define MINUTE 60

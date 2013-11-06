@@ -3,17 +3,17 @@
 bin_PROGRAMS = budgie
 
 noinst_LTLIBRARIES = \
-	libmediadb.la
+	libbudgiedb.la
 
-libmediadb_la_SOURCES = \
-	db/media-db.h \
-	db/media-db.c
+libbudgiedb_la_SOURCES = \
+	db/budgie-db.h \
+	db/budgie-db.c
 
-libmediadb_la_CFLAGS = \
+libbudgiedb_la_CFLAGS = \
 	$(GIO_CFLAGS) \
 	$(AM_CFLAGS)
 
-libmediadb_la_LIBADD = \
+libbudgiedb_la_LIBADD = \
 	$(GIO_LIBS) \
 	-lgdbm
 
@@ -40,4 +40,4 @@ budgie_LDADD = \
 	$(GSTREAMER_LIBS) \
 	$(GSTREAMER_VIDEO_LIBS) \
 	-lid3 \
-	libmediadb.la
+	libbudgiedb.la

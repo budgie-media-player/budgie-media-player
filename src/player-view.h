@@ -26,7 +26,7 @@
 #include <glib-object.h>
 #include <gtk/gtk.h>
 
-#include "db/media-db.h"
+#include "db/budgie-db.h"
 
 typedef struct _PlayerView PlayerView;
 typedef struct _PlayerViewClass   PlayerViewClass;

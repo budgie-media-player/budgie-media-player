@@ -20,40 +20,40 @@
  * 
  * 
  */
-#ifndef media_db_h
-#define media_db_h
+#ifndef budgie_db_h
+#define budgie_db_h
 
 #include <glib-object.h>
 #include <gdbm.h>
 
-typedef struct _MediaDB MediaDB;
-typedef struct _MediaDBClass   MediaDBClass;
-typedef struct _MediaDBPrivate MediaDBPrivate;
+typedef struct _BudgieDB BudgieDB;
+typedef struct _BudgieDBClass   BudgieDBClass;
+typedef struct _BudgieDBPrivate BudgieDBPrivate;
 
-#define MEDIA_DB_TYPE (media_db_get_type())
-#define MEDIA_DB(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), MEDIA_DB_TYPE, MediaDB))
-#define IS_MEDIA_DB(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MEDIA_DB_TYPE))
-#define MEDIA_DB_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), MEDIA_DB_TYPE, MediaDBClass))
-#define IS_MEDIA_DB_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), MEDIA_DB_TYPE))
-#define MEDIA_DB_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), MEDIA_DB_TYPE, MediaDBClass))
+#define BUDGIE_DB_TYPE (budgie_db_get_type())
+#define BUDGIE_DB(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), BUDGIE_DB_TYPE, BudgieDB))
+#define IS_BUDGIE_DB(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), BUDGIE_DB_TYPE))
+#define BUDGIE_DB_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), BUDGIE_DB_TYPE, BudgieDBClass))
+#define IS_BUDGIE_DB_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), BUDGIE_DB_TYPE))
+#define BUDGIE_DB_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), BUDGIE_DB_TYPE, BudgieDBClass))
 
 #define CONFIG_NAME "idmp-1.db"
 
 /* Private storage */
-struct _MediaDBPrivate {
+struct _BudgieDBPrivate {
         gchar *storage_path;
         GDBM_FILE db;
 };
 
-/* MediaDB object */
-struct _MediaDB {
+/* BudgieDB object */
+struct _BudgieDB {
         GObject parent;
 
-        MediaDBPrivate *priv;
+        BudgieDBPrivate *priv;
 };
 
-/* MediaDB class definition */
-struct _MediaDBClass {
+/* BudgieDB class definition */
+struct _BudgieDBClass {
         GObjectClass parent_class;
 };
 
@@ -71,14 +71,14 @@ typedef struct MediaInfo {
 } MediaInfo;
 
 /* Boilerplate GObject code */
-static void media_db_class_init(MediaDBClass *klass);
-static void media_db_init(MediaDB *self);
-static void media_db_dispose(GObject *object);
-GType media_db_get_type(void);
+static void budgie_db_class_init(BudgieDBClass *klass);
+static void budgie_db_init(BudgieDB *self);
+static void budgie_db_dispose(GObject *object);
+GType budgie_db_get_type(void);
 
-/* MediaDB methods */
-MediaDB* media_db_new(void);
-void media_db_store_media(MediaDB *self, MediaInfo *info);
-MediaInfo* media_db_get_media(MediaDB *self, gchar *path);
-GSList* media_db_get_all_media(MediaDB* self);
-#endif /* media_db_h */
+/* BudgieDB methods */
+BudgieDB* budgie_db_new(void);
+void budgie_db_store_media(BudgieDB *self, MediaInfo *info);
+MediaInfo* budgie_db_get_media(BudgieDB *self, gchar *path);
+GSList* budgie_db_get_all_media(BudgieDB* self);
+#endif /* budgie_db_h */

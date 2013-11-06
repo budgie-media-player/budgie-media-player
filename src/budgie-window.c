@@ -310,7 +310,7 @@ static void budgie_window_init(BudgieWindow *self)
         /* Initialise our tracks list */
         self->priv->tracks = NULL;
 
-        self->db = media_db_new();
+        self->db = budgie_db_new();
 
         /* Initialise gstreamer */
         self->gst_player = gst_element_factory_make("playbin", "player");
@@ -323,7 +323,7 @@ static void budgie_window_init(BudgieWindow *self)
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         self->priv->duration = GST_CLOCK_TIME_NONE;
 
-        self->priv->tracks = media_db_get_all_media(self->db);
+        self->priv->tracks = budgie_db_get_all_media(self->db);
 
         g_timeout_add(1000, refresh_cb, (gpointer)self);
 
@@ -647,7 +647,7 @@ static void store_media(gpointer data1, gpointer data2)
         info = (MediaInfo*)data1;
         self = BUDGIE_WINDOW(data2);
 
-        media_db_store_media(self->db, info);
+        budgie_db_store_media(self->db, info);
 }
 
 static gboolean load_media_t(gpointer data)
@@ -678,8 +678,8 @@ static gpointer load_media(gpointer data)
         if (self->priv->tracks)
                 g_slist_free_full (self->priv->tracks, free_media_info);
         g_slist_free_full(tracks, free_media_info);
-        /* Use mediadb's tracks, not our own list */
-        self->priv->tracks = media_db_get_all_media(self->db);
+        /* Use budgiedb's tracks, not our own list */
+        self->priv->tracks = budgie_db_get_all_media(self->db);
         player_view_set_list(PLAYER_VIEW(self->player), self->priv->tracks);
 
         gtk_widget_set_sensitive(self->reload, TRUE);
