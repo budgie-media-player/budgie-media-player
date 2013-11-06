@@ -1,5 +1,5 @@
 AC_INIT([Budgie], 1, [ikey.doherty@gmail.com], [budgie], [http://ikeydoherty.github.io/budgie/])
-AM_INIT_AUTOMAKE([foreign -Wno-portability no-dist-gzip dist-xz])
+AM_INIT_AUTOMAKE([-Wno-portability no-dist-gzip dist-xz])
 AC_PROG_CC
 AC_PROG_CC_STDC
 LT_PREREQ(2.2)
