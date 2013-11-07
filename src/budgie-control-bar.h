@@ -39,6 +39,11 @@ typedef struct _BudgieControlBarClass   BudgieControlBarClass;
 /* BudgieControlBar object */
 struct _BudgieControlBar {
         GtkToolbar parent;
+
+        GtkIconTheme *icon_theme;
+        GtkWidget *reload;
+        GtkWidget *video_controls;
+        GtkWidget *full_screen;
 };
 
 /* BudgieControlBar class definition */

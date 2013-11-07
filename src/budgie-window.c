@@ -28,6 +28,7 @@
 #include <gst/gstbus.h>
 
 #include "budgie-window.h"
+#include "budgie-control-bar.h"
 
 G_DEFINE_TYPE_WITH_PRIVATE(BudgieWindow, budgie_window, G_TYPE_OBJECT);
 
@@ -73,17 +74,6 @@ static void budgie_window_init(BudgieWindow *self)
         GtkWidget *header;
         GtkWidget *video;
         GtkWidget *stack;
-        GtkWidget *control_box;
-        GtkWidget *control_video_box;
-        GtkToolItem *control_item;
-        GtkToolItem *control_video_item;
-        GtkWidget *repeat, *random;
-        GtkWidget *reload;
-        GtkToolItem *reload_item;
-        GtkWidget *full_screen;
-        GtkWidget *aspect;
-        GtkWidget *about;
-        GtkToolItem *about_item;
         /* header buttons */
         GtkWidget *prev, *play, *pause, *next;
         GtkWidget *volume;
@@ -92,9 +82,7 @@ static void budgie_window_init(BudgieWindow *self)
         GtkWidget *player;
         GtkWidget *toolbar;
         GtkWidget *south_reveal;
-        GtkToolItem *separator1, *separator2;
         GtkWidget *layout;
-        GtkStyleContext *style;
         GstBus *bus;
         GtkSettings *settings;
         GdkVisual *visual;
@@ -189,80 +177,8 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_box_pack_end(GTK_BOX(layout), south_reveal, FALSE, FALSE, 0);
 
         /* toolbar */
-        toolbar = gtk_toolbar_new();
+        toolbar = budgie_control_bar_new();
         gtk_container_add(GTK_CONTAINER(south_reveal), toolbar);
-        style = gtk_widget_get_style_context(toolbar);
-        gtk_style_context_add_class(style, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
-
-        /* Our media controls */
-        control_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-        style = gtk_widget_get_style_context(control_box);
-        gtk_style_context_add_class(style, GTK_STYLE_CLASS_LINKED);
-        gtk_style_context_add_class(style, GTK_STYLE_CLASS_RAISED);
-        control_item = gtk_tool_item_new();
-        gtk_container_add(GTK_CONTAINER(control_item), control_box);
-        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(control_item));
-
-        /* repeat */
-        repeat = new_button_with_icon(self->icon_theme, "media-playlist-repeat", TRUE, TRUE);
-        gtk_box_pack_start(GTK_BOX(control_box), repeat, FALSE, FALSE, 0);
-        g_signal_connect(repeat, "clicked", G_CALLBACK(repeat_cb), (gpointer)self);
-        self->priv->repeat = FALSE;
-
-        /* random */
-        random = new_button_with_icon(self->icon_theme, "media-playlist-shuffle", TRUE, TRUE);
-        gtk_box_pack_start(GTK_BOX(control_box), random, FALSE, FALSE, 0);
-        g_signal_connect(random, "clicked", G_CALLBACK(random_cb), (gpointer)self);
-        self->priv->random = FALSE;
-
-        /* Visual separation between generic media and video controls */
-        separator1 = gtk_separator_tool_item_new();
-        gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator1), FALSE);
-        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(separator1));
-
-        /* Our video controls */
-        control_video_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-        self->video_controls = control_video_box;
-        style = gtk_widget_get_style_context(control_video_box);
-        gtk_style_context_add_class(style, GTK_STYLE_CLASS_LINKED);
-        gtk_style_context_add_class(style, GTK_STYLE_CLASS_RAISED);
-        control_video_item = gtk_tool_item_new();
-        gtk_container_add(GTK_CONTAINER(control_video_item), control_video_box);
-        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(control_video_item));
-        
-        /* full screen */
-        full_screen = new_button_with_icon(self->icon_theme, "view-fullscreen-symbolic", TRUE, TRUE);
-        gtk_container_add(GTK_CONTAINER(control_video_box), full_screen);
-        g_signal_connect(full_screen, "clicked", G_CALLBACK(full_screen_cb), (gpointer)self);
-        self->full_screen = full_screen;
-
-        /* Force aspect ratio - enabled by default */
-        aspect = new_button_with_icon(self->icon_theme, "window-maximize-symbolic", TRUE, TRUE);
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(aspect), TRUE);
-        gtk_container_add(GTK_CONTAINER(control_video_box), aspect);
-        g_signal_connect(aspect, "clicked", G_CALLBACK(aspect_cb), (gpointer)self);
-
-        /* separator (shift following items to right hand side */
-        separator2 = gtk_separator_tool_item_new();
-        gtk_tool_item_set_expand(separator2, TRUE);
-        gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator2),
-                FALSE);
-        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(separator2));
-
-        /* reload */
-        reload = new_button_with_icon(self->icon_theme, "view-refresh", TRUE, FALSE);
-        reload_item = gtk_tool_item_new();
-        self->reload = reload;
-        g_signal_connect(reload, "clicked", G_CALLBACK(reload_cb), (gpointer)self);
-        gtk_container_add(GTK_CONTAINER(reload_item), reload);
-        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(reload_item));
-
-        /* about */
-        about = new_button_with_icon(self->icon_theme, "help-about-symbolic", TRUE, FALSE);
-        about_item = gtk_tool_item_new();
-        g_signal_connect(about, "clicked", G_CALLBACK(about_cb), (gpointer)self);
-        gtk_container_add(GTK_CONTAINER(about_item), about);
-        gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(about_item));
 
         /* Stack */
         stack = gtk_stack_new();
@@ -335,7 +251,6 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_revealer_set_reveal_child(GTK_REVEALER(south_reveal), TRUE);
 
         gtk_header_bar_set_title(GTK_HEADER_BAR(header), "Budgie");
-        gtk_widget_hide(control_video_box);
         gtk_widget_hide(pause);
 }
 
@@ -422,10 +337,10 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         /* Switch to video view for video content */
         if (g_str_has_prefix(media->mime, "video/")) {
                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "video");
-                gtk_widget_set_visible(self->video_controls, TRUE);
+                /*gtk_widget_set_visible(self->video_controls, TRUE);*/
         } else {
                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "player");
-                gtk_widget_set_visible(self->video_controls, FALSE);
+                /*gtk_widget_set_visible(self->video_controls, FALSE);*/
         }
 
         uri = g_filename_to_uri(media->path, NULL, NULL);
@@ -566,7 +481,7 @@ static void full_screen_cb(GtkWidget *widget, gpointer userdata)
         gboolean full;
 
         self = BUDGIE_WINDOW(userdata);
-        full = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+        /*full = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
         self->priv->full_screen = full;
         if (full) {
                 gtk_window_fullscreen(GTK_WINDOW(self->window));
@@ -574,7 +489,7 @@ static void full_screen_cb(GtkWidget *widget, gpointer userdata)
         } else {
                 gtk_window_unfullscreen(GTK_WINDOW(self->window));
                 gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), TRUE);
-        }
+        }*/
 }
 
 static void aspect_cb(GtkWidget *widget, gpointer userdata)
@@ -622,7 +537,7 @@ static gboolean load_media_t(gpointer data)
         GThread *thread;
 
         self = BUDGIE_WINDOW(data);
-        gtk_widget_set_sensitive(self->reload, FALSE);
+        /*gtk_widget_set_sensitive(self->reload, FALSE);*/
 
         thread = g_thread_new("reload-media", &load_media, data);
 
@@ -648,7 +563,7 @@ static gpointer load_media(gpointer data)
         self->priv->tracks = budgie_db_get_all_media(self->db);
         player_view_set_list(PLAYER_VIEW(self->player), self->priv->tracks);
 
-        gtk_widget_set_sensitive(self->reload, TRUE);
+        /*gtk_widget_set_sensitive(self->reload, TRUE);*/
 
         return NULL;
 }
@@ -716,6 +631,6 @@ static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata)
         gtk_window_unfullscreen(GTK_WINDOW(self->window));
         gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), TRUE);
         self->priv->full_screen = FALSE;
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self->full_screen), FALSE);
+        /*gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self->full_screen), FALSE);*/
         return TRUE;
 }
