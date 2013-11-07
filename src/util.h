@@ -22,6 +22,20 @@
  */
 #pragma once
 #include <glib.h>
+#include <gtk/gtk.h>
+
+/**
+ * Automate button creation
+ * @param theme An initialised GtkIconTheme
+ * @param icon_name Required icon name
+ * @param toolbar Whether a toolbar size should be used
+ * @param toggle Whether this should be a ToggleButton
+ * @return a GtkWidget of the correct button type
+ */
+GtkWidget* new_button_with_icon(GtkIconTheme *theme,
+                                const gchar *icon_name,
+                                gboolean toolbar,
+                                gboolean toggle);
 
 /**
  * Search a directory for files, and populate the list

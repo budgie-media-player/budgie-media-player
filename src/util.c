@@ -137,6 +137,35 @@ void search_directory(const gchar *path, GSList **list, const gchar *mime_patter
         g_object_unref(file);
 }
 
+GtkWidget* new_button_with_icon(GtkIconTheme *theme,
+                                const gchar *icon_name,
+                                gboolean toolbar,
+                                gboolean toggle)
+{
+        GtkWidget *button;
+        GtkWidget *image;
+        GdkPixbuf *pixbuf;
+        gint size;
+
+        size = toolbar ? 16: 48;
+        /* Load the image */
+        pixbuf = gtk_icon_theme_load_icon(theme, icon_name,
+                size, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
+        image = gtk_image_new_from_pixbuf(pixbuf);
+
+        /* Create the button */
+        if (toggle)
+                button = gtk_toggle_button_new();
+        else
+                button = gtk_button_new();
+        gtk_widget_set_can_focus(button, FALSE);
+        if (!toolbar)
+                gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+        gtk_container_add(GTK_CONTAINER(button), image);
+
+        return button;
+}
+
 gchar *format_seconds(gint64 time, gboolean remaining)
 {
         guint seconds = 0;

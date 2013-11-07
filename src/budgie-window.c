@@ -31,11 +31,6 @@
 
 G_DEFINE_TYPE_WITH_PRIVATE(BudgieWindow, budgie_window, G_TYPE_OBJECT);
 
-/* Utilities */
-static GtkWidget* new_button_with_icon(BudgieWindow *self,
-                                       const gchar *icon_name,
-                                       gboolean toolbar,
-                                       gboolean toggle);
 static void init_styles(BudgieWindow *self);
 
 static void store_media(gpointer data1, gpointer data2);
@@ -146,24 +141,24 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_window_set_titlebar(GTK_WINDOW(window), header);
 
         /* Media control buttons, placed on headerbar */
-        prev = new_button_with_icon(self, "media-seek-backward", FALSE, FALSE);
+        prev = new_button_with_icon(self->icon_theme, "media-seek-backward", FALSE, FALSE);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), prev);
         g_signal_connect(prev, "clicked", G_CALLBACK(prev_cb), (gpointer)self);
         self->prev = prev;
         /* Set some left padding */
         gtk_widget_set_margin_left(prev, 20);
 
-        play = new_button_with_icon(self, "media-playback-start", FALSE, FALSE);
+        play = new_button_with_icon(self->icon_theme, "media-playback-start", FALSE, FALSE);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), play);
         g_signal_connect(play, "clicked", G_CALLBACK(play_cb), (gpointer)self);
         self->play = play;
 
-        pause = new_button_with_icon(self, "media-playback-pause", FALSE, FALSE);
+        pause = new_button_with_icon(self->icon_theme, "media-playback-pause", FALSE, FALSE);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), pause);
         g_signal_connect(pause, "clicked", G_CALLBACK(pause_cb), (gpointer)self);
         self->pause = pause;
 
-        next = new_button_with_icon(self, "media-seek-forward", FALSE, FALSE);
+        next = new_button_with_icon(self->icon_theme, "media-seek-forward", FALSE, FALSE);
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), next);
         g_signal_connect(next, "clicked", G_CALLBACK(next_cb), (gpointer)self);
         self->next = next;
@@ -209,13 +204,13 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(control_item));
 
         /* repeat */
-        repeat = new_button_with_icon(self, "media-playlist-repeat", TRUE, TRUE);
+        repeat = new_button_with_icon(self->icon_theme, "media-playlist-repeat", TRUE, TRUE);
         gtk_box_pack_start(GTK_BOX(control_box), repeat, FALSE, FALSE, 0);
         g_signal_connect(repeat, "clicked", G_CALLBACK(repeat_cb), (gpointer)self);
         self->priv->repeat = FALSE;
 
         /* random */
-        random = new_button_with_icon(self, "media-playlist-shuffle", TRUE, TRUE);
+        random = new_button_with_icon(self->icon_theme, "media-playlist-shuffle", TRUE, TRUE);
         gtk_box_pack_start(GTK_BOX(control_box), random, FALSE, FALSE, 0);
         g_signal_connect(random, "clicked", G_CALLBACK(random_cb), (gpointer)self);
         self->priv->random = FALSE;
@@ -236,13 +231,13 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(control_video_item));
         
         /* full screen */
-        full_screen = new_button_with_icon(self, "view-fullscreen-symbolic", TRUE, TRUE);
+        full_screen = new_button_with_icon(self->icon_theme, "view-fullscreen-symbolic", TRUE, TRUE);
         gtk_container_add(GTK_CONTAINER(control_video_box), full_screen);
         g_signal_connect(full_screen, "clicked", G_CALLBACK(full_screen_cb), (gpointer)self);
         self->full_screen = full_screen;
 
         /* Force aspect ratio - enabled by default */
-        aspect = new_button_with_icon(self, "window-maximize-symbolic", TRUE, TRUE);
+        aspect = new_button_with_icon(self->icon_theme, "window-maximize-symbolic", TRUE, TRUE);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(aspect), TRUE);
         gtk_container_add(GTK_CONTAINER(control_video_box), aspect);
         g_signal_connect(aspect, "clicked", G_CALLBACK(aspect_cb), (gpointer)self);
@@ -255,7 +250,7 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(separator2));
 
         /* reload */
-        reload = new_button_with_icon(self, "view-refresh", TRUE, FALSE);
+        reload = new_button_with_icon(self->icon_theme, "view-refresh", TRUE, FALSE);
         reload_item = gtk_tool_item_new();
         self->reload = reload;
         g_signal_connect(reload, "clicked", G_CALLBACK(reload_cb), (gpointer)self);
@@ -263,7 +258,7 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(reload_item));
 
         /* about */
-        about = new_button_with_icon(self, "help-about-symbolic", TRUE, FALSE);
+        about = new_button_with_icon(self->icon_theme, "help-about-symbolic", TRUE, FALSE);
         about_item = gtk_tool_item_new();
         g_signal_connect(about, "clicked", G_CALLBACK(about_cb), (gpointer)self);
         gtk_container_add(GTK_CONTAINER(about_item), about);
@@ -373,35 +368,6 @@ BudgieWindow* budgie_window_new(void)
 
         self = g_object_new(BUDGIE_WINDOW_TYPE, NULL);
         return BUDGIE_WINDOW(self);
-}
-
-static GtkWidget* new_button_with_icon(BudgieWindow *self,
-                                       const gchar *icon_name,
-                                       gboolean toolbar,
-                                       gboolean toggle)
-{
-        GtkWidget *button;
-        GtkWidget *image;
-        GdkPixbuf *pixbuf;
-        gint size;
-
-        size = toolbar ? 16: 48;
-        /* Load the image */
-        pixbuf = gtk_icon_theme_load_icon(self->icon_theme, icon_name,
-                size, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
-        image = gtk_image_new_from_pixbuf(pixbuf);
-
-        /* Create the button */
-        if (toggle)
-                button = gtk_toggle_button_new();
-        else
-                button = gtk_button_new();
-        gtk_widget_set_can_focus(button, FALSE);
-        if (!toolbar)
-                gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
-        gtk_container_add(GTK_CONTAINER(button), image);
-
-        return button;
 }
 
 static void init_styles(BudgieWindow *self)
