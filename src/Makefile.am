@@ -20,6 +20,8 @@ libbudgiedb_la_LIBADD = \
 budgie_SOURCES = \
 	budgie-window.c \
 	budgie-window.h \
+	budgie-control-bar.c \
+	budgie-control-bar.h \
 	player-status-area.c \
 	player-status-area.h \
 	player-view.c \
