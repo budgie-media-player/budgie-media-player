@@ -30,6 +30,7 @@
 #include "player-status-area.h"
 #include "player-view.h"
 #include "budgie-control-bar.h"
+#include "budgie-settings-view.h"
 #include "util.h"
 #include "db/budgie-db.h"
 
@@ -59,6 +60,7 @@ typedef struct _BudgieWindowPrivate BudgieWindowPrivate;
 struct _BudgieWindowPrivate {
         const gchar *music_directory;
         const gchar *video_directory;
+        const gchar *current_page;
         GSList *tracks;
         gchar *uri;
         gulong volume_id;
@@ -95,6 +97,7 @@ struct _BudgieWindow {
         GtkWidget *next;
         GtkWidget *volume;
         GtkWidget *search;
+        GtkWidget *settings;
         GstElement *gst_player;
 
         GtkCssProvider *css_provider;

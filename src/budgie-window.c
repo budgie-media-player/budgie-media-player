@@ -55,6 +55,7 @@ static void budgie_window_init(BudgieWindow *self)
         GtkWidget *toolbar;
         GtkWidget *south_reveal;
         GtkWidget *layout;
+        GtkWidget *settings_view;
         GstBus *bus;
         GtkSettings *settings;
         GdkVisual *visual;
@@ -167,6 +168,7 @@ static void budgie_window_init(BudgieWindow *self)
         player = player_view_new();
         self->player = player;
         gtk_stack_add_named(GTK_STACK(stack), player, "player");
+        self->priv->current_page = "player";
 
         /* Video */
         video = gtk_drawing_area_new();
@@ -186,6 +188,11 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_widget_set_events (video, gtk_widget_get_events (video) |
              GDK_LEAVE_NOTIFY_MASK | GDK_POINTER_MOTION_MASK |
              GDK_POINTER_MOTION_HINT_MASK | GDK_KEY_RELEASE_MASK);
+
+        /* Settings view */
+        settings_view = budgie_settings_view_new();
+        gtk_stack_add_named(GTK_STACK(stack), settings_view, "settings");
+        self->settings = settings_view;
 
         /* search entry */
         search = gtk_search_entry_new();
@@ -307,6 +314,7 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         BudgieWindow *self;
         MediaInfo *media = NULL;
         gchar *uri;
+        const gchar *next_child;
 
         self = BUDGIE_WINDOW(userdata);
         self->priv->duration = GST_CLOCK_TIME_NONE;
@@ -314,16 +322,22 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         if (!media) /* Revisit */
                 return;
 
+        self->priv->current_page = gtk_stack_get_visible_child_name(GTK_STACK(self->stack));
+
         /* Switch to video view for video content */
         if (g_str_has_prefix(media->mime, "video/")) {
-                gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "video");
+                next_child = "video";
                 budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(self->toolbar), TRUE);
         } else {
-                gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "player");
+                next_child = "player";
                 budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(self->toolbar), FALSE);
                 self->priv->full_screen = FALSE;
                 full_screen_cb(widget, userdata);
         }
+        if (!g_str_equal(self->priv->current_page, "settings"))
+                gtk_stack_set_visible_child_name(GTK_STACK(self->stack), next_child);
+
+        self->priv->current_page = next_child;
 
         uri = g_filename_to_uri(media->path, NULL, NULL);
         if (g_strcmp0(uri, self->priv->uri) != 0) {
@@ -643,6 +657,12 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
                         return prev_cb(GTK_WIDGET(bar), userdata);
                 case BUDGIE_ACTION_NEXT:
                         return next_cb(GTK_WIDGET(bar), userdata);
+                case BUDGIE_ACTION_SETTINGS:
+                        if (toggle)
+                                gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "settings");
+                        else
+                                gtk_stack_set_visible_child_name(GTK_STACK(self->stack), self->priv->current_page);
+                        break;
                 default:
                         break;
         }
