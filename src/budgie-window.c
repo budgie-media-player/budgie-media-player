@@ -362,8 +362,14 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         g_object_set(self->gst_player, "uri", self->priv->uri, NULL);
         gst_element_set_state(self->gst_player, GST_STATE_PLAYING);
         player_view_set_current_selection(PLAYER_VIEW(self->player), media);
+
+        /* Update media controls */
         gtk_widget_hide(self->play);
+        budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
+                BUDGIE_ACTION_PLAY, FALSE);
         gtk_widget_show(self->pause);
+        budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
+                BUDGIE_ACTION_PAUSE, TRUE);
 
         /* Update status label */
         player_status_area_set_media(PLAYER_STATUS_AREA(self->status), media);
@@ -378,7 +384,11 @@ static void pause_cb(GtkWidget *widget, gpointer userdata)
 
         gst_element_set_state(self->gst_player, GST_STATE_PAUSED);
         gtk_widget_hide(self->pause);
+        budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
+                BUDGIE_ACTION_PAUSE, FALSE);
         gtk_widget_show(self->play);
+        budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
+                BUDGIE_ACTION_PLAY, TRUE);
 }
 
 static void next_cb(GtkWidget *widget, gpointer userdata)
@@ -651,6 +661,14 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
                 case BUDGIE_ACTION_FULL_SCREEN:
                         self->priv->full_screen = toggle;
                         return full_screen_cb(GTK_WIDGET(bar), userdata);
+                case BUDGIE_ACTION_PLAY:
+                        return play_cb(GTK_WIDGET(bar), userdata);
+                case BUDGIE_ACTION_PAUSE:
+                        return pause_cb(GTK_WIDGET(bar), userdata);
+                case BUDGIE_ACTION_PREVIOUS:
+                        return prev_cb(GTK_WIDGET(bar), userdata);
+                case BUDGIE_ACTION_NEXT:
+                        return next_cb(GTK_WIDGET(bar), userdata);
                 default:
                         break;
         }
