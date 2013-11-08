@@ -55,12 +55,14 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         GtkWidget *full_screen;
         GtkWidget *aspect;
         GtkWidget *about;
+        GtkWidget *settings;
         /* playback */
         GtkWidget *playback;
         GtkToolItem *playback_item;
         GtkWidget *play, *pause;
         GtkWidget *prev, *next;
         GtkToolItem *about_item;
+        GtkToolItem *settings_item;
         GtkToolItem *separator1, *separator2, *separator3;
         guint *data = NULL;
 
@@ -195,6 +197,16 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         self->reload = reload;
         gtk_container_add(GTK_CONTAINER(reload_item), reload);
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(reload_item));
+
+        /* settings */
+        settings = new_button_with_icon(self->icon_theme, "preferences-system-symbolic", TRUE, TRUE);
+        data = g_malloc(sizeof(guint));
+        *data = BUDGIE_ACTION_SETTINGS;
+        g_object_set_data_full(G_OBJECT(settings), "budgie", data, g_free);
+        g_signal_connect(settings, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        settings_item = gtk_tool_item_new();
+        gtk_container_add(GTK_CONTAINER(settings_item), settings);
+        gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(settings_item));
 
         /* about */
         about = new_button_with_icon(self->icon_theme, "help-about-symbolic", TRUE, FALSE);
