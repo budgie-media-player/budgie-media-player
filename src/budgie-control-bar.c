@@ -202,6 +202,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         settings = new_button_with_icon(self->icon_theme, "preferences-system-symbolic", TRUE, TRUE);
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_SETTINGS;
+        self->settings = settings;
         g_object_set_data_full(G_OBJECT(settings), "budgie", data, g_free);
         g_signal_connect(settings, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
         settings_item = gtk_tool_item_new();
@@ -280,6 +281,9 @@ void budgie_control_bar_set_action_enabled(BudgieControlBar *self,
                         break;
                 case BUDGIE_ACTION_PAUSE:
                         wid = GTK_WIDGET(self->pause);
+                        break;
+                case BUDGIE_ACTION_SETTINGS:
+                        wid = GTK_WIDGET(self->settings);
                         break;
                 default:
                         break;
