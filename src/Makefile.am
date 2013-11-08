@@ -22,6 +22,8 @@ budgie_SOURCES = \
 	budgie-window.h \
 	budgie-control-bar.c \
 	budgie-control-bar.h \
+	budgie-settings-view.c \
+	budgie-settings-view.h \
 	player-status-area.c \
 	player-status-area.h \
 	player-view.c \
