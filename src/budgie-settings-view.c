@@ -37,7 +37,12 @@ static void budgie_settings_view_class_init(BudgieSettingsViewClass *klass)
 
 static void budgie_settings_view_init(BudgieSettingsView *self)
 {
-        /* TODO: Add codes */
+        GtkWidget *top_label;
+
+        top_label = gtk_label_new("<span size='x-large'>Settings.. coming soon.</span>");
+        gtk_label_set_use_markup(GTK_LABEL(top_label), TRUE);
+        gtk_box_pack_start(GTK_BOX(self), top_label, FALSE,
+                FALSE, 0);
 }
 
 static void budgie_settings_view_dispose(GObject *object)
