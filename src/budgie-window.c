@@ -56,6 +56,8 @@ static void aspect_cb(GtkWidget *widget, gpointer userdata);
 static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpointer userdata);
 static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata);
 
+static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle);
+
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
 
@@ -178,6 +180,9 @@ static void budgie_window_init(BudgieWindow *self)
 
         /* toolbar */
         toolbar = budgie_control_bar_new();
+        g_signal_connect(toolbar, "action-selected",
+                G_CALLBACK(toolbar_cb), (gpointer)self);
+
         gtk_container_add(GTK_CONTAINER(south_reveal), toolbar);
 
         /* Stack */
@@ -633,4 +638,8 @@ static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata)
         self->priv->full_screen = FALSE;
         /*gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self->full_screen), FALSE);*/
         return TRUE;
+}
+
+static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle)
+{
 }

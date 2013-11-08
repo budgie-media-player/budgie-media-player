@@ -26,6 +26,8 @@
 
 G_DEFINE_TYPE(BudgieControlBar, budgie_control_bar, GTK_TYPE_TOOLBAR);
 
+static void handler_cb(GtkWidget *widget, gpointer userdata);
+
 /* Initialisation */
 static void budgie_control_bar_class_init(BudgieControlBarClass *klass)
 {
@@ -33,6 +35,11 @@ static void budgie_control_bar_class_init(BudgieControlBarClass *klass)
 
         g_object_class = G_OBJECT_CLASS(klass);
         g_object_class->dispose = &budgie_control_bar_dispose;
+
+        g_signal_new("action-selected",
+                G_TYPE_OBJECT, G_SIGNAL_RUN_FIRST,
+                0, NULL, NULL, NULL, G_TYPE_NONE,
+                2, G_TYPE_INT, G_TYPE_BOOLEAN);
 }
 
 static void budgie_control_bar_init(BudgieControlBar *self)
@@ -69,6 +76,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
 
         /* repeat */
         repeat = new_button_with_icon(self->icon_theme, "media-playlist-repeat", TRUE, TRUE);
+        g_signal_connect(repeat, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
         gtk_box_pack_start(GTK_BOX(control_box), repeat, FALSE, FALSE, 0);
 
         /* random */
@@ -138,4 +146,13 @@ GtkWidget* budgie_control_bar_new(void)
 
         self = g_object_new(BUDGIE_CONTROL_BAR_TYPE, NULL);
         return GTK_WIDGET(self);
+}
+
+static void handler_cb(GtkWidget *widget, gpointer userdata)
+{
+        BudgieControlBar *self;
+
+        self = BUDGIE_CONTROL_BAR(userdata);
+
+        g_signal_emit_by_name(self, "action-selected", -1, FALSE);
 }
