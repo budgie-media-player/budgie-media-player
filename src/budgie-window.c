@@ -349,6 +349,8 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         } else {
                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "player");
                 budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(self->toolbar), FALSE);
+                self->priv->full_screen = FALSE;
+                full_screen_cb(widget, userdata);
         }
 
         uri = g_filename_to_uri(media->path, NULL, NULL);
