@@ -178,6 +178,7 @@ static void budgie_window_init(BudgieWindow *self)
 
         /* toolbar */
         toolbar = budgie_control_bar_new();
+        self->toolbar = toolbar;
         g_signal_connect(toolbar, "action-selected",
                 G_CALLBACK(toolbar_cb), (gpointer)self);
 
@@ -249,6 +250,7 @@ static void budgie_window_init(BudgieWindow *self)
 
         gtk_widget_realize(window);
         gtk_widget_show_all(window);
+        budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(toolbar), FALSE);
 
         /* Show the toolbar */
         gtk_revealer_set_reveal_child(GTK_REVEALER(south_reveal), TRUE);
@@ -340,10 +342,10 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         /* Switch to video view for video content */
         if (g_str_has_prefix(media->mime, "video/")) {
                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "video");
-                /*gtk_widget_set_visible(self->video_controls, TRUE);*/
+                budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(self->toolbar), TRUE);
         } else {
                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "player");
-                /*gtk_widget_set_visible(self->video_controls, FALSE);*/
+                budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(self->toolbar), FALSE);
         }
 
         uri = g_filename_to_uri(media->path, NULL, NULL);

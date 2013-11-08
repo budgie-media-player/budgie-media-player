@@ -72,4 +72,10 @@ GType budgie_control_bar_get_type(void);
 /* BudgieControlBar methods */
 GtkWidget* budgie_control_bar_new(void);
 
+/**
+ * Show or hide the video specific controls
+ * @param show Whether to show or hide the controls
+ */
+void budgie_control_bar_set_show_video(BudgieControlBar *self, gboolean show);
+
 #endif /* budgie_control_bar_h */

@@ -189,3 +189,8 @@ static void handler_cb(GtkWidget *widget, gpointer userdata)
 
         g_signal_emit_by_name(self, "action-selected", data, toggle);
 }
+
+void budgie_control_bar_set_show_video(BudgieControlBar *self, gboolean show)
+{
+        gtk_widget_set_visible(self->video_controls, show);
+}

@@ -79,6 +79,7 @@ struct _BudgieWindow {
 
         GtkWidget *video;
         GtkWidget *stack;
+        GtkWidget *toolbar;
 
         BudgieDB *db;
 
