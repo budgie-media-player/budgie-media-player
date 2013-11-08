@@ -468,15 +468,13 @@ static void full_screen_cb(GtkWidget *widget, gpointer userdata)
         gboolean full;
 
         self = BUDGIE_WINDOW(userdata);
-        /*full = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-        self->priv->full_screen = full;
-        if (full) {
+        if (self->priv->full_screen) {
                 gtk_window_fullscreen(GTK_WINDOW(self->window));
                 gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), FALSE);
         } else {
                 gtk_window_unfullscreen(GTK_WINDOW(self->window));
                 gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), TRUE);
-        }*/
+        }
 }
 
 static void aspect_cb(GtkWidget *widget, gpointer userdata)
@@ -642,6 +640,7 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
                 case BUDGIE_ACTION_ASPECT_RATIO:
                         return aspect_cb(GTK_WIDGET(bar), userdata);
                 case BUDGIE_ACTION_FULL_SCREEN:
+                        self->priv->full_screen = toggle;
                         return full_screen_cb(GTK_WIDGET(bar), userdata);
                 default:
                         break;
