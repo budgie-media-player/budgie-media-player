@@ -44,6 +44,10 @@ typedef enum {
         BUDGIE_ACTION_ASPECT_RATIO,
         BUDGIE_ACTION_RELOAD,
         BUDGIE_ACTION_ABOUT,
+        BUDGIE_ACTION_PLAY,
+        BUDGIE_ACTION_PAUSE,
+        BUDGIE_ACTION_PREVIOUS,
+        BUDGIE_ACTION_NEXT,
         BUDGIE_MAX_ACTIONS
 } BudgieAction;
 
@@ -55,6 +59,11 @@ struct _BudgieControlBar {
         GtkWidget *reload;
         GtkWidget *video_controls;
         GtkWidget *full_screen;
+
+        /* Playback controls */
+        GtkWidget *playback;
+        GtkWidget *play;
+        GtkWidget *pause;
 };
 
 /* BudgieControlBar class definition */

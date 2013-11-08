@@ -55,8 +55,13 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         GtkWidget *full_screen;
         GtkWidget *aspect;
         GtkWidget *about;
+        /* playback */
+        GtkWidget *playback;
+        GtkToolItem *playback_item;
+        GtkWidget *play, *pause;
+        GtkWidget *prev, *next;
         GtkToolItem *about_item;
-        GtkToolItem *separator1, *separator2;
+        GtkToolItem *separator1, *separator2, *separator3;
         guint *data = NULL;
 
         /* Initialise IconTheme */
@@ -124,12 +129,60 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(aspect), TRUE);
         gtk_container_add(GTK_CONTAINER(control_video_box), aspect);
 
-        /* separator (shift following items to right hand side */
+        /* Visual separation between video and playback controls */
         separator2 = gtk_separator_tool_item_new();
-        gtk_tool_item_set_expand(separator2, TRUE);
-        gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator2),
-                FALSE);
+        gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator2), FALSE);
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(separator2));
+
+        /* Playback controls */
+        playback = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        style = gtk_widget_get_style_context(playback);
+        gtk_style_context_add_class(style, GTK_STYLE_CLASS_LINKED);
+        gtk_style_context_add_class(style, GTK_STYLE_CLASS_RAISED);
+        playback_item = gtk_tool_item_new();
+        gtk_container_add(GTK_CONTAINER(playback_item), playback);
+        gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(playback_item));
+
+        /* previous */
+        prev = new_button_with_icon(self->icon_theme, "media-seek-backward", TRUE, FALSE);
+        data = g_malloc(sizeof(guint));
+        *data = BUDGIE_ACTION_PREVIOUS;
+        g_object_set_data_full(G_OBJECT(prev), "budgie", data, g_free);
+        g_signal_connect(prev, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        gtk_box_pack_start(GTK_BOX(playback), prev, FALSE, FALSE, 0);
+
+        /* play */
+        play = new_button_with_icon(self->icon_theme, "media-playback-start", TRUE, FALSE);
+        data = g_malloc(sizeof(guint));
+        *data = BUDGIE_ACTION_PLAY;
+        self->play = play;
+        g_object_set_data_full(G_OBJECT(play), "budgie", data, g_free);
+        g_signal_connect(play, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        gtk_box_pack_start(GTK_BOX(playback), play, FALSE, FALSE, 0);
+
+        /* pause */
+        pause = new_button_with_icon(self->icon_theme, "media-playback-pause", TRUE, FALSE);
+        data = g_malloc(sizeof(guint));
+        *data = BUDGIE_ACTION_PAUSE;
+        self->pause = pause;
+        g_object_set_data_full(G_OBJECT(pause), "budgie", data, g_free);
+        g_signal_connect(pause, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        gtk_box_pack_start(GTK_BOX(playback), pause, FALSE, FALSE, 0);
+
+        /* next */
+        next = new_button_with_icon(self->icon_theme, "media-seek-forward", TRUE, FALSE);
+        data = g_malloc(sizeof(guint));
+        *data = BUDGIE_ACTION_NEXT;
+        g_object_set_data_full(G_OBJECT(next), "budgie", data, g_free);
+        g_signal_connect(next, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        gtk_box_pack_start(GTK_BOX(playback), next, FALSE, FALSE, 0);
+
+        /* separator (shift following items to right hand side */
+        separator3 = gtk_separator_tool_item_new();
+        gtk_tool_item_set_expand(separator3, TRUE);
+        gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator3),
+                FALSE);
+        gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(separator3));
 
         /* reload */
         reload = new_button_with_icon(self->icon_theme, "view-refresh", TRUE, FALSE);
@@ -197,18 +250,30 @@ void budgie_control_bar_set_action_enabled(BudgieControlBar *self,
                                            gboolean enabled)
 {
         GtkWidget *wid = NULL;
+        gboolean sensitive = FALSE;
+
         /* Ideally we leave room for future expansion, but for now
          * we just handle reload button */
         switch (action) {
                 case BUDGIE_ACTION_RELOAD:
                         wid = GTK_WIDGET(self->reload);
+                        sensitive = TRUE;
+                        break;
+                case BUDGIE_ACTION_PLAY:
+                        wid = GTK_WIDGET(self->play);
+                        break;
+                case BUDGIE_ACTION_PAUSE:
+                        wid = GTK_WIDGET(self->pause);
                         break;
                 default:
                         break;
         }
         if (wid == NULL)
                 return;
-        gtk_widget_set_sensitive(wid, enabled);
+        if (sensitive)
+                gtk_widget_set_sensitive(wid, enabled);
+        else
+                gtk_widget_set_visible(wid, enabled);
 }
 
 void budgie_control_bar_set_action_state(BudgieControlBar *self,
