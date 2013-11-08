@@ -64,6 +64,7 @@ struct _BudgieWindowPrivate {
         gint64 duration;
         gboolean repeat;
         gboolean random;
+        gboolean force_aspect;
         gboolean full_screen;
         guintptr window_handle;
 };

@@ -480,11 +480,9 @@ static void full_screen_cb(GtkWidget *widget, gpointer userdata)
 static void aspect_cb(GtkWidget *widget, gpointer userdata)
 {
         BudgieWindow *self;
-        gboolean force_aspect;
 
         self = BUDGIE_WINDOW(userdata);
-        force_aspect = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-        g_object_set(self->gst_player, "force-aspect-ratio", force_aspect, NULL);
+        g_object_set(self->gst_player, "force-aspect-ratio", self->priv->force_aspect, NULL);
         /* Otherwise we get dirty regions on our drawing area */
         gtk_widget_queue_draw(self->window);
 }
@@ -638,6 +636,7 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
                         self->priv->repeat = toggle;
                         break;
                 case BUDGIE_ACTION_ASPECT_RATIO:
+                        self->priv->force_aspect = toggle;
                         return aspect_cb(GTK_WIDGET(bar), userdata);
                 case BUDGIE_ACTION_FULL_SCREEN:
                         self->priv->full_screen = toggle;
