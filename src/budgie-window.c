@@ -45,8 +45,6 @@ static void pause_cb(GtkWidget *widget, gpointer userdata);
 static void next_cb(GtkWidget *widget, gpointer userdata);
 static void prev_cb(GtkWidget *widget, gpointer userdata);
 static void volume_cb(GtkWidget *widget, gpointer userdata);
-static void repeat_cb(GtkWidget *widget, gpointer userdata);
-static void random_cb(GtkWidget *widget, gpointer userdata);
 static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata);
 static void realize_cb(GtkWidget *widget, gpointer userdata);
 static gboolean refresh_cb(gpointer userdata);
@@ -457,22 +455,6 @@ static gboolean refresh_cb(gpointer userdata) {
         player_status_area_set_media_time(PLAYER_STATUS_AREA(self->status),
                 self->priv->duration, track_current);
         return TRUE;
-}
-
-static void repeat_cb(GtkWidget *widget, gpointer userdata)
-{
-        BudgieWindow *self;
-
-        self = BUDGIE_WINDOW(userdata);
-        self->priv->repeat = !self->priv->repeat;
-}
-
-static void random_cb(GtkWidget *widget, gpointer userdata)
-{
-        BudgieWindow *self;
-
-        self = BUDGIE_WINDOW(userdata);
-        self->priv->random = !self->priv->random;
 }
 
 static void reload_cb(GtkWidget *widget, gpointer userdata)
