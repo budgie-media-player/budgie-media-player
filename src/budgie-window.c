@@ -251,6 +251,7 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_widget_realize(window);
         gtk_widget_show_all(window);
         budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(toolbar), FALSE);
+        budgie_control_bar_set_show_playback(BUDGIE_CONTROL_BAR(toolbar), FALSE);
         budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(toolbar),
                 BUDGIE_ACTION_PAUSE, FALSE);
 
@@ -475,9 +476,11 @@ static void full_screen_cb(GtkWidget *widget, gpointer userdata)
         if (self->priv->full_screen) {
                 gtk_window_fullscreen(GTK_WINDOW(self->window));
                 gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), FALSE);
+                budgie_control_bar_set_show_playback(BUDGIE_CONTROL_BAR(self->toolbar), TRUE);
         } else {
                 gtk_window_unfullscreen(GTK_WINDOW(self->window));
                 gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), TRUE);
+                budgie_control_bar_set_show_playback(BUDGIE_CONTROL_BAR(self->toolbar), FALSE);
         }
 }
 

@@ -88,6 +88,12 @@ GtkWidget* budgie_control_bar_new(void);
 void budgie_control_bar_set_show_video(BudgieControlBar *self, gboolean show);
 
 /**
+ * Show or hide the playback controls
+ * @param show Whether to show or hide the playback controls
+ */
+void budgie_control_bar_set_show_playback(BudgieControlBar *self, gboolean show);
+
+/**
  * Enable or disable a selected actions button
  * @param action The action to enable or disable
  * @param enabled Whether this action should be enabled or disabled

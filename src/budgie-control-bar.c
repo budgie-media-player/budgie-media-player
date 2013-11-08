@@ -136,6 +136,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
 
         /* Playback controls */
         playback = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        self->playback = playback;
         style = gtk_widget_get_style_context(playback);
         gtk_style_context_add_class(style, GTK_STYLE_CLASS_LINKED);
         gtk_style_context_add_class(style, GTK_STYLE_CLASS_RAISED);
@@ -243,6 +244,11 @@ static void handler_cb(GtkWidget *widget, gpointer userdata)
 void budgie_control_bar_set_show_video(BudgieControlBar *self, gboolean show)
 {
         gtk_widget_set_visible(self->video_controls, show);
+}
+
+void budgie_control_bar_set_show_playback(BudgieControlBar *self, gboolean show)
+{
+        gtk_widget_set_visible(self->playback, show);
 }
 
 void budgie_control_bar_set_action_enabled(BudgieControlBar *self,
