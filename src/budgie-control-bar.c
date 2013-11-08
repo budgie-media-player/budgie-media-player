@@ -258,8 +258,6 @@ void budgie_control_bar_set_action_enabled(BudgieControlBar *self,
         GtkWidget *wid = NULL;
         gboolean sensitive = FALSE;
 
-        /* Ideally we leave room for future expansion, but for now
-         * we just handle reload button */
         switch (action) {
                 case BUDGIE_ACTION_RELOAD:
                         wid = GTK_WIDGET(self->reload);
