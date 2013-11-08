@@ -194,3 +194,23 @@ void budgie_control_bar_set_show_video(BudgieControlBar *self, gboolean show)
 {
         gtk_widget_set_visible(self->video_controls, show);
 }
+
+void budgie_control_bar_set_action_enabled(BudgieControlBar *self,
+                                           BudgieAction action,
+                                           gboolean enabled)
+{
+        GtkWidget *wid = NULL;
+        /* Ideally we leave room for future expansion, but for now
+         * we just handle reload button */
+        switch (action)
+        {
+                case BUDGIE_ACTION_RELOAD:
+                        wid = GTK_WIDGET(self->reload);
+                        break;
+                default:
+                        break;
+        }
+        if (wid == NULL)
+                return;
+        gtk_widget_set_sensitive(wid, enabled);
+}

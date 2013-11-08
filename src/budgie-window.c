@@ -522,7 +522,8 @@ static gboolean load_media_t(gpointer data)
         GThread *thread;
 
         self = BUDGIE_WINDOW(data);
-        /*gtk_widget_set_sensitive(self->reload, FALSE);*/
+        budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
+                BUDGIE_ACTION_RELOAD, FALSE);
 
         thread = g_thread_new("reload-media", &load_media, data);
 
@@ -548,7 +549,8 @@ static gpointer load_media(gpointer data)
         self->priv->tracks = budgie_db_get_all_media(self->db);
         player_view_set_list(PLAYER_VIEW(self->player), self->priv->tracks);
 
-        /*gtk_widget_set_sensitive(self->reload, TRUE);*/
+        budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
+                BUDGIE_ACTION_RELOAD, TRUE);
 
         return NULL;
 }

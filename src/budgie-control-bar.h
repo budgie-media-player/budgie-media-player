@@ -78,4 +78,14 @@ GtkWidget* budgie_control_bar_new(void);
  */
 void budgie_control_bar_set_show_video(BudgieControlBar *self, gboolean show);
 
+/**
+ * Enable or disable a selected actions button
+ * @param action The action to enable or disable
+ * @param enabled Whether this action should be enabled or disabled
+ */
+void budgie_control_bar_set_action_enabled(BudgieControlBar *self,
+                                           BudgieAction action,
+                                           gboolean enabled);
+
+
 #endif /* budgie_control_bar_h */
