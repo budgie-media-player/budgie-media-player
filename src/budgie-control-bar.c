@@ -57,6 +57,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         GtkWidget *about;
         GtkToolItem *about_item;
         GtkToolItem *separator1, *separator2;
+        guint *data = NULL;
 
         /* Initialise IconTheme */
         self->icon_theme = gtk_icon_theme_get_default();
@@ -76,11 +77,18 @@ static void budgie_control_bar_init(BudgieControlBar *self)
 
         /* repeat */
         repeat = new_button_with_icon(self->icon_theme, "media-playlist-repeat", TRUE, TRUE);
+        data = g_malloc(sizeof(guint));
+        *data = BUDGIE_ACTION_REPEAT;
+        g_object_set_data_full(G_OBJECT(repeat), "budgie", data, g_free);
         g_signal_connect(repeat, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
         gtk_box_pack_start(GTK_BOX(control_box), repeat, FALSE, FALSE, 0);
 
         /* random */
         random = new_button_with_icon(self->icon_theme, "media-playlist-shuffle", TRUE, TRUE);
+        data = g_malloc(sizeof(guint));
+        *data = BUDGIE_ACTION_RANDOM;
+        g_object_set_data_full(G_OBJECT(random), "budgie", data, g_free);
+        g_signal_connect(random, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
         gtk_box_pack_start(GTK_BOX(control_box), random, FALSE, FALSE, 0);
 
         /* Visual separation between generic media and video controls */
@@ -100,11 +108,19 @@ static void budgie_control_bar_init(BudgieControlBar *self)
 
         /* full screen */
         full_screen = new_button_with_icon(self->icon_theme, "view-fullscreen-symbolic", TRUE, TRUE);
+        data = g_malloc(sizeof(guint));
+        *data = BUDGIE_ACTION_FULL_SCREEN;
+        g_object_set_data_full(G_OBJECT(full_screen), "budgie", data, g_free);
+        g_signal_connect(full_screen, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
         gtk_container_add(GTK_CONTAINER(control_video_box), full_screen);
         self->full_screen = full_screen;
 
         /* Force aspect ratio - enabled by default */
         aspect = new_button_with_icon(self->icon_theme, "window-maximize-symbolic", TRUE, TRUE);
+        data = g_malloc(sizeof(guint));
+        *data = BUDGIE_ACTION_ASPECT_RATIO;
+        g_object_set_data_full(G_OBJECT(aspect), "budgie", data, g_free);
+        g_signal_connect(aspect, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(aspect), TRUE);
         gtk_container_add(GTK_CONTAINER(control_video_box), aspect);
 
@@ -117,6 +133,10 @@ static void budgie_control_bar_init(BudgieControlBar *self)
 
         /* reload */
         reload = new_button_with_icon(self->icon_theme, "view-refresh", TRUE, FALSE);
+        data = g_malloc(sizeof(guint));
+        *data = BUDGIE_ACTION_RELOAD;
+        g_object_set_data_full(G_OBJECT(reload), "budgie", data, g_free);
+        g_signal_connect(reload, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
         reload_item = gtk_tool_item_new();
         self->reload = reload;
         gtk_container_add(GTK_CONTAINER(reload_item), reload);
@@ -124,6 +144,10 @@ static void budgie_control_bar_init(BudgieControlBar *self)
 
         /* about */
         about = new_button_with_icon(self->icon_theme, "help-about-symbolic", TRUE, FALSE);
+        data = g_malloc(sizeof(guint));
+        *data = BUDGIE_ACTION_ABOUT;
+        g_object_set_data_full(G_OBJECT(about), "budgie", data, g_free);
+        g_signal_connect(about, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
         about_item = gtk_tool_item_new();
         gtk_container_add(GTK_CONTAINER(about_item), about);
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(about_item));

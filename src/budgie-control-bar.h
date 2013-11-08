@@ -36,6 +36,17 @@ typedef struct _BudgieControlBarClass   BudgieControlBarClass;
 #define IS_BUDGIE_CONTROL_BAR_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), BUDGIE_CONTROL_BAR_TYPE))
 #define BUDGIE_CONTROL_BAR_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), BUDGIE_CONTROL_BAR_TYPE, BudgieControlBarClass))
 
+/* Representative of supported actions */
+typedef enum {
+        BUDGIE_ACTION_RANDOM = 0,
+        BUDGIE_ACTION_REPEAT,
+        BUDGIE_ACTION_FULL_SCREEN,
+        BUDGIE_ACTION_ASPECT_RATIO,
+        BUDGIE_ACTION_RELOAD,
+        BUDGIE_ACTION_ABOUT,
+        BUDGIE_MAX_ACTIONS
+} BudgieAction;
+
 /* BudgieControlBar object */
 struct _BudgieControlBar {
         GtkToolbar parent;
