@@ -178,8 +178,14 @@ GtkWidget* budgie_control_bar_new(void)
 static void handler_cb(GtkWidget *widget, gpointer userdata)
 {
         BudgieControlBar *self;
+        guint data;
+        gboolean toggle = FALSE;
 
         self = BUDGIE_CONTROL_BAR(userdata);
+        if (GTK_IS_TOGGLE_BUTTON(widget))
+                toggle = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 
-        g_signal_emit_by_name(self, "action-selected", -1, FALSE);
+        data = *(guint*)g_object_get_data(G_OBJECT(widget), "budgie");
+
+        g_signal_emit_by_name(self, "action-selected", data, toggle);
 }

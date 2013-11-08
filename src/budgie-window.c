@@ -56,7 +56,7 @@ static void aspect_cb(GtkWidget *widget, gpointer userdata);
 static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpointer userdata);
 static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata);
 
-static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle);
+static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpointer userdata);
 
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
@@ -640,6 +640,28 @@ static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata)
         return TRUE;
 }
 
-static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle)
+static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpointer userdata)
 {
+        BudgieWindow *self;
+
+        self = BUDGIE_WINDOW(userdata);
+
+        switch (action) {
+                case BUDGIE_ACTION_ABOUT:
+                        return about_cb(GTK_WIDGET(bar), userdata);
+                case BUDGIE_ACTION_RELOAD:
+                        return reload_cb(GTK_WIDGET(bar), userdata);
+                case BUDGIE_ACTION_RANDOM:
+                        self->priv->random = toggle;
+                        break;
+                case BUDGIE_ACTION_REPEAT:
+                        self->priv->repeat = toggle;
+                        break;
+                case BUDGIE_ACTION_ASPECT_RATIO:
+                        return aspect_cb(GTK_WIDGET(bar), userdata);
+                case BUDGIE_ACTION_FULL_SCREEN:
+                        return full_screen_cb(GTK_WIDGET(bar), userdata);
+                default:
+                        break;
+        }
 }
