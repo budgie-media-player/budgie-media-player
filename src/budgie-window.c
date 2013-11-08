@@ -28,36 +28,8 @@
 #include <gst/gstbus.h>
 
 #include "budgie-window.h"
-#include "budgie-control-bar.h"
 
 G_DEFINE_TYPE_WITH_PRIVATE(BudgieWindow, budgie_window, G_TYPE_OBJECT);
-
-static void init_styles(BudgieWindow *self);
-
-static void store_media(gpointer data1, gpointer data2);
-static gboolean load_media_t(gpointer data);
-static gpointer load_media(gpointer data);
-
-/* Callbacks */
-static void about_cb(GtkWidget *widget, gpointer userdata);
-static void play_cb(GtkWidget *widget, gpointer userdata);
-static void pause_cb(GtkWidget *widget, gpointer userdata);
-static void next_cb(GtkWidget *widget, gpointer userdata);
-static void prev_cb(GtkWidget *widget, gpointer userdata);
-static void volume_cb(GtkWidget *widget, gpointer userdata);
-static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata);
-static void realize_cb(GtkWidget *widget, gpointer userdata);
-static gboolean refresh_cb(gpointer userdata);
-static void reload_cb(GtkWidget *widget, gpointer userdata);
-static void full_screen_cb(GtkWidget *widget, gpointer userdata);
-static void aspect_cb(GtkWidget *widget, gpointer userdata);
-static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpointer userdata);
-static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata);
-
-static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpointer userdata);
-
-/* GStreamer callbacks */
-static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
 
 /* Initialisation */
 static void budgie_window_class_init(BudgieWindowClass *klass)
