@@ -159,9 +159,6 @@ static void budgie_control_bar_dispose(GObject *object)
 
         self = BUDGIE_CONTROL_BAR(object);
 
-        if (self->icon_theme)
-                g_object_unref(self->icon_theme);
-
         /* Destruct */
         G_OBJECT_CLASS (budgie_control_bar_parent_class)->dispose (object);
 }
