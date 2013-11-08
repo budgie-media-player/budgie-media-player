@@ -88,4 +88,13 @@ void budgie_control_bar_set_action_enabled(BudgieControlBar *self,
                                            gboolean enabled);
 
 
+/**
+ * Set the selection action button to active or inactive
+ * @param action The action to modify
+ * @param enabled Whether this action should be active or inactive
+ */
+void budgie_control_bar_set_action_state(BudgieControlBar *self,
+                                         BudgieAction action,
+                                         gboolean state);
+
 #endif /* budgie_control_bar_h */

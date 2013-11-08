@@ -618,7 +618,8 @@ static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata)
         gtk_window_unfullscreen(GTK_WINDOW(self->window));
         gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), TRUE);
         self->priv->full_screen = FALSE;
-        /*gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self->full_screen), FALSE);*/
+        budgie_control_bar_set_action_state(BUDGIE_CONTROL_BAR(self->toolbar),
+                BUDGIE_ACTION_FULL_SCREEN, FALSE);
         return TRUE;
 }
 

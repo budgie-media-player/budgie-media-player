@@ -202,8 +202,7 @@ void budgie_control_bar_set_action_enabled(BudgieControlBar *self,
         GtkWidget *wid = NULL;
         /* Ideally we leave room for future expansion, but for now
          * we just handle reload button */
-        switch (action)
-        {
+        switch (action) {
                 case BUDGIE_ACTION_RELOAD:
                         wid = GTK_WIDGET(self->reload);
                         break;
@@ -213,4 +212,22 @@ void budgie_control_bar_set_action_enabled(BudgieControlBar *self,
         if (wid == NULL)
                 return;
         gtk_widget_set_sensitive(wid, enabled);
+}
+
+void budgie_control_bar_set_action_state(BudgieControlBar *self,
+                                         BudgieAction action,
+                                         gboolean state)
+{
+        GtkToggleButton *wid = NULL;
+
+        switch (action) {
+                case BUDGIE_ACTION_FULL_SCREEN:
+                        wid = GTK_TOGGLE_BUTTON(self->full_screen);
+                        break;
+                default:
+                        break;
+        }
+        if (wid == NULL)
+                return;
+        gtk_toggle_button_set_active(wid, state);
 }
