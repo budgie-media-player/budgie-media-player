@@ -86,7 +86,7 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_window_set_title(GTK_WINDOW(window), "Music Player");
         gtk_widget_set_size_request(window, 1100, 500);
         gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-        gtk_window_set_icon_name(GTK_WINDOW(window), "gnome-music");
+        gtk_window_set_icon_name(GTK_WINDOW(window), "budgie");
         gtk_window_set_wmclass(GTK_WINDOW(window), "Budgie", "Budgie");
         g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
@@ -302,7 +302,7 @@ static void about_cb(GtkWidget *widget, gpointer userdata)
                 "authors", authors,
                 "comments", comments,
                 "copyright", copyright,
-                "logo-icon-name", "gnome-music",
+                "logo-icon-name", "budgie",
                 "program-name", PACKAGE_NAME,
                 "license-type", GTK_LICENSE_GPL_2_0,
                 "version", PACKAGE_VERSION,
