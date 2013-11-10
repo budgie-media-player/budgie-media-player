@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Budgie
+GenericName=Media Player
+Comment=Modern and elegant media player
+Icon=budgie
+Exec=budgie
+Terminal=false
+Type=Application
+Categories=GNOME;GTK;AudioVideo;Player;
+StartupNotify=false

@@ -5,7 +5,13 @@ iconsdir=$(datadir)/icons/hicolor/scalable/apps
 icons_DATA = \
 	budgie.svg
 
+# Our .desktop file
+desktopdir=$(datadir)/applications
+desktop_DATA = \
+	budgie.desktop
+
 EXTRA_DIST = \
+	budgie.desktop \
 	budgie.svg \
 	budgie-128x128.png \
 	budgie-16x16.png \
