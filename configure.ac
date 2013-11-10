@@ -23,6 +23,6 @@ AS_IF([test "x$music_player_found_id3_headers" != "xyes"],
 AC_CHECK_HEADERS([gdbm.h], [], [AC_MSG_ERROR([Unable to find gdbm headers])])
 
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_FILES(Makefile src/Makefile)
+AC_CONFIG_FILES(Makefile src/Makefile data/Makefile)
 AC_OUTPUT
 
