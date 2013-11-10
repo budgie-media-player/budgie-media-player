@@ -103,10 +103,10 @@ void search_directory(const gchar *path, GSList **list, const gchar *mime_patter
         MediaInfo *media;
 
         file = g_file_new_for_path(path);
-        type = g_file_query_file_type(file, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL);
+        type = g_file_query_file_type(file, G_FILE_QUERY_INFO_NONE, NULL);
         if (type == G_FILE_TYPE_DIRECTORY) {
                 /* Enumerate children (needs less query flags!) */
-                listing = g_file_enumerate_children(file, "standard::*", G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+                listing = g_file_enumerate_children(file, "standard::*", G_FILE_QUERY_INFO_NONE,
                         NULL, NULL);
 
                 /* Lets go through them */
