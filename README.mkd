@@ -19,9 +19,9 @@ On Ubuntu:
 To build:
 
     $ ./autogen.sh
-		$ ./configure
-		$ make
-		$ make install
+    $ ./configure
+    $ make
+    $ make install
 
 Notes
 -----
