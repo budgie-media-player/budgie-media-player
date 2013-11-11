@@ -37,7 +37,7 @@ typedef struct _BudgieDBPrivate BudgieDBPrivate;
 #define IS_BUDGIE_DB_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), BUDGIE_DB_TYPE))
 #define BUDGIE_DB_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), BUDGIE_DB_TYPE, BudgieDBClass))
 
-#define CONFIG_NAME "idmp-1.db"
+#define CONFIG_NAME "budgie-1.db"
 
 /* Private storage */
 struct _BudgieDBPrivate {
