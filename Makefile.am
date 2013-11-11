@@ -1,5 +1,5 @@
-ACLOCAL_AMFLAGS= -I m4
-AM_CFLAGS= -DDATADIR=\"$(pkgdatadir)\"
+ACLOCAL_AMFLAGS = -I m4
+AM_CFLAGS = -DDATADIR=\"$(pkgdatadir)\"
 
 EXTRA_DIST = ${top_srcdir}/README.mkd
 

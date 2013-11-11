@@ -1,4 +1,3 @@
--include $(top_srcdir)/Makefile.am
 
 # Our SVG
 iconsdir=$(datadir)/icons/hicolor/scalable/apps
