@@ -83,7 +83,8 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(control_item));
 
         /* repeat */
-        repeat = new_button_with_icon(self->icon_theme, "media-playlist-repeat", TRUE, TRUE);
+        repeat = new_button_with_icon(self->icon_theme, "media-playlist-repeat",
+                TRUE, TRUE, "Toggle repeat mode");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_REPEAT;
         g_object_set_data_full(G_OBJECT(repeat), "budgie", data, g_free);
@@ -91,7 +92,8 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_box_pack_start(GTK_BOX(control_box), repeat, FALSE, FALSE, 0);
 
         /* random */
-        random = new_button_with_icon(self->icon_theme, "media-playlist-shuffle", TRUE, TRUE);
+        random = new_button_with_icon(self->icon_theme, "media-playlist-shuffle",
+                TRUE, TRUE, "Toggle random playback (shuffle)");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_RANDOM;
         g_object_set_data_full(G_OBJECT(random), "budgie", data, g_free);
@@ -114,7 +116,8 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(control_video_item));
 
         /* full screen */
-        full_screen = new_button_with_icon(self->icon_theme, "view-fullscreen-symbolic", TRUE, TRUE);
+        full_screen = new_button_with_icon(self->icon_theme, "view-fullscreen-symbolic",
+                TRUE, TRUE, "Toggle full-screen mode");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_FULL_SCREEN;
         g_object_set_data_full(G_OBJECT(full_screen), "budgie", data, g_free);
@@ -123,7 +126,8 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         self->full_screen = full_screen;
 
         /* Force aspect ratio - enabled by default */
-        aspect = new_button_with_icon(self->icon_theme, "window-maximize-symbolic", TRUE, TRUE);
+        aspect = new_button_with_icon(self->icon_theme, "window-maximize-symbolic",
+                TRUE, TRUE, "Toggle aspect-ratio mode");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_ASPECT_RATIO;
         g_object_set_data_full(G_OBJECT(aspect), "budgie", data, g_free);
@@ -147,7 +151,8 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(playback_item));
 
         /* previous */
-        prev = new_button_with_icon(self->icon_theme, "media-seek-backward", TRUE, FALSE);
+        prev = new_button_with_icon(self->icon_theme, "media-seek-backward", TRUE, FALSE,
+                "Previous track");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_PREVIOUS;
         g_object_set_data_full(G_OBJECT(prev), "budgie", data, g_free);
@@ -155,7 +160,8 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_box_pack_start(GTK_BOX(playback), prev, FALSE, FALSE, 0);
 
         /* play */
-        play = new_button_with_icon(self->icon_theme, "media-playback-start", TRUE, FALSE);
+        play = new_button_with_icon(self->icon_theme, "media-playback-start",
+                TRUE, FALSE, "Play");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_PLAY;
         self->play = play;
@@ -164,7 +170,8 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_box_pack_start(GTK_BOX(playback), play, FALSE, FALSE, 0);
 
         /* pause */
-        pause = new_button_with_icon(self->icon_theme, "media-playback-pause", TRUE, FALSE);
+        pause = new_button_with_icon(self->icon_theme, "media-playback-pause",
+                TRUE, FALSE, "Pause");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_PAUSE;
         self->pause = pause;
@@ -173,7 +180,8 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_box_pack_start(GTK_BOX(playback), pause, FALSE, FALSE, 0);
 
         /* next */
-        next = new_button_with_icon(self->icon_theme, "media-seek-forward", TRUE, FALSE);
+        next = new_button_with_icon(self->icon_theme, "media-seek-forward",
+                TRUE, FALSE, "Next track");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_NEXT;
         g_object_set_data_full(G_OBJECT(next), "budgie", data, g_free);
@@ -188,7 +196,8 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(separator3));
 
         /* reload */
-        reload = new_button_with_icon(self->icon_theme, "view-refresh", TRUE, FALSE);
+        reload = new_button_with_icon(self->icon_theme, "view-refresh",
+                TRUE, FALSE, "Reload media library");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_RELOAD;
         g_object_set_data_full(G_OBJECT(reload), "budgie", data, g_free);
@@ -199,7 +208,8 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(reload_item));
 
         /* settings */
-        settings = new_button_with_icon(self->icon_theme, "preferences-system-symbolic", TRUE, TRUE);
+        settings = new_button_with_icon(self->icon_theme, "preferences-system-symbolic",
+                TRUE, TRUE, "Preferences");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_SETTINGS;
         self->settings = settings;
@@ -210,7 +220,8 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(settings_item));
 
         /* about */
-        about = new_button_with_icon(self->icon_theme, "help-about-symbolic", TRUE, FALSE);
+        about = new_button_with_icon(self->icon_theme, "help-about-symbolic",
+                TRUE, FALSE, "About Budgie..");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_ABOUT;
         g_object_set_data_full(G_OBJECT(about), "budgie", data, g_free);

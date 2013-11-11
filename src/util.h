@@ -30,12 +30,14 @@
  * @param icon_name Required icon name
  * @param toolbar Whether a toolbar size should be used
  * @param toggle Whether this should be a ToggleButton
+ * @param description Tooltip for the new button
  * @return a GtkWidget of the correct button type
  */
 GtkWidget* new_button_with_icon(GtkIconTheme *theme,
                                 const gchar *icon_name,
                                 gboolean toolbar,
-                                gboolean toggle);
+                                gboolean toggle,
+                                const gchar *description);
 
 /**
  * Search a directory for files, and populate the list

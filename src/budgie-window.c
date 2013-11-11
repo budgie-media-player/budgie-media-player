@@ -102,24 +102,28 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_window_set_titlebar(GTK_WINDOW(window), header);
 
         /* Media control buttons, placed on headerbar */
-        prev = new_button_with_icon(self->icon_theme, "media-seek-backward", FALSE, FALSE);
+        prev = new_button_with_icon(self->icon_theme, "media-seek-backward",
+                FALSE, FALSE, "Previous track");
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), prev);
         g_signal_connect(prev, "clicked", G_CALLBACK(prev_cb), (gpointer)self);
         self->prev = prev;
         /* Set some left padding */
         gtk_widget_set_margin_left(prev, 20);
 
-        play = new_button_with_icon(self->icon_theme, "media-playback-start", FALSE, FALSE);
+        play = new_button_with_icon(self->icon_theme, "media-playback-start",
+                FALSE, FALSE, "Play");
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), play);
         g_signal_connect(play, "clicked", G_CALLBACK(play_cb), (gpointer)self);
         self->play = play;
 
-        pause = new_button_with_icon(self->icon_theme, "media-playback-pause", FALSE, FALSE);
+        pause = new_button_with_icon(self->icon_theme, "media-playback-pause",
+                FALSE, FALSE, "Pause");
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), pause);
         g_signal_connect(pause, "clicked", G_CALLBACK(pause_cb), (gpointer)self);
         self->pause = pause;
 
-        next = new_button_with_icon(self->icon_theme, "media-seek-forward", FALSE, FALSE);
+        next = new_button_with_icon(self->icon_theme, "media-seek-forward",
+                FALSE, FALSE, "Next track");
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), next);
         g_signal_connect(next, "clicked", G_CALLBACK(next_cb), (gpointer)self);
         self->next = next;

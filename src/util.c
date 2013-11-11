@@ -140,7 +140,8 @@ void search_directory(const gchar *path, GSList **list, const gchar *mime_patter
 GtkWidget* new_button_with_icon(GtkIconTheme *theme,
                                 const gchar *icon_name,
                                 gboolean toolbar,
-                                gboolean toggle)
+                                gboolean toggle,
+                                const gchar *description)
 {
         GtkWidget *button;
         GtkWidget *image;
@@ -163,6 +164,9 @@ GtkWidget* new_button_with_icon(GtkIconTheme *theme,
                 gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
         gtk_container_add(GTK_CONTAINER(button), image);
 
+        /* Set a helpful tooltip for toolbar buttons */
+        if (toolbar)
+                gtk_widget_set_tooltip_text(button, description);
         return button;
 }
 
