@@ -6,5 +6,15 @@
       <summary>Configured media directories</summary>
       <description>List of media providing directories to search.</description>
     </key>
+    <key type="b" name="repeat">
+      <default>false</default>
+      <summary>Repeat media tracks</summary>
+      <description>Whether to repeat the current track or not</description>
+    </key>
+    <key type="b" name="random">
+      <default>false</default>
+      <summary>Randomly choode media</summary>
+      <description>Whether to play media sequentially or in a random order</description>
+    </key>
   </schema>
 </schemalist>
