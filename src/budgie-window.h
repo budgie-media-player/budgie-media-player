@@ -45,6 +45,18 @@
 #title {\
     text-shadow: 0 1px shade(#cecece, 1.2);\
 }"
+
+/* -- Settings -- */
+
+/**
+ * Budgie GSettings schema
+ */
+#define BUDGIE_SCHEMA "io.github.ikeydoherty.Budgie"
+/**
+ * Media directory GSettings key
+ */
+#define BUDGIE_MEDIA_DIRS "media-directories"
+
 typedef struct _BudgieWindow BudgieWindow;
 typedef struct _BudgieWindowClass   BudgieWindowClass;
 typedef struct _BudgieWindowPrivate BudgieWindowPrivate;
@@ -58,9 +70,8 @@ typedef struct _BudgieWindowPrivate BudgieWindowPrivate;
 
 /* Private storage */
 struct _BudgieWindowPrivate {
-        const gchar *music_directory;
-        const gchar *video_directory;
         const gchar *current_page;
+        GSettings *settings;
         GSList *tracks;
         gchar *uri;
         gulong volume_id;
@@ -75,6 +86,8 @@ struct _BudgieWindowPrivate {
 /* BudgieWindow object */
 struct _BudgieWindow {
         GObject parent;
+
+        gchar **media_dirs;
 
         GtkWidget *window;
         GtkWidget *header;

@@ -91,7 +91,7 @@ static MediaInfo* media_from_file(gchar *path, GFileInfo *file_info, const gchar
         return media;
 }
 
-void search_directory(const gchar *path, GSList **list, const gchar *mime_pattern)
+void search_directory(const gchar *path, GSList **list, int n_params, const gchar **mimes)
 {
         GFile *file = NULL;
         GFileInfo *next_file;
@@ -101,6 +101,7 @@ void search_directory(const gchar *path, GSList **list, const gchar *mime_patter
         const gchar *file_mime;
         gchar *full_path = NULL;
         MediaInfo *media;
+        guint i;
 
         file = g_file_new_for_path(path);
         type = g_file_query_file_type(file, G_FILE_QUERY_INFO_NONE, NULL);
@@ -116,14 +117,16 @@ void search_directory(const gchar *path, GSList **list, const gchar *mime_patter
 
                         /* Recurse if its a directory */
                         if (g_file_info_get_file_type(next_file) == G_FILE_TYPE_DIRECTORY) {
-                                search_directory(full_path, list, mime_pattern);
+                                search_directory(full_path, list, n_params, mimes);
                         } else {
                                 /* Not exactly a regex but it'll do for now */
                                 file_mime = g_file_info_get_content_type(next_file);
-                                if (g_str_has_prefix(file_mime, mime_pattern)) {
-                                        media = media_from_file(full_path, next_file, file_mime);
-                                        /* Probably switch to a new struct in the future */
-                                        *list = g_slist_append(*list, media);
+                                for (i=0; i < n_params; i++) {
+                                        if (g_str_has_prefix(file_mime, mimes[i])) {
+                                                media = media_from_file(full_path, next_file, file_mime);
+                                                /* Probably switch to a new struct in the future */
+                                                *list = g_slist_append(*list, media);
+                                        }
                                 }
                         }
                         g_free(full_path);

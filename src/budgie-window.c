@@ -60,16 +60,29 @@ static void budgie_window_init(BudgieWindow *self)
         GtkSettings *settings;
         GdkVisual *visual;
         guint length;
+        gchar **media_dirs = NULL;
+        const gchar *dirs[3];
 
         self->priv = budgie_window_get_instance_private(self);
+        /* Init our settings */
+        self->priv->settings = g_settings_new(BUDGIE_SCHEMA);
 
-        /* TODO: Handle this better */
-        self->priv->music_directory = g_get_user_special_dir(G_USER_DIRECTORY_MUSIC);
-        if (!self->priv->music_directory)
-                g_error("No music directory configured");
-        self->priv->video_directory = g_get_user_special_dir(G_USER_DIRECTORY_VIDEOS);
-        if (!self->priv->video_directory)
-                g_error("No video directory configured");
+        /* Retrieve media directories */
+        media_dirs = g_settings_get_strv(self->priv->settings, BUDGIE_MEDIA_DIRS);
+        if (g_strv_length(media_dirs) == 0) {
+                /* Set defaults */
+                g_strfreev(media_dirs);
+                dirs[0] = g_get_user_special_dir(G_USER_DIRECTORY_MUSIC);
+                if (!dirs[0])
+                        g_warning("Music directory not found\n");
+                dirs[1] = g_get_user_special_dir(G_USER_DIRECTORY_VIDEOS);
+                if (!dirs[1])
+                        g_warning("Video directory not found\n");
+                dirs[2] = NULL;
+                g_settings_set_strv(self->priv->settings, BUDGIE_MEDIA_DIRS, dirs);
+                media_dirs = g_settings_get_strv(self->priv->settings, BUDGIE_MEDIA_DIRS);
+        }
+        self->media_dirs = media_dirs;
 
         init_styles(self);
 
@@ -259,6 +272,8 @@ static void budgie_window_dispose(GObject *object)
         if (self->priv->uri)
                 g_free(self->priv->uri);
 
+        g_strfreev(self->media_dirs);
+        g_object_unref(self->priv->settings);
         g_object_unref(self->db);
 
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
@@ -545,12 +560,16 @@ static gpointer load_media(gpointer data)
 {
         BudgieWindow *self;
         GSList *tracks = NULL;
+        guint length, i;
+        const gchar *mimes[2];
 
         self = BUDGIE_WINDOW(data);
-        search_directory(self->priv->music_directory,
-                &tracks, "audio/");
-        search_directory(self->priv->video_directory,
-                &tracks, "video/");
+        length = g_strv_length(self->media_dirs);
+        mimes[0] = "audio/";
+        mimes[1] = "video/";
+        for (i=0; i < length; i++)
+                search_directory(self->media_dirs[i], &tracks, 2, mimes);
+
         g_slist_foreach(tracks, store_media, (gpointer)self);
         /* Reset tracks */
         if (self->priv->tracks)
