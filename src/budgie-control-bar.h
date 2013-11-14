@@ -61,6 +61,9 @@ struct _BudgieControlBar {
         GtkWidget *video_controls;
         GtkWidget *full_screen;
 
+        GtkWidget *repeat;
+        GtkWidget *random;
+
         GtkWidget *settings;
 
         /* Playback controls */

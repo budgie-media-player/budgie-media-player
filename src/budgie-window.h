@@ -162,7 +162,7 @@ static void full_screen_cb(GtkWidget *widget, gpointer userdata);
 static void aspect_cb(GtkWidget *widget, gpointer userdata);
 static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpointer userdata);
 static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata);
-
+static void settings_changed(GSettings *settings, gchar *key, gpointer userdata);
 static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpointer userdata);
 
 /* GStreamer callbacks */

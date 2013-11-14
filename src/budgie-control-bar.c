@@ -85,6 +85,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         /* repeat */
         repeat = new_button_with_icon(self->icon_theme, "media-playlist-repeat",
                 TRUE, TRUE, "Toggle repeat mode");
+        self->repeat = repeat;
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_REPEAT;
         g_object_set_data_full(G_OBJECT(repeat), "budgie", data, g_free);
@@ -94,6 +95,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         /* random */
         random = new_button_with_icon(self->icon_theme, "media-playlist-shuffle",
                 TRUE, TRUE, "Toggle random playback (shuffle)");
+        self->random = random;
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_RANDOM;
         g_object_set_data_full(G_OBJECT(random), "budgie", data, g_free);
@@ -316,6 +318,12 @@ void budgie_control_bar_set_action_state(BudgieControlBar *self,
         switch (action) {
                 case BUDGIE_ACTION_FULL_SCREEN:
                         wid = GTK_TOGGLE_BUTTON(self->full_screen);
+                        break;
+                case BUDGIE_ACTION_REPEAT:
+                        wid = GTK_TOGGLE_BUTTON(self->repeat);
+                        break;
+                case BUDGIE_ACTION_RANDOM:
+                        wid = GTK_TOGGLE_BUTTON(self->random);
                         break;
                 default:
                         break;

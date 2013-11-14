@@ -62,10 +62,13 @@ static void budgie_window_init(BudgieWindow *self)
         guint length;
         gchar **media_dirs = NULL;
         const gchar *dirs[3];
+        gboolean b_value;
 
         self->priv = budgie_window_get_instance_private(self);
         /* Init our settings */
         self->priv->settings = g_settings_new(BUDGIE_SCHEMA);
+        g_signal_connect(self->priv->settings, "changed",
+                G_CALLBACK(settings_changed), (gpointer)self);
 
         /* Retrieve media directories */
         media_dirs = g_settings_get_strv(self->priv->settings, BUDGIE_MEDIA_DIRS);
@@ -171,6 +174,18 @@ static void budgie_window_init(BudgieWindow *self)
         self->toolbar = toolbar;
         g_signal_connect(toolbar, "action-selected",
                 G_CALLBACK(toolbar_cb), (gpointer)self);
+
+        /* Initialise repeat setting */
+        b_value = g_settings_get_boolean(self->priv->settings, BUDGIE_REPEAT);
+        budgie_control_bar_set_action_state(BUDGIE_CONTROL_BAR(self->toolbar),
+                BUDGIE_ACTION_REPEAT, b_value);
+        self->priv->repeat = b_value;
+
+        /* Initialise random setting */
+        b_value = g_settings_get_boolean(self->priv->settings, BUDGIE_RANDOM);
+        budgie_control_bar_set_action_state(BUDGIE_CONTROL_BAR(self->toolbar),
+                BUDGIE_ACTION_RANDOM, b_value);
+        self->priv->random = b_value;
 
         gtk_container_add(GTK_CONTAINER(south_reveal), toolbar);
 
@@ -653,6 +668,26 @@ static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata)
         return TRUE;
 }
 
+static void settings_changed(GSettings *settings, gchar *key, gpointer userdata)
+{
+        BudgieWindow *self;
+        gboolean bool_value;
+
+        self = BUDGIE_WINDOW(userdata);
+
+        /* Test keys. */
+        if (g_str_equal(key, BUDGIE_RANDOM)) {
+                bool_value = g_settings_get_boolean(self->priv->settings, BUDGIE_RANDOM);
+                budgie_control_bar_set_action_state(BUDGIE_CONTROL_BAR(self->toolbar),
+                        BUDGIE_ACTION_RANDOM, bool_value);
+                self->priv->random = bool_value;
+        } else if (g_str_equal(key, BUDGIE_REPEAT)) {
+                bool_value = g_settings_get_boolean(self->priv->settings, BUDGIE_REPEAT);
+                budgie_control_bar_set_action_state(BUDGIE_CONTROL_BAR(self->toolbar),
+                        BUDGIE_ACTION_REPEAT, bool_value);
+                self->priv->repeat = bool_value;
+        }
+}
 static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpointer userdata)
 {
         BudgieWindow *self;
@@ -666,9 +701,13 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
                         return reload_cb(GTK_WIDGET(bar), userdata);
                 case BUDGIE_ACTION_RANDOM:
                         self->priv->random = toggle;
+                        g_settings_set_boolean(self->priv->settings,
+                                BUDGIE_RANDOM, toggle);
                         break;
                 case BUDGIE_ACTION_REPEAT:
                         self->priv->repeat = toggle;
+                        g_settings_set_boolean(self->priv->settings,
+                                BUDGIE_REPEAT, toggle);
                         break;
                 case BUDGIE_ACTION_ASPECT_RATIO:
                         self->priv->force_aspect = toggle;
