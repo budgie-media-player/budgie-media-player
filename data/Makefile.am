@@ -1,4 +1,3 @@
-
 # Our SVG
 iconsdir=$(datadir)/icons/hicolor/scalable/apps
 icons_DATA = \
@@ -9,8 +8,14 @@ desktopdir=$(datadir)/applications
 desktop_DATA = \
 	budgie.desktop
 
+# GLib Schema
+glibdir=$(datadir)/glib-2.0/schemas
+glib_DATA = \
+	io.github.ikeydoherty.Budgie.gschema.xml
+
 EXTRA_DIST = \
 	budgie.desktop \
+	io.github.ikeydoherty.Budgie.gschema.xml \
 	budgie.svg \
 	budgie-128x128.png \
 	budgie-16x16.png \

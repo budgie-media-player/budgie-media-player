@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="budgie">
+  <schema path="/io/github/ikeydoherty/Budgie/" id="io.github.ikeydoherty.Budgie">
+    <key type="as" name="media-directories">
+      <default>[]</default>
+      <summary>Configured media directories</summary>
+      <description>List of media providing directories to search.</description>
+    </key>
+  </schema>
+</schemalist>
