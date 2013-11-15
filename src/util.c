@@ -175,9 +175,7 @@ GtkWidget* new_button_with_icon(GtkIconTheme *theme,
 
 gchar *format_seconds(gint64 time, gboolean remaining)
 {
-        guint seconds = 0;
-        guint minutes = 0;
-        guint hours = 0;
+        div_t dv, dv2;
         gchar *ret;
         gchar *prefix;
 
@@ -186,19 +184,12 @@ gchar *format_seconds(gint64 time, gboolean remaining)
         else
                 prefix = "";
 
-        while (time >= HOUR) {
-                time -= HOUR;
-                hours++;
+        dv = div(time, 60);
+        if (dv.quot < 60) {
+                ret = g_strdup_printf("%s00:%02d:%02d", prefix, dv.quot, dv.rem);
+        } else {
+                dv2 = div(dv.quot, 60);
+                ret = g_strdup_printf("%s%02d:%02d:%02d", prefix, dv2.quot, dv2.rem, dv.rem);
         }
-        while (time >= MINUTE) {
-                time -= MINUTE;
-                minutes++;
-        }
-        seconds = time;
-
-        if (hours > 0)
-                ret = g_strdup_printf("%s%02d:%02d:%02d", prefix, hours, minutes, seconds);
-        else
-                ret = g_strdup_printf("%s%02d:%02d", prefix, minutes, seconds);
         return ret;
 }
