@@ -265,6 +265,7 @@ static void budgie_window_init(BudgieWindow *self)
         budgie_control_bar_set_show_playback(BUDGIE_CONTROL_BAR(toolbar), FALSE);
         budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(toolbar),
                 BUDGIE_ACTION_PAUSE, FALSE);
+        player_status_area_set_media_time(PLAYER_STATUS_AREA(self->status), -1, -1);
 
         /* Show the toolbar */
         gtk_revealer_set_reveal_child(GTK_REVEALER(south_reveal), TRUE);

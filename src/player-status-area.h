@@ -43,6 +43,7 @@ typedef struct _PlayerStatusAreaPrivate PlayerStatusAreaPrivate;
 struct _PlayerStatusAreaPrivate {
         gchar *title_string;
         gchar *time_string;
+        gchar *remaining_string;
 };
 
 /* PlayerStatusArea object */
@@ -51,6 +52,8 @@ struct _PlayerStatusArea {
 
         GtkWidget *label;
         GtkWidget *time_label;
+        GtkWidget *remaining_label;
+        GtkWidget *slider;
 
         PlayerStatusAreaPrivate *priv;
 };

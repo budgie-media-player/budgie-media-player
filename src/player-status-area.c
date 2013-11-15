@@ -39,9 +39,10 @@ static void player_status_area_class_init(PlayerStatusAreaClass *klass)
 static void player_status_area_init(PlayerStatusArea *self)
 {
         GtkWidget *label;
-        GtkWidget *time_label;
+        GtkWidget *time_label, *remaining_label;
+        GtkWidget *slider;
         GtkStyleContext *context;
-        GtkWidget *box;
+        GtkWidget *box, *bottom;
 
         self->priv = player_status_area_get_instance_private(self);
 
@@ -57,11 +58,30 @@ static void player_status_area_init(PlayerStatusArea *self)
         context = gtk_widget_get_style_context(label);
         gtk_style_context_add_class(context, "dim-label");
 
+        /* Bottom row */
+        bottom = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        gtk_box_pack_start(GTK_BOX(box), bottom, FALSE, FALSE, 0);
+
+        /* Time passed */
         time_label = gtk_label_new("");
         context = gtk_widget_get_style_context(time_label);
         gtk_style_context_add_class(context, "dim-label");
-        gtk_box_pack_start(GTK_BOX(box), time_label, FALSE, FALSE, 0);
+        gtk_box_pack_start(GTK_BOX(bottom), time_label, FALSE, FALSE, 2);
         self->time_label = time_label;
+
+        /* Slider */
+        slider = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,
+            0.0, 1.0, 1.0/100);
+        gtk_box_pack_start(GTK_BOX(bottom), slider, TRUE, TRUE, 2);
+        self->slider = slider;
+        gtk_scale_set_draw_value(GTK_SCALE(slider), FALSE);
+
+        /* Remaining time */
+        remaining_label = gtk_label_new("");
+        context = gtk_widget_get_style_context(remaining_label);
+        gtk_style_context_add_class(context, "dim-label");
+        gtk_box_pack_end(GTK_BOX(bottom), remaining_label, FALSE, FALSE, 2);
+        self->remaining_label = remaining_label;
 
         gtk_container_add(GTK_CONTAINER(self), box);
 
@@ -77,6 +97,8 @@ static void player_status_area_dispose(GObject *object)
                 g_free(self->priv->title_string);
         if (self->priv->time_string)
                 g_free(self->priv->time_string);
+        if (self->priv->remaining_string)
+                g_free(self->priv->remaining_string);
 
         /* Destruct */
         G_OBJECT_CLASS (player_status_area_parent_class)->dispose (object);
@@ -108,10 +130,29 @@ void player_status_area_set_media_time(PlayerStatusArea *self, gint64 max, gint6
 {
         if (self->priv->time_string)
                 g_free(self->priv->time_string);
+        if (self->priv->remaining_string)
+                g_free(self->priv->remaining_string);
 
-        gint64 remaining;
+        /* Clear info */
+        if (max < 0) {
+                gtk_widget_set_visible(self->slider, FALSE);
+                gtk_label_set_markup(GTK_LABEL(self->time_label), "");
+                gtk_label_set_markup(GTK_LABEL(self->remaining_label), "");
+                return;
+        }
+        gtk_widget_set_visible(self->slider, TRUE);
+        gint64 remaining, elapsed;
+
+        /* Update slider */
+        gtk_range_set_range(GTK_RANGE(self->slider), 0, max);
+        gtk_range_set_value(GTK_RANGE(self->slider), current);
 
         remaining = (max - current)/GST_SECOND;
-        self->priv->time_string = format_seconds(remaining, TRUE);
+        elapsed = current/GST_SECOND;
+        self->priv->time_string = format_seconds(elapsed, FALSE);
+        self->priv->remaining_string = format_seconds(remaining, TRUE);
+
+        /* Update labels */
         gtk_label_set_markup(GTK_LABEL(self->time_label), self->priv->time_string);
+        gtk_label_set_markup(GTK_LABEL(self->remaining_label), self->priv->remaining_string);
 }

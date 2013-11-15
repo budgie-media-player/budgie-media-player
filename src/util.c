@@ -186,7 +186,7 @@ gchar *format_seconds(gint64 time, gboolean remaining)
 
         dv = div(time, 60);
         if (dv.quot < 60) {
-                ret = g_strdup_printf("%s00:%02d:%02d", prefix, dv.quot, dv.rem);
+                ret = g_strdup_printf("%s%02d:%02d", prefix, dv.quot, dv.rem);
         } else {
                 dv2 = div(dv.quot, 60);
                 ret = g_strdup_printf("%s%02d:%02d:%02d", prefix, dv2.quot, dv2.rem, dv.rem);
