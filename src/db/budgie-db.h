@@ -59,16 +59,35 @@ struct _BudgieDBClass {
 
 
 /* MediaInfo API */
+
+/**
+ * Free a MediaInfo
+ * @param p_info MediaInfo pointer
+ */
 void free_media_info(gpointer p_info);
 
+/**
+ * Represents relevant media information
+ */
 typedef struct MediaInfo {
-        gchar *title;
-        gchar *artist;
-        gchar *album;
-        gchar *genre;
-        gchar *path;
-        gchar *mime;
+        gchar *title; /**<Title */
+        gchar *artist; /**<Artist or author */
+        gchar *album; /**<Album */
+        gchar *genre; /**<Genre */
+        gchar *path; /**<File system path */
+        gchar *mime; /**<File mime type */
 } MediaInfo;
+
+/**
+ * Used to query the database for matches
+ */
+typedef enum {
+        MEDIA_QUERY_TITLE, /**<Query the title */
+        MEDIA_QUERY_ARTIST, /**<Query the artist */
+        MEDIA_QUERY_ALBUM, /**<Query the album */
+        MEDIA_QUERY_GENRE, /**<Query the genre */
+        MEDIA_QUERY_MAX
+} MediaQuery;
 
 /* Boilerplate GObject code */
 static void budgie_db_class_init(BudgieDBClass *klass);
@@ -77,8 +96,34 @@ static void budgie_db_dispose(GObject *object);
 GType budgie_db_get_type(void);
 
 /* BudgieDB methods */
+
+/**
+ * Construct a new BudgieDB
+ */
 BudgieDB* budgie_db_new(void);
+
+/**
+ * Store media in BudgieDB
+ * @param self BudgieDB instance
+ * @param info Media to store
+ */
 void budgie_db_store_media(BudgieDB *self, MediaInfo *info);
+
+/**
+ * Retrieve media information from BudgieDB by filesystem path
+ * You must free the result of this call using free_media_info
+ * @param self BudgieDB instance
+ * @param path Path to media file on the filesystem
+ * @return a MediaInfo if the file is known, or NULL
+ */
 MediaInfo* budgie_db_get_media(BudgieDB *self, gchar *path);
+
+/**
+ * Get all media known to BudgieDB
+ * You must free the result of this call using g_slist_free_full
+ * @param self BudgieDB instance
+ * @return a singly linked list of results, or NULL
+ */
 GSList* budgie_db_get_all_media(BudgieDB* self);
+
 #endif /* budgie_db_h */
