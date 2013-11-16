@@ -23,6 +23,7 @@
 
 #include "budgie-settings-view.h"
 #include "util.h"
+#include "common.h"
 
 G_DEFINE_TYPE(BudgieSettingsView, budgie_settings_view, GTK_TYPE_BOX);
 
@@ -50,24 +51,32 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
         GtkStyleContext *style;
         GtkToolItem *tool;
 
+        /* Settings */
+        self->settings = g_settings_new(BUDGIE_SCHEMA);
+
         /* Bit of sane padding around all components */
         gtk_container_set_border_width(GTK_CONTAINER(self), 30);
 
         /* Construct our paths frame */
         paths = gtk_frame_new("");
+        gtk_widget_set_size_request(paths, 400, 200);
         label = gtk_label_new("<big>Media directories</big>");
         gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
         gtk_frame_set_label_widget(GTK_FRAME(paths), label);
 
         gtk_container_add(GTK_CONTAINER(self), paths);
         gtk_container_set_border_width(GTK_CONTAINER(paths), 5);
-        gtk_widget_set_halign(paths, GTK_ALIGN_START);
+        gtk_widget_set_halign(paths, GTK_ALIGN_CENTER);
         gtk_widget_set_valign(paths, GTK_ALIGN_START);
         gtk_frame_set_shadow_type(GTK_FRAME(paths), GTK_SHADOW_NONE);
 
         /* Paths treeview */
         tree = gtk_tree_view_new();
+        gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), FALSE);
+        self->paths = tree;
         scroll = gtk_scrolled_window_new(NULL, NULL);
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
+                GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
         style = gtk_widget_get_style_context(scroll);
         gtk_style_context_set_junction_sides(style, GTK_JUNCTION_BOTTOM);
         gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
@@ -101,6 +110,8 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
         gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(tool),
                 "list-remove-symbolic");
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(tool));
+
+        budgie_settings_refresh(self);
 }
 
 static void budgie_settings_view_dispose(GObject *object)
@@ -121,4 +132,32 @@ GtkWidget* budgie_settings_view_new(void)
         self = g_object_new(BUDGIE_SETTINGS_VIEW_TYPE, "orientation",
                 GTK_ORIENTATION_VERTICAL, NULL);
         return GTK_WIDGET(self);
+}
+
+static void budgie_settings_refresh(BudgieSettingsView *self)
+{
+        gchar **media_dirs = NULL;
+        gchar *path = NULL;
+        gint length = 0, i;
+        /* paths view */
+        GtkListStore *store;
+        GtkTreeIter iter;
+
+        media_dirs = g_settings_get_strv(self->settings, BUDGIE_MEDIA_DIRS);
+        if ((length = g_strv_length(media_dirs)) == 0)
+                goto end;
+
+        store = gtk_list_store_new(SETTINGS_N_COLUMNS, G_TYPE_STRING);
+        /* Add all media directories to paths view */
+        for (i=0; i < length; i++) {
+                path = media_dirs[i];
+                gtk_list_store_append(store, &iter);
+                gtk_list_store_set(store, &iter, SETTINGS_COLUMN_PATH,
+                        path, -1);
+        }
+        gtk_tree_view_set_model(GTK_TREE_VIEW(self->paths),
+                GTK_TREE_MODEL(store));
+end:
+        if (media_dirs)
+                g_strfreev(media_dirs);
 }

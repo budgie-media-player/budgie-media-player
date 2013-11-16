@@ -39,6 +39,8 @@ typedef struct _BudgieSettingsViewClass   BudgieSettingsViewClass;
 /* BudgieSettingsView object */
 struct _BudgieSettingsView {
         GtkBox parent;
+        GtkWidget *paths;
+        GSettings *settings;
 };
 
 /* BudgieSettingsView class definition */
@@ -55,5 +57,8 @@ GType budgie_settings_view_get_type(void);
 
 /* BudgieSettingsView methods */
 GtkWidget* budgie_settings_view_new(void);
+
+/* Refresh view from settings */
+static void budgie_settings_refresh(BudgieSettingsView *self);
 
 #endif /* budgie_settings_view_h */
