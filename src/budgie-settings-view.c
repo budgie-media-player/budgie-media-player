@@ -32,6 +32,10 @@ enum SettingsColumns {
         SETTINGS_N_COLUMNS
 };
 
+static void paths_cursor_cb(GtkWidget *widget, gpointer userdata);
+static void paths_add_cb(GtkWidget *widget, gpointer userdata);
+static void paths_remove_cb(GtkWidget *widget, gpointer userdata);
+
 /* Initialisation */
 static void budgie_settings_view_class_init(BudgieSettingsViewClass *klass)
 {
@@ -51,7 +55,10 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
         GtkStyleContext *style;
         GtkToolItem *tool;
 
-        /* Settings */
+        /* Settings
+         * TODO: Connect gsettings and refresh when the value changes.
+         * i.e. someone being rightfully awkward and doing this in
+         * dconf-editor */
         self->settings = g_settings_new(BUDGIE_SCHEMA);
 
         /* Bit of sane padding around all components */
@@ -73,6 +80,8 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
         /* Paths treeview */
         tree = gtk_tree_view_new();
         gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), FALSE);
+        g_signal_connect(tree, "cursor-changed",
+                G_CALLBACK(paths_cursor_cb), (gpointer)self);
         self->paths = tree;
         scroll = gtk_scrolled_window_new(NULL, NULL);
         gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
@@ -102,13 +111,20 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
 
         /* Manipulation buttons (+/-) */
         tool = gtk_tool_button_new(NULL, "Add");
+        self->path_add = GTK_WIDGET(tool);
+        g_signal_connect(tool, "clicked", G_CALLBACK(paths_add_cb),
+                (gpointer)self);
         gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(tool),
                 "list-add-symbolic");
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(tool));
 
         tool = gtk_tool_button_new(NULL, "Remove");
+        self->path_remove = GTK_WIDGET(tool);
+        g_signal_connect(tool, "clicked", G_CALLBACK(paths_remove_cb),
+                (gpointer)self);
         gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(tool),
                 "list-remove-symbolic");
+        gtk_widget_set_sensitive(GTK_WIDGET(tool), FALSE);
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(tool));
 
         budgie_settings_refresh(self);
@@ -144,8 +160,7 @@ static void budgie_settings_refresh(BudgieSettingsView *self)
         GtkTreeIter iter;
 
         media_dirs = g_settings_get_strv(self->settings, BUDGIE_MEDIA_DIRS);
-        if ((length = g_strv_length(media_dirs)) == 0)
-                goto end;
+        length = g_strv_length(media_dirs);
 
         store = gtk_list_store_new(SETTINGS_N_COLUMNS, G_TYPE_STRING);
         /* Add all media directories to paths view */
@@ -160,4 +175,113 @@ static void budgie_settings_refresh(BudgieSettingsView *self)
 end:
         if (media_dirs)
                 g_strfreev(media_dirs);
+}
+
+static void paths_cursor_cb(GtkWidget *widget, gpointer userdata)
+{
+        BudgieSettingsView *self;
+        GtkTreeSelection *selection = NULL;
+        GtkTreeModel *model = NULL;
+        GtkTreeIter iter;
+
+        self = BUDGIE_SETTINGS_VIEW(userdata);
+
+        /* If nothing is selected, disable the remove button */
+        selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self->paths));
+        if (!gtk_tree_selection_get_selected(selection, &model, &iter)) {
+                gtk_widget_set_sensitive(self->path_remove, FALSE);
+                return;
+        }
+        gtk_widget_set_sensitive(self->path_remove, TRUE);
+}
+
+static void paths_add_cb(GtkWidget *widget, gpointer userdata)
+{
+        BudgieSettingsView *self;
+        GtkWidget *dialog;
+        GtkWidget *top;
+        gchar *filename;
+        /* settings */
+        gchar **paths = NULL;
+        GPtrArray *new_paths = NULL;
+        guint length, i;
+
+        self = BUDGIE_SETTINGS_VIEW(userdata);
+        top = gtk_widget_get_toplevel(GTK_WIDGET(self));
+        dialog = gtk_file_chooser_dialog_new("Choose a directory",
+                GTK_WINDOW(top), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                "Cancel", GTK_RESPONSE_REJECT,
+                "Select", GTK_RESPONSE_ACCEPT, NULL);
+
+        /* Present the dialog */
+        if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT)
+                goto end;
+
+        /* Get paths */
+        filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        paths = g_settings_get_strv(self->settings, BUDGIE_MEDIA_DIRS);
+        length = g_strv_length(paths);
+
+        /* Make a new array to copy the original */
+        new_paths = g_ptr_array_new();
+        for (i=0; i < length; i++) {
+                if (!g_str_equal(filename, paths[i]))
+                        g_ptr_array_add(new_paths, paths[i]);
+        }
+        /* Copy path in */
+        g_ptr_array_add(new_paths, filename);
+        g_ptr_array_add(new_paths, NULL);
+
+        /* Update GSettings with new directories */
+        g_settings_set_strv(self->settings, BUDGIE_MEDIA_DIRS,
+                (const gchar* const*)new_paths->pdata);
+        budgie_settings_refresh(self);
+        g_ptr_array_free(new_paths, TRUE);
+
+        g_free(filename);
+end:
+        gtk_widget_destroy(dialog);
+}
+
+static void paths_remove_cb(GtkWidget *widget, gpointer userdata)
+{
+        BudgieSettingsView *self;
+        GtkTreeSelection *selection = NULL;
+        GtkTreeModel *model = NULL;
+        GtkTreeIter iter;
+        GValue value = G_VALUE_INIT;
+        const gchar *path;
+        /* settings */
+        gchar **paths = NULL;
+        GPtrArray *new_paths = NULL;
+        guint length, i;
+
+        self = BUDGIE_SETTINGS_VIEW(userdata);
+
+        /* Shouldn't be a null selection. */
+        selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self->paths));
+        if (!gtk_tree_selection_get_selected(selection, &model, &iter))
+                return;
+
+        /* Retrieve old values */
+        paths = g_settings_get_strv(self->settings, BUDGIE_MEDIA_DIRS);
+        gtk_tree_model_get_value(model, &iter, SETTINGS_COLUMN_PATH, &value);
+        path = g_value_get_string(&value);
+        length = g_strv_length(paths);
+
+        /* Make a new array, with one less element */
+        new_paths = g_ptr_array_new();
+        /* Copy all elements except the one we're removing */
+        for (i=0; i < length; i++) {
+                if (!g_str_equal(path, paths[i]))
+                        g_ptr_array_add(new_paths, paths[i]);
+        }
+        g_ptr_array_add(new_paths, NULL);
+
+        /* Update GSettings with new directories */
+        g_settings_set_strv(self->settings, BUDGIE_MEDIA_DIRS,
+                (const gchar* const*)new_paths->pdata);
+        budgie_settings_refresh(self);
+        g_ptr_array_free(new_paths, TRUE);
+        g_value_unset(&value);
 }

@@ -41,6 +41,9 @@ struct _BudgieSettingsView {
         GtkBox parent;
         GtkWidget *paths;
         GSettings *settings;
+
+        GtkWidget *path_remove;
+        GtkWidget *path_add;
 };
 
 /* BudgieSettingsView class definition */
