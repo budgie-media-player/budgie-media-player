@@ -82,6 +82,7 @@ static void player_status_area_init(PlayerStatusArea *self)
         gtk_box_pack_start(GTK_BOX(bottom), slider, TRUE, TRUE, 2);
         self->slider = slider;
         gtk_scale_set_draw_value(GTK_SCALE(slider), FALSE);
+        gtk_widget_set_can_focus(slider, FALSE);
         self->priv->seek_id = g_signal_connect(slider, "value-changed",
                 G_CALLBACK(changed_cb), (gpointer)self);
 
