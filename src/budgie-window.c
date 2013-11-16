@@ -584,6 +584,11 @@ static gpointer load_media(gpointer data)
         const gchar *mimes[2];
 
         self = BUDGIE_WINDOW(data);
+        if (self->media_dirs) {
+                g_strfreev(self->media_dirs);
+                self->media_dirs = g_settings_get_strv(self->priv->settings, BUDGIE_MEDIA_DIRS);
+        }
+
         length = g_strv_length(self->media_dirs);
         mimes[0] = "audio/";
         mimes[1] = "video/";
