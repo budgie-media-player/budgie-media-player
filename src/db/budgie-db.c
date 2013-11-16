@@ -164,6 +164,7 @@ GSList* budgie_db_get_all_media(BudgieDB* self)
         }
         return ret;
 }
+
 gboolean budgie_db_get_all_by_field(BudgieDB *self,
                                     MediaQuery query,
                                     GPtrArray **results)
@@ -222,6 +223,7 @@ gboolean budgie_db_get_all_by_field(BudgieDB *self,
         *results = _results;
         return ret;
 }
+
 /** PRIVATE **/
 static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target)
 {
