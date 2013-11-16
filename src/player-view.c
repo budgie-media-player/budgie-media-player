@@ -180,6 +180,8 @@ void player_view_set_list(PlayerView *self, GSList* list)
                 PLAYER_COLUMN_NAME, GTK_SORT_ASCENDING);
         gtk_tree_view_set_model(GTK_TREE_VIEW(self->tree),
                 GTK_TREE_MODEL(store.model));
+        gtk_tree_view_set_search_column(GTK_TREE_VIEW(self->tree),
+                PLAYER_COLUMN_NAME);
 }
 
 MediaInfo* player_view_get_current_selection(PlayerView *self)
