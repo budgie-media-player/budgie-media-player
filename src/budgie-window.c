@@ -364,6 +364,8 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         /* Switch to video view for video content */
         if (g_str_has_prefix(media->mime, "video/")) {
                 next_child = "video";
+                if (!self->video_realized)
+                        gtk_widget_realize(self->video);
                 budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(self->toolbar), TRUE);
         } else {
                 next_child = "player";
@@ -623,6 +625,7 @@ static void realize_cb(GtkWidget *widg, gpointer userdata)
                 g_error("Unable to initialize video");
         self->priv->window_handle = GDK_WINDOW_XID(window);
         gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(self->gst_player), self->priv->window_handle);
+        self->video_realized = TRUE;
 }
 
 static gboolean hide_bar(gpointer udata)
