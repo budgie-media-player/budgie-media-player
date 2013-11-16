@@ -46,25 +46,6 @@
     text-shadow: 0 1px shade(#cecece, 1.2);\
 }"
 
-/* -- Settings -- */
-
-/**
- * Budgie GSettings schema
- */
-#define BUDGIE_SCHEMA "io.github.ikeydoherty.Budgie"
-/**
- * Media directory GSettings key
- */
-#define BUDGIE_MEDIA_DIRS "media-directories"
-/**
- * Repeat GSettings key
- */
-#define BUDGIE_REPEAT "repeat"
-/**
- * Random GSettings key
- */
-#define BUDGIE_RANDOM "random"
-
 typedef struct _BudgieWindow BudgieWindow;
 typedef struct _BudgieWindowClass   BudgieWindowClass;
 typedef struct _BudgieWindowPrivate BudgieWindowPrivate;

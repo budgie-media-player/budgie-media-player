@@ -27,6 +27,7 @@
 #include <gst/video/videooverlay.h>
 #include <gst/gstbus.h>
 
+#include "common.h"
 #include "budgie-window.h"
 
 G_DEFINE_TYPE_WITH_PRIVATE(BudgieWindow, budgie_window, G_TYPE_OBJECT);

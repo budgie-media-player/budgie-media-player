@@ -29,6 +29,7 @@ budgie_SOURCES = \
 	player-view.h \
 	util.c \
 	util.h \
+	common.h \
 	main.c
 
 budgie_CFLAGS = \
