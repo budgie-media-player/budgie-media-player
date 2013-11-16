@@ -1,5 +1,5 @@
 /*
- * media-db.c
+ * budgie-db.c
  * 
  * Copyright 2013 Ikey Doherty <ikey.doherty@gmail.com>
  * 
