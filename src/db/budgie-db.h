@@ -82,7 +82,7 @@ typedef struct MediaInfo {
  * Used to query the database for matches
  */
 typedef enum {
-        MEDIA_QUERY_TITLE, /**<Query the title */
+        MEDIA_QUERY_TITLE = 0, /**<Query the title */
         MEDIA_QUERY_ARTIST, /**<Query the artist */
         MEDIA_QUERY_ALBUM, /**<Query the album */
         MEDIA_QUERY_GENRE, /**<Query the genre */
@@ -125,5 +125,16 @@ MediaInfo* budgie_db_get_media(BudgieDB *self, gchar *path);
  * @return a singly linked list of results, or NULL
  */
 GSList* budgie_db_get_all_media(BudgieDB* self);
+
+/**
+ * Return string values of one field for all MediaInfo in the database
+ * @param self BudgieDB instance
+ * @param query The query to perform
+ * @param results Pointer to store results in
+ * @return a boolean value, indicating success of the operation
+ */
+gboolean budgie_db_get_all_by_field(BudgieDB *self,
+                                    MediaQuery query,
+                                    GPtrArray **results);
 
 #endif /* budgie_db_h */

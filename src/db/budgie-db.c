@@ -164,6 +164,64 @@ GSList* budgie_db_get_all_media(BudgieDB* self)
         }
         return ret;
 }
+gboolean budgie_db_get_all_by_field(BudgieDB *self,
+                                    MediaQuery query,
+                                    GPtrArray **results)
+{
+        g_assert(query >= 0 && query < MEDIA_QUERY_MAX);
+
+        datum key, nextkey;
+        GPtrArray *_results = NULL;
+        char *path;
+        gboolean ret = FALSE;
+        MediaInfo *media = NULL;
+        char *append = NULL;
+
+        _results = g_ptr_array_new();
+
+        /* Iterate through every key in the database */
+        key = gdbm_firstkey(self->priv->db);
+        while (key.dptr) {
+                path = (char*)key.dptr;
+
+                media = budgie_db_get_media(self, path);
+                /* Only interested in one field really */
+                switch (query) {
+                        case MEDIA_QUERY_TITLE:
+                                append = media->title;
+                                break;
+                        case MEDIA_QUERY_ALBUM:
+                                append = media->album;
+                                break;
+                        case MEDIA_QUERY_ARTIST:
+                                append = media->artist;
+                                break;
+                        case MEDIA_QUERY_GENRE:
+                                append = media->genre;
+                                break;
+                        default:
+                                break;
+                }
+                if (append)
+                        g_ptr_array_add(_results, g_strdup(append));
+                free_media_info(media);
+                /* Visit the next key */
+                nextkey = gdbm_nextkey(self->priv->db, key);
+                free(key.dptr);
+                key = nextkey;
+                append = NULL;
+        }
+        /* No results */
+        if (_results->len < 1) {
+                g_ptr_array_free(_results, TRUE);
+                return ret;
+        }
+        /* Null terminate the array */
+        g_ptr_array_add(_results, NULL);
+        ret = TRUE;
+        *results = _results;
+        return ret;
+}
 /** PRIVATE **/
 static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target)
 {
