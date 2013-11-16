@@ -158,6 +158,7 @@ static void budgie_window_init(BudgieWindow *self)
         /* Status area */
         status = player_status_area_new();
         gtk_header_bar_set_custom_title(GTK_HEADER_BAR(header), status);
+        g_signal_connect(status, "seek", G_CALLBACK(seek_cb), (gpointer)self);
         self->status = status;
 
         /* main layout */
@@ -733,4 +734,18 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
                 default:
                         break;
         }
+}
+
+static void seek_cb(PlayerStatusArea *status, gint64 value, gpointer userdata)
+{
+        BudgieWindow *self;
+        GstFormat format;
+        GstSeekFlags flags;
+
+        self = BUDGIE_WINDOW(userdata);
+        format = GST_FORMAT_TIME;
+        flags = GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT;
+
+        gst_element_seek_simple(GST_ELEMENT(self->gst_player), GST_FORMAT_TIME,
+                flags, value);
 }

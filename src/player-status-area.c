@@ -27,6 +27,8 @@
 
 G_DEFINE_TYPE_WITH_PRIVATE(PlayerStatusArea, player_status_area, GTK_TYPE_EVENT_BOX);
 
+static void changed_cb(GtkWidget *widget, gdouble value, gpointer userdata);
+
 /* Initialisation */
 static void player_status_area_class_init(PlayerStatusAreaClass *klass)
 {
@@ -34,6 +36,11 @@ static void player_status_area_class_init(PlayerStatusAreaClass *klass)
 
         g_object_class = G_OBJECT_CLASS(klass);
         g_object_class->dispose = &player_status_area_dispose;
+
+        g_signal_new("seek",
+                G_TYPE_OBJECT, G_SIGNAL_RUN_FIRST,
+                0, NULL, NULL, NULL, G_TYPE_NONE,
+                1, G_TYPE_INT64);
 }
 
 static void player_status_area_init(PlayerStatusArea *self)
@@ -75,6 +82,8 @@ static void player_status_area_init(PlayerStatusArea *self)
         gtk_box_pack_start(GTK_BOX(bottom), slider, TRUE, TRUE, 2);
         self->slider = slider;
         gtk_scale_set_draw_value(GTK_SCALE(slider), FALSE);
+        self->priv->seek_id = g_signal_connect(slider, "value-changed",
+                G_CALLBACK(changed_cb), (gpointer)self);
 
         /* Remaining time */
         remaining_label = gtk_label_new("");
@@ -143,16 +152,31 @@ void player_status_area_set_media_time(PlayerStatusArea *self, gint64 max, gint6
         gtk_widget_set_visible(self->slider, TRUE);
         gint64 remaining, elapsed;
 
-        /* Update slider */
-        gtk_range_set_range(GTK_RANGE(self->slider), 0, max);
-        gtk_range_set_value(GTK_RANGE(self->slider), current);
-
         remaining = (max - current)/GST_SECOND;
         elapsed = current/GST_SECOND;
         self->priv->time_string = format_seconds(elapsed, FALSE);
         self->priv->remaining_string = format_seconds(remaining, TRUE);
 
+        /* Update slider */
+        current /= GST_SECOND;
+        max /= GST_SECOND;
+        g_signal_handler_block(self->slider, self->priv->seek_id);
+        gtk_range_set_range(GTK_RANGE(self->slider), 0, max);
+        gtk_range_set_value(GTK_RANGE(self->slider), current);
+        g_signal_handler_unblock(self->slider, self->priv->seek_id);
+
         /* Update labels */
         gtk_label_set_markup(GTK_LABEL(self->time_label), self->priv->time_string);
         gtk_label_set_markup(GTK_LABEL(self->remaining_label), self->priv->remaining_string);
+}
+
+static void changed_cb(GtkWidget *widget, gdouble value, gpointer userdata)
+{
+        PlayerStatusArea *self;
+        gint64 num;
+
+        num = gtk_range_get_value(GTK_RANGE(widget)) * GST_SECOND;
+
+        self = PLAYER_STATUS_AREA(userdata);
+        g_signal_emit_by_name(self, "seek", num);
 }

@@ -44,6 +44,7 @@ struct _PlayerStatusAreaPrivate {
         gchar *title_string;
         gchar *time_string;
         gchar *remaining_string;
+        gulong seek_id;
 };
 
 /* PlayerStatusArea object */
