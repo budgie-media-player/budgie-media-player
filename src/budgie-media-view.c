@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "budgie-media-view.h"
+#include "util.h"
 
 G_DEFINE_TYPE(BudgieMediaView, budgie_media_view, GTK_TYPE_BIN);
 
@@ -146,16 +147,18 @@ static void update_db(BudgieMediaView *self)
         gchar *album = NULL;
         gchar *markup = NULL;
         MediaInfo *current;
+        const gchar *cache;
+        gchar *album_id = NULL, *path = NULL;
         int i;
 
         /* No albums */
         if (!budgie_db_get_all_by_field(self->db, MEDIA_QUERY_ALBUM, &albums))
                 return;
 
+        cache = g_get_user_cache_dir();
+
         /* We don't *yet* support album art, use generic symbol */
         theme = gtk_icon_theme_get_default();
-        pixbuf = gtk_icon_theme_load_icon(theme, "folder-music-symbolic",
-                64, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
         model = gtk_list_store_new(ALBUM_COLUMNS, G_TYPE_STRING, GDK_TYPE_PIXBUF);
 
         for (i=0; i < albums->len; i++) {
@@ -168,12 +171,21 @@ static void update_db(BudgieMediaView *self)
                 if (current->album == NULL)
                         goto albumfail;
 
+                album_id = albumart_name_for_media(current, "jpeg");
+                path = g_strdup_printf("%s/media-art/%s", cache, album_id);
+                g_free(album_id);
+                pixbuf = gdk_pixbuf_new_from_file_at_size(path, 96, 96, NULL);
+                if (!pixbuf)
+                        pixbuf = gtk_icon_theme_load_icon(theme, "folder-music-symbolic",
+                                96, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
                 /* Pretty label */
-                markup = g_markup_printf_escaped("<b>%s</b>\n<span color='grey'>%s</span>",
+                markup = g_markup_printf_escaped("<big><b>%s</b>\n<span color='grey'>%s</span></big>",
                         current->album, current->artist);
                 gtk_list_store_append(model, &iter);
                 gtk_list_store_set(model, &iter, ALBUM_TITLE, markup, -1);
                 gtk_list_store_set(model, &iter, ALBUM_PIXBUF, pixbuf, -1);
+                g_object_unref(pixbuf);
+
 albumfail:
                 free_media_info(current);
                 g_ptr_array_free(results, TRUE);
@@ -186,5 +198,4 @@ fail:
                 GTK_TREE_MODEL(model));
         g_ptr_array_free(albums, TRUE);
 
-        g_object_unref(pixbuf);
 }
