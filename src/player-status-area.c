@@ -60,10 +60,10 @@ static void player_status_area_init(PlayerStatusArea *self)
         gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
         gtk_widget_set_name(label, "title");
         gtk_misc_set_alignment(GTK_MISC(label), 0.5, 0.5);
+        gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
         self->label = label;
 
         context = gtk_widget_get_style_context(label);
-        gtk_style_context_add_class(context, "dim-label");
 
         /* Bottom row */
         bottom = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -129,11 +129,12 @@ void player_status_area_set_media(PlayerStatusArea *self, MediaInfo *info)
                 g_free(self->priv->title_string);
 
         if (info->artist)
-                self->priv->title_string = g_strdup_printf("<big>%s</big>\n<small>%s</small>",
+                self->priv->title_string = g_strdup_printf("<b>%s</b>\n<small>%s</small>",
                         info->title, info->artist);
         else
-                self->priv->title_string = g_strdup_printf("<big>%s</big>\n", info->title);
+                self->priv->title_string = g_strdup_printf("<b>%s</b>", info->title);
         gtk_label_set_markup(GTK_LABEL(self->label), self->priv->title_string);
+        gtk_label_set_max_width_chars(GTK_LABEL(self->label), 1);
 }
 
 void player_status_area_set_media_time(PlayerStatusArea *self, gint64 max, gint64 current)

@@ -43,9 +43,6 @@
                                       shade(shade(@theme_bg_color, 0.89), 1.05),\
                                       shade(shade(@theme_bg_color, 0.96), 0.97)\
                                       );\
-}\
-#title {\
-    text-shadow: 0 1px shade(#cecece, 1.2);\
 }"
 
 typedef struct _BudgieWindow BudgieWindow;
