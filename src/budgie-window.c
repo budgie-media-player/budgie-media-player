@@ -107,7 +107,7 @@ static void budgie_window_init(BudgieWindow *self)
 
         /* Set our window up */
         gtk_window_set_title(GTK_WINDOW(window), "Music Player");
-        gtk_widget_set_size_request(window, 1100, 500);
+        gtk_window_set_default_size(GTK_WINDOW(window), 950, 500);
         gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
         gtk_window_set_icon_name(GTK_WINDOW(window), "budgie");
         gtk_window_set_wmclass(GTK_WINDOW(window), "Budgie", "Budgie");
@@ -131,7 +131,7 @@ static void budgie_window_init(BudgieWindow *self)
         g_signal_connect(prev, "clicked", G_CALLBACK(prev_cb), (gpointer)self);
         self->prev = prev;
         /* Set some left padding */
-        gtk_widget_set_margin_left(prev, 20);
+        gtk_widget_set_margin_left(prev, 10);
 
         play = new_button_with_icon(self->icon_theme, "media-playback-start-symbolic",
                 FALSE, FALSE, "Play");
@@ -158,6 +158,7 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_scale_set_draw_value(GTK_SCALE(volume), FALSE);
         gtk_widget_set_size_request(volume, 100, 10);
         gtk_widget_set_can_focus(volume, FALSE);
+        gtk_widget_set_margin_right(volume, 20);
         self->priv->volume_id = g_signal_connect(volume, "value-changed",
                 G_CALLBACK(volume_cb), (gpointer)self);
         self->volume = volume;
