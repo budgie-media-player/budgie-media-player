@@ -23,6 +23,8 @@
 #ifndef budgie_window_h
 #define budgie_window_h
 
+#include "config.h"
+
 #include <glib-object.h>
 #include <gtk/gtk.h>
 #include <gst/gst.h>
@@ -91,6 +93,9 @@ struct _BudgieWindow {
 
         GtkWidget *status;
         GtkWidget *player;
+#ifdef TESTING
+        GtkWidget *view;
+#endif
         GtkWidget *south_reveal;
 
         /* Header controls */

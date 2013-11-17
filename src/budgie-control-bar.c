@@ -20,7 +20,7 @@
  * 
  * 
  */
-
+#include "config.h"
 #include "budgie-control-bar.h"
 #include "util.h"
 
@@ -56,6 +56,9 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         GtkWidget *aspect;
         GtkWidget *about;
         GtkWidget *settings;
+#ifdef TESTING
+        GtkWidget *browse_view;
+#endif
         /* playback */
         GtkWidget *playback;
         GtkToolItem *playback_item;
@@ -102,6 +105,17 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         g_signal_connect(random, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
         gtk_box_pack_start(GTK_BOX(control_box), random, FALSE, FALSE, 0);
 
+#ifdef TESTING
+        /* browse view*/
+        browse_view = new_button_with_icon(self->icon_theme, "view-grid-symbolic",
+                TRUE, TRUE, "Experimental view mode");
+        data = g_malloc(sizeof(guint));
+        *data = BUDGIE_ACTION_BROWSE_VIEW;
+        g_object_set_data_full(G_OBJECT(browse_view), "budgie", data, g_free);
+        g_signal_connect(browse_view, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        gtk_box_pack_start(GTK_BOX(control_box), browse_view, FALSE, FALSE, 0);
+
+#endif
         /* Visual separation between generic media and video controls */
         separator1 = gtk_separator_tool_item_new();
         gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(separator1), FALSE);

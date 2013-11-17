@@ -29,7 +29,9 @@
 
 #include "common.h"
 #include "budgie-window.h"
-
+#ifdef TESTING
+        #include "budgie-media-view.h"
+#endif
 G_DEFINE_TYPE_WITH_PRIVATE(BudgieWindow, budgie_window, G_TYPE_OBJECT);
 
 /* Initialisation */
@@ -53,6 +55,9 @@ static void budgie_window_init(BudgieWindow *self)
         GtkWidget *search;
         GtkWidget *status;
         GtkWidget *player;
+#ifdef TESTING
+        GtkWidget *view;
+#endif
         GtkWidget *toolbar;
         GtkWidget *south_reveal;
         GtkWidget *layout;
@@ -204,6 +209,13 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_stack_add_named(GTK_STACK(stack), player, "player");
         self->priv->current_page = "player";
 
+#ifdef TESTING
+        /* Browse view */
+        view = budgie_media_view_new(self->db);
+        self->view = view;
+        gtk_stack_add_named(GTK_STACK(stack), view, "view");
+
+#endif
         /* Video */
         video = gtk_drawing_area_new();
         self->video = video;
@@ -740,6 +752,14 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
                         else
                                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), self->priv->current_page);
                         break;
+#ifdef TESTING
+                case BUDGIE_ACTION_BROWSE_VIEW:
+                        if (toggle)
+                                gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "view");
+                        else
+                                gtk_stack_set_visible_child_name(GTK_STACK(self->stack), self->priv->current_page);
+                        break;
+#endif
                 default:
                         break;
         }
