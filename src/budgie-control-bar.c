@@ -86,7 +86,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(control_item));
 
         /* repeat */
-        repeat = new_button_with_icon(self->icon_theme, "media-playlist-repeat",
+        repeat = new_button_with_icon(self->icon_theme, "media-playlist-repeat-symbolic",
                 TRUE, TRUE, "Toggle repeat mode");
         self->repeat = repeat;
         data = g_malloc(sizeof(guint));
@@ -96,7 +96,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_box_pack_start(GTK_BOX(control_box), repeat, FALSE, FALSE, 0);
 
         /* random */
-        random = new_button_with_icon(self->icon_theme, "media-playlist-shuffle",
+        random = new_button_with_icon(self->icon_theme, "media-playlist-shuffle-symbolic",
                 TRUE, TRUE, "Toggle random playback (shuffle)");
         self->random = random;
         data = g_malloc(sizeof(guint));
@@ -167,7 +167,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(playback_item));
 
         /* previous */
-        prev = new_button_with_icon(self->icon_theme, "media-seek-backward", TRUE, FALSE,
+        prev = new_button_with_icon(self->icon_theme, "media-seek-backward-symbolic", TRUE, FALSE,
                 "Previous track");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_PREVIOUS;
@@ -176,7 +176,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_box_pack_start(GTK_BOX(playback), prev, FALSE, FALSE, 0);
 
         /* play */
-        play = new_button_with_icon(self->icon_theme, "media-playback-start",
+        play = new_button_with_icon(self->icon_theme, "media-playback-start-symbolic",
                 TRUE, FALSE, "Play");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_PLAY;
@@ -186,7 +186,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_box_pack_start(GTK_BOX(playback), play, FALSE, FALSE, 0);
 
         /* pause */
-        pause = new_button_with_icon(self->icon_theme, "media-playback-pause",
+        pause = new_button_with_icon(self->icon_theme, "media-playback-pause-symbolic",
                 TRUE, FALSE, "Pause");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_PAUSE;
@@ -196,7 +196,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_box_pack_start(GTK_BOX(playback), pause, FALSE, FALSE, 0);
 
         /* next */
-        next = new_button_with_icon(self->icon_theme, "media-seek-forward",
+        next = new_button_with_icon(self->icon_theme, "media-seek-forward-symbolic",
                 TRUE, FALSE, "Next track");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_NEXT;
@@ -212,7 +212,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(separator3));
 
         /* reload */
-        reload = new_button_with_icon(self->icon_theme, "view-refresh",
+        reload = new_button_with_icon(self->icon_theme, "view-refresh-symbolic",
                 TRUE, FALSE, "Reload media library");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_RELOAD;
@@ -236,7 +236,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(settings_item));
 
         /* about */
-        about = new_button_with_icon(self->icon_theme, "help-about-symbolic",
+        about = new_button_with_icon(self->icon_theme, "dialog-information-symbolic",
                 TRUE, FALSE, "About Budgie..");
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_ABOUT;
