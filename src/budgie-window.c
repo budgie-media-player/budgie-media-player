@@ -163,7 +163,7 @@ static void budgie_window_init(BudgieWindow *self)
         self->volume = volume;
 
         /* Status area */
-        status = player_status_area_new();
+        status = budgie_status_area_new();
         gtk_header_bar_set_custom_title(GTK_HEADER_BAR(header), status);
         g_signal_connect(status, "seek", G_CALLBACK(seek_cb), (gpointer)self);
         self->status = status;
@@ -278,7 +278,7 @@ static void budgie_window_init(BudgieWindow *self)
         budgie_control_bar_set_show_playback(BUDGIE_CONTROL_BAR(toolbar), FALSE);
         budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(toolbar),
                 BUDGIE_ACTION_PAUSE, FALSE);
-        player_status_area_set_media_time(PLAYER_STATUS_AREA(self->status), -1, -1);
+        budgie_status_area_set_media_time(BUDGIE_STATUS_AREA(self->status), -1, -1);
 
         /* Show the toolbar */
         gtk_revealer_set_reveal_child(GTK_REVEALER(south_reveal), TRUE);
@@ -410,7 +410,7 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
                 BUDGIE_ACTION_PAUSE, TRUE);
 
         /* Update status label */
-        player_status_area_set_media(PLAYER_STATUS_AREA(self->status), media);
+        budgie_status_area_set_media(BUDGIE_STATUS_AREA(self->status), media);
         refresh_cb(self);
 }
 
@@ -505,7 +505,7 @@ static gboolean refresh_cb(gpointer userdata) {
         if (!gst_element_query_position(self->gst_player, fmt, &track_current))
                 return TRUE;
 
-        player_status_area_set_media_time(PLAYER_STATUS_AREA(self->status),
+        budgie_status_area_set_media_time(BUDGIE_STATUS_AREA(self->status),
                 self->priv->duration, track_current);
         return TRUE;
 }
@@ -764,7 +764,7 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
         }
 }
 
-static void seek_cb(PlayerStatusArea *status, gint64 value, gpointer userdata)
+static void seek_cb(BudgieStatusArea *status, gint64 value, gpointer userdata)
 {
         BudgieWindow *self;
         GstFormat format;

@@ -29,14 +29,14 @@
 #include <gtk/gtk.h>
 #include <gst/gst.h>
 
-#include "player-status-area.h"
+#include "budgie-status-area.h"
 #include "player-view.h"
 #include "budgie-control-bar.h"
 #include "budgie-settings-view.h"
 #include "util.h"
 #include "db/budgie-db.h"
 
-#define PLAYER_CSS "PlayerStatusArea {\
+#define PLAYER_CSS "BudgieStatusArea {\
     border-radius: 4px;\
     border-width: 1px;\
     background-image: linear-gradient(to bottom,\
@@ -148,7 +148,7 @@ static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpoin
 static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata);
 static void settings_changed(GSettings *settings, gchar *key, gpointer userdata);
 static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpointer userdata);
-static void seek_cb(PlayerStatusArea *status, gint64 value, gpointer userdata);
+static void seek_cb(BudgieStatusArea *status, gint64 value, gpointer userdata);
 
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);

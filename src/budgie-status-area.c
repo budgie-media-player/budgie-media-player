@@ -1,5 +1,5 @@
 /*
- * player-status-area.c
+ * budgie-status-area.c
  * 
  * Copyright 2013 Ikey Doherty <ikey.doherty@gmail.com>
  * 
@@ -22,20 +22,20 @@
  */
 #include <gst/gst.h>
 
-#include "player-status-area.h"
+#include "budgie-status-area.h"
 #include "util.h"
 
-G_DEFINE_TYPE_WITH_PRIVATE(PlayerStatusArea, player_status_area, GTK_TYPE_EVENT_BOX);
+G_DEFINE_TYPE_WITH_PRIVATE(BudgieStatusArea, budgie_status_area, GTK_TYPE_EVENT_BOX);
 
 static void changed_cb(GtkWidget *widget, gdouble value, gpointer userdata);
 
 /* Initialisation */
-static void player_status_area_class_init(PlayerStatusAreaClass *klass)
+static void budgie_status_area_class_init(BudgieStatusAreaClass *klass)
 {
         GObjectClass *g_object_class;
 
         g_object_class = G_OBJECT_CLASS(klass);
-        g_object_class->dispose = &player_status_area_dispose;
+        g_object_class->dispose = &budgie_status_area_dispose;
 
         g_signal_new("seek",
                 G_TYPE_OBJECT, G_SIGNAL_RUN_FIRST,
@@ -43,7 +43,7 @@ static void player_status_area_class_init(PlayerStatusAreaClass *klass)
                 1, G_TYPE_INT64);
 }
 
-static void player_status_area_init(PlayerStatusArea *self)
+static void budgie_status_area_init(BudgieStatusArea *self)
 {
         GtkWidget *label;
         GtkWidget *time_label, *remaining_label;
@@ -52,7 +52,7 @@ static void player_status_area_init(PlayerStatusArea *self)
         GtkWidget *box, *top, *bottom;
         GtkWidget *image;
 
-        self->priv = player_status_area_get_instance_private(self);
+        self->priv = budgie_status_area_get_instance_private(self);
 
         box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
         top = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -109,11 +109,11 @@ static void player_status_area_init(PlayerStatusArea *self)
         gtk_widget_set_size_request(GTK_WIDGET(self), 300, 70);
 }
 
-static void player_status_area_dispose(GObject *object)
+static void budgie_status_area_dispose(GObject *object)
 {
-        PlayerStatusArea *self;
+        BudgieStatusArea *self;
 
-        self = PLAYER_STATUS_AREA(object);
+        self = BUDGIE_STATUS_AREA(object);
         if (self->priv->title_string)
                 g_free(self->priv->title_string);
         if (self->priv->time_string)
@@ -122,19 +122,19 @@ static void player_status_area_dispose(GObject *object)
                 g_free(self->priv->remaining_string);
 
         /* Destruct */
-        G_OBJECT_CLASS (player_status_area_parent_class)->dispose (object);
+        G_OBJECT_CLASS (budgie_status_area_parent_class)->dispose (object);
 }
 
-/* Utility; return a new PlayerStatusArea */
-GtkWidget* player_status_area_new(void)
+/* Utility; return a new BudgieStatusArea */
+GtkWidget* budgie_status_area_new(void)
 {
-        PlayerStatusArea *self;
+        BudgieStatusArea *self;
 
-        self = g_object_new(PLAYER_STATUS_AREA_TYPE, NULL);
+        self = g_object_new(BUDGIE_STATUS_AREA_TYPE, NULL);
         return GTK_WIDGET(self);
 }
 
-void player_status_area_set_media(PlayerStatusArea *self, MediaInfo *info)
+void budgie_status_area_set_media(BudgieStatusArea *self, MediaInfo *info)
 {
         const gchar *cache;
         gchar *album, *path;
@@ -181,7 +181,7 @@ void player_status_area_set_media(PlayerStatusArea *self, MediaInfo *info)
         gtk_widget_queue_draw(GTK_WIDGET(self));
 }
 
-void player_status_area_set_media_time(PlayerStatusArea *self, gint64 max, gint64 current)
+void budgie_status_area_set_media_time(BudgieStatusArea *self, gint64 max, gint64 current)
 {
         if (self->priv->time_string)
                 g_free(self->priv->time_string);
@@ -218,11 +218,11 @@ void player_status_area_set_media_time(PlayerStatusArea *self, gint64 max, gint6
 
 static void changed_cb(GtkWidget *widget, gdouble value, gpointer userdata)
 {
-        PlayerStatusArea *self;
+        BudgieStatusArea *self;
         gint64 num;
 
         num = gtk_range_get_value(GTK_RANGE(widget)) * GST_SECOND;
 
-        self = PLAYER_STATUS_AREA(userdata);
+        self = BUDGIE_STATUS_AREA(userdata);
         g_signal_emit_by_name(self, "seek", num);
 }

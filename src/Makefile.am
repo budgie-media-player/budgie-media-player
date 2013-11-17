@@ -23,8 +23,8 @@ budgie_SOURCES = \
 	budgie-control-bar.h \
 	budgie-settings-view.c \
 	budgie-settings-view.h \
-	player-status-area.c \
-	player-status-area.h \
+	budgie-status-area.c \
+	budgie-status-area.h \
 	player-view.c \
 	player-view.h \
 	util.c \
