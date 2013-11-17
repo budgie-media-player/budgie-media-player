@@ -55,6 +55,7 @@ struct _PlayerStatusArea {
         GtkWidget *time_label;
         GtkWidget *remaining_label;
         GtkWidget *slider;
+        GtkWidget *image;
 
         PlayerStatusAreaPrivate *priv;
 };

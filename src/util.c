@@ -333,7 +333,7 @@ gchar *albumart_name_for_media(MediaInfo *info, gchar *extension)
                 return NULL;
 
         char *album = cleaned_string(info->album);
-        gchar *artist = cleaned_string(info->album);
+        gchar *artist = cleaned_string(info->artist);
         gchar *artist_md5, *album_md5;
         gchar *album_string = NULL;
 
