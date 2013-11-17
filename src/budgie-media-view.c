@@ -31,6 +31,11 @@ enum {
         PROP_0, PROP_DATABASE, N_PROPERTIES
 };
 
+enum {
+        ALBUM_TITLE,
+        ALBUM_PIXBUF,
+        ALBUM_COLUMNS
+};
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
 
 /* Initialisation */
@@ -91,7 +96,24 @@ static void budgie_media_view_get_property(GObject *object,
 
 static void budgie_media_view_init(BudgieMediaView *self)
 {
+        GtkWidget *icon_view, *scroll;
 
+        /* Set up our icon view */
+        icon_view = gtk_icon_view_new();
+        self->icon_view = icon_view;
+        scroll = gtk_scrolled_window_new(NULL, NULL);
+        gtk_container_add(GTK_CONTAINER(scroll), icon_view);
+        gtk_container_add(GTK_CONTAINER(self), scroll);
+
+        /* Relevant columns */
+        gtk_icon_view_set_markup_column(GTK_ICON_VIEW(icon_view),
+                ALBUM_TITLE);
+        gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(icon_view),
+                ALBUM_PIXBUF);
+        gtk_icon_view_set_item_width(GTK_ICON_VIEW(icon_view), 300);
+        gtk_icon_view_set_columns(GTK_ICON_VIEW(icon_view), 2);
+        gtk_icon_view_set_item_orientation(GTK_ICON_VIEW(icon_view),
+                GTK_ORIENTATION_HORIZONTAL);
 }
 
 static void budgie_media_view_dispose(GObject *object)
@@ -115,5 +137,54 @@ GtkWidget* budgie_media_view_new(BudgieDB *database)
 
 static void update_db(BudgieMediaView *self)
 {
-        /* Called when the DB is changed */
+        GtkIconTheme *theme;
+        GtkListStore *model;
+        GPtrArray *albums = NULL;
+        GPtrArray *results = NULL;
+        GdkPixbuf *pixbuf;
+        GtkTreeIter iter;
+        gchar *album = NULL;
+        gchar *markup = NULL;
+        MediaInfo *current;
+        int i;
+
+        /* No albums */
+        if (!budgie_db_get_all_by_field(self->db, MEDIA_QUERY_ALBUM, &albums))
+                return;
+
+        /* We don't *yet* support album art, use generic symbol */
+        theme = gtk_icon_theme_get_default();
+        pixbuf = gtk_icon_theme_load_icon(theme, "folder-music-symbolic",
+                64, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
+        model = gtk_list_store_new(ALBUM_COLUMNS, G_TYPE_STRING, GDK_TYPE_PIXBUF);
+
+        for (i=0; i < albums->len; i++) {
+                album = (gchar *)albums->pdata[i];
+                /* Try to gain at least one artist */
+                if (!budgie_db_search_field(self->db, MEDIA_QUERY_ALBUM,
+                        MATCH_QUERY_EXACT, album, 1, &results))
+                        goto fail;
+                current = results->pdata[0];
+                if (current->album == NULL)
+                        goto albumfail;
+
+                /* Pretty label */
+                markup = g_markup_printf_escaped("<b>%s</b>\n<span color='grey'>%s</span>",
+                        current->album, current->artist);
+                gtk_list_store_append(model, &iter);
+                gtk_list_store_set(model, &iter, ALBUM_TITLE, markup, -1);
+                gtk_list_store_set(model, &iter, ALBUM_PIXBUF, pixbuf, -1);
+albumfail:
+                free_media_info(current);
+                g_ptr_array_free(results, TRUE);
+fail:
+                g_free(album);
+        }
+        gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model),
+                ALBUM_TITLE, GTK_SORT_ASCENDING);
+        gtk_icon_view_set_model(GTK_ICON_VIEW(self->icon_view),
+                GTK_TREE_MODEL(model));
+        g_ptr_array_free(albums, TRUE);
+
+        g_object_unref(pixbuf);
 }

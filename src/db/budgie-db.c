@@ -177,6 +177,8 @@ gboolean budgie_db_get_all_by_field(BudgieDB *self,
         gboolean ret = FALSE;
         MediaInfo *media = NULL;
         char *append = NULL;
+        gboolean should_append = TRUE;
+        int i;
 
         _results = g_ptr_array_new();
 
@@ -203,8 +205,17 @@ gboolean budgie_db_get_all_by_field(BudgieDB *self,
                         default:
                                 break;
                 }
-                if (append)
+                if (append != NULL) {
+                        for (i=0; i < _results->len; i++) {
+                                if (g_str_equal(_results->pdata[i], append)) {
+                                        should_append = FALSE;
+                                        break;
+                                }
+                        }
+                }
+                if (should_append && append != NULL)
                         g_ptr_array_add(_results, g_strdup(append));
+                should_append = TRUE;
                 free_media_info(media);
                 /* Visit the next key */
                 nextkey = gdbm_nextkey(self->priv->db, key);
@@ -217,8 +228,6 @@ gboolean budgie_db_get_all_by_field(BudgieDB *self,
                 g_ptr_array_free(_results, TRUE);
                 return ret;
         }
-        /* Null terminate the array */
-        g_ptr_array_add(_results, NULL);
         ret = TRUE;
         *results = _results;
         return ret;
@@ -233,6 +242,7 @@ gboolean budgie_db_search_field(BudgieDB *self,
 {
         g_assert(query >= 0 && query < MEDIA_QUERY_MAX);
         g_assert(match >= 0 && match < MATCH_QUERY_MAX);
+        g_assert(term != NULL);
 
         datum key, nextkey;
         GPtrArray *_results = NULL;

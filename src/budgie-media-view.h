@@ -42,6 +42,8 @@ typedef struct _BudgieMediaViewClass   BudgieMediaViewClass;
 struct _BudgieMediaView {
         GtkBin parent;
         BudgieDB *db;
+
+        GtkWidget *icon_view;
 };
 
 /* BudgieMediaView class definition */
