@@ -23,6 +23,7 @@
 #pragma once
 #include <glib.h>
 #include <gtk/gtk.h>
+#include "db/budgie-db.h"
 
 /**
  * Automate button creation
@@ -58,6 +59,17 @@ void search_directory(const gchar *dir, GSList **list, int n_params, const gchar
  */
 gchar *format_seconds(gint64 time, gboolean remaining);
 
+
+/**
+ * Get the albumart name for the given MediaInfo
+ * Note this is deliberately designed to adhere to the spec put forth
+ * by GNOME: https://wiki.gnome.org/MediaArtStorageSpec
+ *
+ * @param info MediaInfo to query
+ * @param extension "jpeg" or "png", JPEG being more common
+ * @return The albumart (allocated), or NULL
+ */
+gchar *albumart_name_for_media(MediaInfo *info, gchar *extension);
 
 /**
  * Following are taken from GNOME Wiki/Tracker code to ensure we stay

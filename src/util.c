@@ -26,7 +26,6 @@
 #include <id3.h>
 
 #include "util.h"
-#include "db/budgie-db.h"
 
 /* Unneeded constants but improve readability */
 #define MINUTE 60
@@ -326,4 +325,28 @@ gchar *cleaned_string(gchar *string)
         g_free(normalized);
 
         return lower;
+}
+
+gchar *albumart_name_for_media(MediaInfo *info, gchar *extension)
+{
+        if (!info->album || ! info->artist)
+                return NULL;
+
+        char *album = cleaned_string(info->album);
+        gchar *artist = cleaned_string(info->album);
+        gchar *artist_md5, *album_md5;
+        gchar *album_string = NULL;
+
+        artist_md5 = g_compute_checksum_for_string(G_CHECKSUM_MD5, artist, -1);
+        album_md5 = g_compute_checksum_for_string(G_CHECKSUM_MD5, album, -1);
+
+        album_string = g_strdup_printf("album-%s-%s.%s", artist_md5,
+                album_md5, extension);
+
+        g_free(artist_md5);
+        g_free(artist);
+        g_free(album_md5);
+        g_free(album);
+
+        return album_string;
 }
