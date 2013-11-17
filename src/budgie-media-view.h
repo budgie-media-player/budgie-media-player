@@ -41,6 +41,7 @@ typedef struct _BudgieMediaViewClass   BudgieMediaViewClass;
 /* BudgieMediaView object */
 struct _BudgieMediaView {
         GtkBin parent;
+        BudgieDB *db;
 };
 
 /* BudgieMediaView class definition */
@@ -56,6 +57,22 @@ static void budgie_media_view_dispose(GObject *object);
 GType budgie_media_view_get_type(void);
 
 /* BudgieMediaView methods */
-GtkWidget* budgie_media_view_new(void);
 
+/**
+ * Construct a new BudgieMediaView
+ * @param database Database to use
+ * @return A new BudgieMediaView
+ */
+GtkWidget* budgie_media_view_new(BudgieDB *database);
+
+
+static void budgie_media_view_get_property(GObject *object,
+                                           guint prop_id,
+                                           GValue *value,
+                                           GParamSpec *pspec);
+
+static void budgie_media_view_set_property(GObject *object,
+                                           guint prop_id,
+                                           const GValue *value,
+                                           GParamSpec *pspec);
 #endif /* budgie_media_view_h */

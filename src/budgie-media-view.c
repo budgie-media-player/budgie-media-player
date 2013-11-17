@@ -27,13 +27,65 @@
 
 G_DEFINE_TYPE(BudgieMediaView, budgie_media_view, GTK_TYPE_BIN);
 
+enum {
+        PROP_0, PROP_DATABASE, N_PROPERTIES
+};
+
+static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
+
 /* Initialisation */
 static void budgie_media_view_class_init(BudgieMediaViewClass *klass)
 {
         GObjectClass *g_object_class;
 
         g_object_class = G_OBJECT_CLASS(klass);
+        obj_properties[PROP_DATABASE] =
+        g_param_spec_pointer("database", "Database", "Database",
+                G_PARAM_READWRITE);
+
         g_object_class->dispose = &budgie_media_view_dispose;
+        g_object_class->set_property = &budgie_media_view_set_property;
+        g_object_class->get_property = &budgie_media_view_get_property;
+        g_object_class_install_properties(g_object_class, N_PROPERTIES,
+                obj_properties);
+}
+
+static void budgie_media_view_set_property(GObject *object,
+                                           guint prop_id,
+                                           const GValue *value,
+                                           GParamSpec *pspec)
+{
+        BudgieMediaView *self;
+
+        self = BUDGIE_MEDIA_VIEW(object);
+        switch (prop_id) {
+                case PROP_DATABASE:
+                        self->db = g_value_get_pointer((GValue*)value);
+                        break;
+                default:
+                        G_OBJECT_WARN_INVALID_PROPERTY_ID (object,
+                                prop_id, pspec);
+                        break;
+        }
+}
+
+static void budgie_media_view_get_property(GObject *object,
+                                           guint prop_id,
+                                           GValue *value,
+                                           GParamSpec *pspec)
+{
+        BudgieMediaView *self;
+
+        self = BUDGIE_MEDIA_VIEW(object);
+        switch (prop_id) {
+                case PROP_DATABASE:
+                        g_value_set_pointer((GValue *)value, (gpointer)self->db);
+                        break;
+                default:
+                        G_OBJECT_WARN_INVALID_PROPERTY_ID (object,
+                                prop_id, pspec);
+                        break;
+        }
 }
 
 static void budgie_media_view_init(BudgieMediaView *self)
@@ -52,10 +104,10 @@ static void budgie_media_view_dispose(GObject *object)
 }
 
 /* Utility; return a new BudgieMediaView */
-GtkWidget* budgie_media_view_new(void)
+GtkWidget* budgie_media_view_new(BudgieDB *database)
 {
         BudgieMediaView *self;
 
-        self = g_object_new(BUDGIE_MEDIA_VIEW_TYPE, NULL);
+        self = g_object_new(BUDGIE_MEDIA_VIEW_TYPE, "database", database, NULL);
         return GTK_WIDGET(self);
 }
