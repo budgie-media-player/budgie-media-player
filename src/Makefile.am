@@ -25,14 +25,17 @@ budgie_SOURCES = \
 	budgie-settings-view.h \
 	player-status-area.c \
 	player-status-area.h \
-	budgie-media-view.c \
-	budgie-media-view.h \
 	player-view.c \
 	player-view.h \
 	util.c \
 	util.h \
 	common.h \
 	main.c
+if TESTING
+budgie_SOURCES += \
+	budgie-media-view.c \
+	budgie-media-view.h
+endif
 
 budgie_CFLAGS = \
 	$(GTK3_CFLAGS) \
