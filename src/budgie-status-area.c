@@ -145,10 +145,10 @@ void budgie_status_area_set_media(BudgieStatusArea *self, MediaInfo *info)
                 g_free(self->priv->title_string);
 
         if (info->artist)
-                self->priv->title_string = g_strdup_printf("<b>%s</b>\n<small>%s</small>",
+                self->priv->title_string = g_markup_printf_escaped("<b>%s</b>\n<small>%s</small>",
                         info->title, info->artist);
         else
-                self->priv->title_string = g_strdup_printf("<b>%s</b>", info->title);
+                self->priv->title_string = g_markup_printf_escaped("<b>%s</b>", info->title);
 
         /* media-art path for images */
         cache = g_get_user_cache_dir();
