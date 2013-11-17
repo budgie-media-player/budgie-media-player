@@ -75,4 +75,7 @@ static void budgie_media_view_set_property(GObject *object,
                                            guint prop_id,
                                            const GValue *value,
                                            GParamSpec *pspec);
+
+static void update_db(BudgieMediaView *self);
+
 #endif /* budgie_media_view_h */

@@ -92,6 +92,7 @@ static void budgie_window_init(BudgieWindow *self)
                 media_dirs = g_settings_get_strv(self->priv->settings, BUDGIE_MEDIA_DIRS);
         }
         self->media_dirs = media_dirs;
+        self->db = budgie_db_new();
 
         init_styles(self);
 
@@ -249,8 +250,6 @@ static void budgie_window_init(BudgieWindow *self)
 
         /* Initialise our tracks list */
         self->priv->tracks = NULL;
-
-        self->db = budgie_db_new();
 
         /* Initialise gstreamer */
         self->gst_player = gst_element_factory_make("playbin", "player");
