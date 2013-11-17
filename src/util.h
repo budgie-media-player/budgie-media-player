@@ -57,3 +57,23 @@ void search_directory(const gchar *dir, GSList **list, int n_params, const gchar
  * @return a string representation of the time
  */
 gchar *format_seconds(gint64 time, gboolean remaining);
+
+
+/**
+ * Following are taken from GNOME Wiki/Tracker code to ensure we stay
+ * compatible in our mediaart spec
+ */
+static gboolean
+strip_find_next_block (const gchar    *original,
+                       const gunichar  open_char,
+                       const gunichar  close_char,
+                       gint           *open_pos,
+                       gint           *close_pos);
+
+gchar *
+albumart_strip_invalid_entities (const gchar *original);
+
+/**
+ * Utility of mine to clean the album string before processing
+ */
+gchar *cleaned_string(gchar *string);

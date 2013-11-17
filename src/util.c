@@ -188,3 +188,142 @@ gchar *format_seconds(gint64 time, gboolean remaining)
         }
         return ret;
 }
+
+static gboolean
+strip_find_next_block (const gchar    *original,
+                       const gunichar  open_char,
+                       const gunichar  close_char,
+                       gint           *open_pos,
+                       gint           *close_pos)
+{
+        const gchar *p1, *p2;
+
+        if (open_pos) {
+                *open_pos = -1;
+        }
+
+        if (close_pos) {
+                *close_pos = -1;
+        }
+
+        p1 = g_utf8_strchr (original, -1, open_char);
+        if (p1) {
+                if (open_pos) {
+                        *open_pos = p1 - original;
+                }
+
+                p2 = g_utf8_strchr (g_utf8_next_char (p1), -1, close_char);
+                if (p2) {
+                        if (close_pos) {
+                                *close_pos = p2 - original;
+                        }
+                        
+                        return TRUE;
+                }
+        }
+
+        return FALSE;
+}
+
+gchar *
+albumart_strip_invalid_entities (const gchar *original)
+{
+        GString         *str_no_blocks;
+        gchar          **strv;
+        gchar           *str;
+        gboolean         blocks_done = FALSE;
+        const gchar     *p;
+        const gchar     *invalid_chars = "()[]<>{}_!@#$^&*+=|\\/\"'?~";
+        const gchar     *invalid_chars_delimiter = "*";
+        const gchar     *convert_chars = "\t";
+        const gchar     *convert_chars_delimiter = " ";
+        const gunichar   blocks[5][2] = {
+                { '(', ')' },
+                { '{', '}' }, 
+                { '[', ']' }, 
+                { '<', '>' }, 
+                {  0,   0  }
+        };
+
+        str_no_blocks = g_string_new ("");
+
+        p = original;
+
+        while (!blocks_done) {
+                gint pos1, pos2, i;
+
+                pos1 = -1;
+                pos2 = -1;
+        
+                for (i = 0; blocks[i][0] != 0; i++) {
+                        gint start, end;
+                        
+                        /* Go through blocks, find the earliest block we can */
+                        if (strip_find_next_block (p, blocks[i][0], blocks[i][1], &start, &end)) {
+                                if (pos1 == -1 || start < pos1) {
+                                        pos1 = start;
+                                        pos2 = end;
+                                }
+                        }
+                }
+                
+                /* If either are -1 we didn't find any */
+                if (pos1 == -1) {
+                        /* This means no blocks were found */
+                        g_string_append (str_no_blocks, p);
+                        blocks_done = TRUE;
+                } else {
+                        /* Append the test BEFORE the block */
+                        if (pos1 > 0) {
+                                g_string_append_len (str_no_blocks, p, pos1);
+                        }
+
+                        p = g_utf8_next_char (p + pos2);
+
+                        /* Do same again for position AFTER block */
+                        if (*p == '\0') {
+                                blocks_done = TRUE;
+                        }
+                }       
+        }
+
+        str = g_string_free (str_no_blocks, FALSE);
+
+        /* Now strip invalid chars */
+        g_strdelimit (str, invalid_chars, *invalid_chars_delimiter);
+        strv = g_strsplit (str, invalid_chars_delimiter, -1);
+        g_free (str);
+        str = g_strjoinv (NULL, strv);
+        g_strfreev (strv);
+
+        /* Now convert chars */
+        g_strdelimit (str, convert_chars, *convert_chars_delimiter);
+        strv = g_strsplit (str, convert_chars_delimiter, -1);
+        g_free (str);
+        str = g_strjoinv (convert_chars_delimiter, strv);
+        g_strfreev (strv);
+
+        /* Now remove double spaces */
+        strv = g_strsplit (str, "  ", -1);
+        g_free (str);
+        str = g_strjoinv (" ", strv);
+        g_strfreev (strv);
+        
+        /* Now strip leading/trailing white space */
+        g_strstrip (str);
+
+        return str;
+}
+
+gchar *cleaned_string(gchar *string)
+{
+        gchar *stripped, *normalized, *lower;
+
+        stripped = albumart_strip_invalid_entities(string);
+        normalized = g_utf8_normalize(stripped, -1, G_NORMALIZE_ALL);
+        g_free(stripped);
+        lower = g_utf8_strdown(normalized, -1);
+        g_free(normalized);
+
+        return lower;
+}
