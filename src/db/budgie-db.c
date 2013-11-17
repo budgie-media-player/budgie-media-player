@@ -224,6 +224,96 @@ gboolean budgie_db_get_all_by_field(BudgieDB *self,
         return ret;
 }
 
+gboolean budgie_db_search_field(BudgieDB *self,
+                                MediaQuery query,
+                                MatchQuery match,
+                                gchar *term,
+                                guint max,
+                                GPtrArray **results)
+{
+        g_assert(query >= 0 && query < MEDIA_QUERY_MAX);
+        g_assert(match >= 0 && match < MATCH_QUERY_MAX);
+
+        datum key, nextkey;
+        GPtrArray *_results = NULL;
+        char *path;
+        gboolean ret = FALSE;
+        MediaInfo *media = NULL;
+        char *test = NULL;
+        int count = 0;
+        gboolean succ = FALSE;
+
+        _results = g_ptr_array_new();
+
+        /* Iterate through every key in the database */
+        key = gdbm_firstkey(self->priv->db);
+        while (key.dptr) {
+                /* Only return a limited set of results */
+                if (count >= max && max != -1) {
+                        free(key.dptr);
+                        break;
+                }
+                path = (char*)key.dptr;
+
+                media = budgie_db_get_media(self, path);
+                /* Only interested in one field really */
+                switch (query) {
+                        case MEDIA_QUERY_TITLE:
+                                test = media->title;
+                                break;
+                        case MEDIA_QUERY_ALBUM:
+                                test = media->album;
+                                break;
+                        case MEDIA_QUERY_ARTIST:
+                                test = media->artist;
+                                break;
+                        case MEDIA_QUERY_GENRE:
+                                test = media->genre;
+                                break;
+                        default:
+                                break;
+                }
+                if (!test)
+                        goto clear;
+                /* Test the search term */
+                switch (match) {
+                        case MATCH_QUERY_END:
+                                succ = g_str_has_suffix(test, term);
+                                break;
+                        case MATCH_QUERY_START:
+                                succ = g_str_has_prefix(test, term);
+                                break;
+                        case MATCH_QUERY_EXACT:
+                                succ = g_str_equal(test, term);
+                                break;
+                        default:
+                                break;
+                }
+                if (succ) {
+                        g_ptr_array_add(_results, media);
+                        count += 1;
+                        goto next;
+                }
+clear:
+                free_media_info(media);
+                /* Visit the next key */
+next:
+                nextkey = gdbm_nextkey(self->priv->db, key);
+                free(key.dptr);
+                key = nextkey;
+                test = NULL;
+                succ = FALSE;
+        }
+        /* No results */
+        if (_results->len < 1) {
+                g_ptr_array_free(_results, TRUE);
+                return ret;
+        }
+        ret = TRUE;
+        *results = _results;
+        return ret;
+}
+
 /** PRIVATE **/
 static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target)
 {

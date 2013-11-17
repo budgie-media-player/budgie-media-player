@@ -89,6 +89,16 @@ typedef enum {
         MEDIA_QUERY_MAX
 } MediaQuery;
 
+/**
+ * Used to determine search matching
+ */
+typedef enum {
+        MATCH_QUERY_START = 0, /**<Match the start of the search term */
+        MATCH_QUERY_END, /**<Match the end of the search term */
+        MATCH_QUERY_EXACT, /**<Match if search term is identical */
+        MATCH_QUERY_MAX
+} MatchQuery;
+
 /* Boilerplate GObject code */
 static void budgie_db_class_init(BudgieDBClass *klass);
 static void budgie_db_init(BudgieDB *self);
@@ -136,5 +146,22 @@ GSList* budgie_db_get_all_media(BudgieDB* self);
 gboolean budgie_db_get_all_by_field(BudgieDB *self,
                                     MediaQuery query,
                                     GPtrArray **results);
+
+/**
+ * Search all media for a given term
+ * @param self BudgieDB instance
+ * @param query The query to perform
+ * @param match Type of match to perform
+ * @param term Term to search for
+ * @param max Maximum results to return, or -1 for unlimited
+ * @param results Pointer to store results in
+ * @return a boolean value, indicating success of the operation
+ */
+gboolean budgie_db_search_field(BudgieDB *self,
+                                MediaQuery query,
+                                MatchQuery match,
+                                gchar *term,
+                                guint max,
+                                GPtrArray **results);
 
 #endif /* budgie_db_h */
