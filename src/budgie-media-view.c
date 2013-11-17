@@ -111,8 +111,7 @@ static void budgie_media_view_init(BudgieMediaView *self)
                 ALBUM_TITLE);
         gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(icon_view),
                 ALBUM_PIXBUF);
-        gtk_icon_view_set_item_width(GTK_ICON_VIEW(icon_view), 300);
-        gtk_icon_view_set_columns(GTK_ICON_VIEW(icon_view), 2);
+        gtk_icon_view_set_item_width(GTK_ICON_VIEW(icon_view), 200);
         gtk_icon_view_set_item_orientation(GTK_ICON_VIEW(icon_view),
                 GTK_ORIENTATION_HORIZONTAL);
 }
@@ -174,10 +173,10 @@ static void update_db(BudgieMediaView *self)
                 album_id = albumart_name_for_media(current, "jpeg");
                 path = g_strdup_printf("%s/media-art/%s", cache, album_id);
                 g_free(album_id);
-                pixbuf = gdk_pixbuf_new_from_file_at_size(path, 96, 96, NULL);
+                pixbuf = gdk_pixbuf_new_from_file_at_size(path, 64, 64, NULL);
                 if (!pixbuf)
                         pixbuf = gtk_icon_theme_load_icon(theme, "folder-music-symbolic",
-                                96, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
+                                64, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
                 /* Pretty label */
                 markup = g_markup_printf_escaped("<big><b>%s</b>\n<span color='grey'>%s</span></big>",
                         current->album, current->artist);
