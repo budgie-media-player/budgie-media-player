@@ -5,6 +5,7 @@ AC_PROG_CC_STDC
 LT_PREREQ(2.2)
 AC_CONFIG_HEADERS([config.h])
 AC_PREFIX_DEFAULT(/usr/local)
+AM_SILENT_RULES([yes])
 LT_INIT([disable-static])
 
 # Package requirements
