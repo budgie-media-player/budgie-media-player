@@ -47,13 +47,18 @@ static void budgie_settings_view_class_init(BudgieSettingsViewClass *klass)
 
 static void budgie_settings_view_init(BudgieSettingsView *self)
 {
-        GtkWidget *paths, *label;
+        GtkWidget *paths;
         GtkWidget *tree, *scroll, *box;
         GtkTreeViewColumn *column;
         GtkCellRenderer *cell;
         GtkWidget *toolbar;
         GtkStyleContext *style;
         GtkToolItem *tool;
+        /* Global stack */
+        GtkWidget *stack, *chooser;
+        GValue value = G_VALUE_INIT;
+        /* Layout */
+        GtkWidget *layout;
 
         /* Settings
          * TODO: Connect gsettings and refresh when the value changes.
@@ -61,21 +66,32 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
          * dconf-editor */
         self->settings = g_settings_new(BUDGIE_SCHEMA);
 
+        layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        gtk_container_add(GTK_CONTAINER(self), layout);
+
+        /* Add our stack chooser, etc. */
+        stack = gtk_stack_new();
+        chooser = gtk_stack_switcher_new();
+        gtk_stack_switcher_set_stack(GTK_STACK_SWITCHER(chooser),
+            GTK_STACK(stack));
+        gtk_box_pack_start(GTK_BOX(layout), chooser, FALSE, FALSE, 0);
+        gtk_box_pack_start(GTK_BOX(layout), stack, TRUE, TRUE, 0);
+
+        /* Center the switcher */
+        gtk_widget_set_halign(chooser, GTK_ALIGN_CENTER);
+
         /* Bit of sane padding around all components */
         gtk_container_set_border_width(GTK_CONTAINER(self), 30);
+        gtk_container_set_border_width(GTK_CONTAINER(stack), 20);
 
-        /* Construct our paths frame */
-        paths = gtk_frame_new("");
-        gtk_widget_set_size_request(paths, 400, 200);
-        label = gtk_label_new("<big>Media directories</big>");
-        gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
-        gtk_frame_set_label_widget(GTK_FRAME(paths), label);
-
-        gtk_container_add(GTK_CONTAINER(self), paths);
-        gtk_container_set_border_width(GTK_CONTAINER(paths), 5);
-        gtk_widget_set_halign(paths, GTK_ALIGN_CENTER);
-        gtk_widget_set_valign(paths, GTK_ALIGN_START);
-        gtk_frame_set_shadow_type(GTK_FRAME(paths), GTK_SHADOW_NONE);
+        paths = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        gtk_stack_add_named(GTK_STACK(stack), paths, "paths");
+        /* Set the title. I love how this is a simple task.. */
+        g_value_init(&value, G_TYPE_STRING);
+        g_value_set_static_string(&value, "Media Directories");
+        gtk_container_child_set_property(GTK_CONTAINER(stack), paths,
+            "title", &value);
+        g_value_unset(&value);
 
         /* Paths treeview */
         tree = gtk_tree_view_new();
