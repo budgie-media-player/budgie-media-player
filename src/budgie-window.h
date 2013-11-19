@@ -132,7 +132,6 @@ static gboolean load_media_t(gpointer data);
 static gpointer load_media(gpointer data);
 
 /* Callbacks */
-static void about_cb(GtkWidget *widget, gpointer userdata);
 static void play_cb(GtkWidget *widget, gpointer userdata);
 static void pause_cb(GtkWidget *widget, gpointer userdata);
 static void next_cb(GtkWidget *widget, gpointer userdata);

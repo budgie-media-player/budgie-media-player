@@ -107,7 +107,7 @@ static void budgie_window_init(BudgieWindow *self)
 
         /* Set our window up */
         gtk_window_set_title(GTK_WINDOW(window), "Music Player");
-        gtk_window_set_default_size(GTK_WINDOW(window), 950, 500);
+        gtk_window_set_default_size(GTK_WINDOW(window), 950, 550);
         gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
         gtk_window_set_icon_name(GTK_WINDOW(window), "budgie");
         gtk_window_set_wmclass(GTK_WINDOW(window), "Budgie", "Budgie");
@@ -335,29 +335,6 @@ static void init_styles(BudgieWindow *self)
         self->css_provider = css_provider;
 }
 
-static void about_cb(GtkWidget *widget, gpointer userdata)
-{
-        BudgieWindow *self;
-
-        self = BUDGIE_WINDOW(userdata);
-
-        const gchar* authors[] = {
-                "Ikey Doherty <ikey.doherty@gmail.com>",
-                NULL
-        };
-        const gchar* comments = "Modern, Lightweight and distraction free media experience.";
-        const gchar* copyright = "Copyright \u00A9 Ikey Doherty 2013";
-        gtk_show_about_dialog(GTK_WINDOW(self->window),
-                "authors", authors,
-                "comments", comments,
-                "copyright", copyright,
-                "logo-icon-name", "budgie",
-                "program-name", PACKAGE_NAME,
-                "license-type", GTK_LICENSE_GPL_2_0,
-                "version", PACKAGE_VERSION,
-                "website", PACKAGE_URL,
-                NULL);
-}
 static void play_cb(GtkWidget *widget, gpointer userdata)
 {
         BudgieWindow *self;
@@ -718,8 +695,6 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
         self = BUDGIE_WINDOW(userdata);
 
         switch (action) {
-                case BUDGIE_ACTION_ABOUT:
-                        return about_cb(GTK_WIDGET(bar), userdata);
                 case BUDGIE_ACTION_RELOAD:
                         return reload_cb(GTK_WIDGET(bar), userdata);
                 case BUDGIE_ACTION_RANDOM:

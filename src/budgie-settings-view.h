@@ -63,5 +63,6 @@ GtkWidget* budgie_settings_view_new(void);
 
 /* Refresh view from settings */
 static void budgie_settings_refresh(BudgieSettingsView *self);
+static GtkWidget *create_about(BudgieSettingsView *self);
 
 #endif /* budgie_settings_view_h */

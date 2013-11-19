@@ -54,7 +54,6 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         GtkToolItem *reload_item;
         GtkWidget *full_screen;
         GtkWidget *aspect;
-        GtkWidget *about;
         GtkWidget *settings;
 #ifdef TESTING
         GtkWidget *browse_view;
@@ -64,7 +63,6 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         GtkToolItem *playback_item;
         GtkWidget *play, *pause;
         GtkWidget *prev, *next;
-        GtkToolItem *about_item;
         GtkToolItem *settings_item;
         GtkToolItem *separator1, *separator2, *separator3;
         guint *data = NULL;
@@ -234,17 +232,6 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         settings_item = gtk_tool_item_new();
         gtk_container_add(GTK_CONTAINER(settings_item), settings);
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(settings_item));
-
-        /* about */
-        about = new_button_with_icon(self->icon_theme, "dialog-information-symbolic",
-                TRUE, FALSE, "About Budgie..");
-        data = g_malloc(sizeof(guint));
-        *data = BUDGIE_ACTION_ABOUT;
-        g_object_set_data_full(G_OBJECT(about), "budgie", data, g_free);
-        g_signal_connect(about, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
-        about_item = gtk_tool_item_new();
-        gtk_container_add(GTK_CONTAINER(about_item), about);
-        gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(about_item));
 }
 
 static void budgie_control_bar_dispose(GObject *object)

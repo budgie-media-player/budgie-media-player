@@ -21,6 +21,7 @@
  * 
  */
 
+#include "config.h"
 #include "budgie-settings-view.h"
 #include "util.h"
 #include "common.h"
@@ -56,6 +57,7 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
         GtkToolItem *tool;
         /* Global stack */
         GtkWidget *stack, *chooser;
+        GtkWidget *about;
         GValue value = G_VALUE_INIT;
         /* Layout */
         GtkWidget *layout;
@@ -90,6 +92,15 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
         g_value_init(&value, G_TYPE_STRING);
         g_value_set_static_string(&value, "Media Directories");
         gtk_container_child_set_property(GTK_CONTAINER(stack), paths,
+            "title", &value);
+        g_value_unset(&value);
+
+        /* Add the about page */
+        about = create_about(self);
+        gtk_stack_add_named(GTK_STACK(stack), about, "about");
+        g_value_init(&value, G_TYPE_STRING);
+        g_value_set_static_string(&value, "About Budgie");
+        gtk_container_child_set_property(GTK_CONTAINER(stack), about,
             "title", &value);
         g_value_unset(&value);
 
@@ -300,4 +311,43 @@ static void paths_remove_cb(GtkWidget *widget, gpointer userdata)
         budgie_settings_refresh(self);
         g_ptr_array_free(new_paths, TRUE);
         g_value_unset(&value);
+}
+
+static GtkWidget *create_about(BudgieSettingsView *self)
+{
+        GtkWidget *horiz, *verti;
+        GtkWidget *label, *desc, *image;
+        GtkWidget *link;
+        gchar *title;
+
+        horiz = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        gtk_widget_set_valign(horiz, GTK_ALIGN_CENTER);
+
+        /* Left image */
+        image = gtk_image_new_from_icon_name("budgie", GTK_ICON_SIZE_INVALID);
+        gtk_image_set_pixel_size(GTK_IMAGE(image), 256);
+        gtk_box_pack_start(GTK_BOX(horiz), image, FALSE, FALSE, 0);
+
+        /* Stores labels */
+        verti = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+        gtk_widget_set_valign(verti, GTK_ALIGN_CENTER);
+        gtk_box_pack_start(GTK_BOX(horiz), verti, FALSE, FALSE, 0);
+
+        /* Main label */
+        title = g_strdup_printf("<span size='x-large'>%s</span> <small>v%s</small>",
+                PACKAGE_NAME, PACKAGE_VERSION);
+        label = gtk_label_new(title);
+        g_free(title);
+        gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
+        gtk_box_pack_start(GTK_BOX(verti), label, FALSE, FALSE, 0);
+
+        /* Description */
+        desc = gtk_label_new("Modern, lightweight and distraction free media experience");
+        gtk_box_pack_start(GTK_BOX(verti), desc, FALSE, FALSE, 0);
+
+        /* Link */
+        link = gtk_link_button_new_with_label(PACKAGE_URL, "Visit Budgie's home");
+        gtk_box_pack_start(GTK_BOX(verti), link, FALSE, FALSE, 0);
+
+        return horiz;
 }
