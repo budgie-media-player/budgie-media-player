@@ -74,6 +74,8 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
         /* Add our stack chooser, etc. */
         stack = gtk_stack_new();
         chooser = gtk_stack_switcher_new();
+        gtk_stack_set_transition_type(GTK_STACK(stack),
+                GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);
         gtk_stack_switcher_set_stack(GTK_STACK_SWITCHER(chooser),
             GTK_STACK(stack));
         gtk_box_pack_start(GTK_BOX(layout), chooser, FALSE, FALSE, 0);
