@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include "budgie-window.h"
 
-static void perform_migration()
+static void perform_migration(void)
 {
         int i;
         gchar *path;
