@@ -205,7 +205,7 @@ static void budgie_settings_refresh(BudgieSettingsView *self)
         }
         gtk_tree_view_set_model(GTK_TREE_VIEW(self->paths),
                 GTK_TREE_MODEL(store));
-end:
+
         if (media_dirs)
                 g_strfreev(media_dirs);
 }
