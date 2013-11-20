@@ -68,7 +68,7 @@ static void budgie_status_area_init(BudgieStatusArea *self)
                 GTK_ICON_SIZE_DIALOG);
         self->image = image;
         gtk_box_pack_start(GTK_BOX(top), image, FALSE, FALSE, 0);
-        g_object_set(image, "margin", 5);
+        g_object_set(image, "margin", 5, NULL);
 
         /* Construct our main label */
         label = gtk_label_new("Budgie");
