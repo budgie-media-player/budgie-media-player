@@ -25,7 +25,7 @@
 
 #include "player-view.h"
 
-G_DEFINE_TYPE_WITH_PRIVATE(PlayerView, player_view, GTK_TYPE_BIN)
+G_DEFINE_TYPE(PlayerView, player_view, GTK_TYPE_BIN)
 
 /* Used only in append_track */
 struct TrackAddStore {

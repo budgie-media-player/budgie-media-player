@@ -56,21 +56,6 @@ typedef struct _BudgieWindowPrivate BudgieWindowPrivate;
 #define IS_BUDGIE_WINDOW_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), BUDGIE_WINDOW_TYPE))
 #define BUDGIE_WINDOW_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), BUDGIE_WINDOW_TYPE, BudgieWindowClass))
 
-/* Private storage */
-struct _BudgieWindowPrivate {
-        const gchar *current_page;
-        GSettings *settings;
-        GSList *tracks;
-        gchar *uri;
-        gulong volume_id;
-        gint64 duration;
-        gboolean repeat;
-        gboolean random;
-        gboolean force_aspect;
-        gboolean full_screen;
-        guintptr window_handle;
-};
-
 /* BudgieWindow object */
 struct _BudgieWindow {
         GObject parent;

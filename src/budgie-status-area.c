@@ -25,6 +25,14 @@
 #include "budgie-status-area.h"
 #include "util.h"
 
+/* Private storage */
+struct _BudgieStatusAreaPrivate {
+        gchar *title_string;
+        gchar *time_string;
+        gchar *remaining_string;
+        gulong seek_id;
+};
+
 G_DEFINE_TYPE_WITH_PRIVATE(BudgieStatusArea, budgie_status_area, GTK_TYPE_EVENT_BOX)
 
 static void changed_cb(GtkWidget *widget, gdouble value, gpointer userdata);

@@ -32,6 +32,22 @@
 #ifdef TESTING
         #include "budgie-media-view.h"
 #endif
+
+/* Private storage */
+struct _BudgieWindowPrivate {
+        const gchar *current_page;
+        GSettings *settings;
+        GSList *tracks;
+        gchar *uri;
+        gulong volume_id;
+        gint64 duration;
+        gboolean repeat;
+        gboolean random;
+        gboolean force_aspect;
+        gboolean full_screen;
+        guintptr window_handle;
+};
+
 G_DEFINE_TYPE_WITH_PRIVATE(BudgieWindow, budgie_window, G_TYPE_OBJECT)
 
 /* BudgieWindow prototypes */

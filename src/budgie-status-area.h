@@ -39,14 +39,6 @@ typedef struct _BudgieStatusAreaPrivate BudgieStatusAreaPrivate;
 #define IS_BUDGIE_STATUS_AREA_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), BUDGIE_STATUS_AREA_TYPE))
 #define BUDGIE_STATUS_AREA_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), BUDGIE_STATUS_AREA_TYPE, BudgieStatusAreaClass))
 
-/* Private storage */
-struct _BudgieStatusAreaPrivate {
-        gchar *title_string;
-        gchar *time_string;
-        gchar *remaining_string;
-        gulong seek_id;
-};
-
 /* BudgieStatusArea object */
 struct _BudgieStatusArea {
         GtkEventBox parent;

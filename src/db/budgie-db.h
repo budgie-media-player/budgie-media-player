@@ -39,12 +39,6 @@ typedef struct _BudgieDBPrivate BudgieDBPrivate;
 
 #define CONFIG_NAME "budgie-1.db"
 
-/* Private storage */
-struct _BudgieDBPrivate {
-        gchar *storage_path;
-        GDBM_FILE db;
-};
-
 /* BudgieDB object */
 struct _BudgieDB {
         GObject parent;

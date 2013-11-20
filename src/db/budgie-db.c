@@ -27,6 +27,12 @@
 
 #include "budgie-db.h"
 
+/* Private storage */
+struct _BudgieDBPrivate {
+        gchar *storage_path;
+        GDBM_FILE db;
+};
+
 G_DEFINE_TYPE_WITH_PRIVATE(BudgieDB, budgie_db, G_TYPE_OBJECT)
 
 /* Private utilities */

@@ -30,7 +30,6 @@
 
 typedef struct _PlayerView PlayerView;
 typedef struct _PlayerViewClass   PlayerViewClass;
-typedef struct _PlayerViewPrivate PlayerViewPrivate;
 
 #define PLAYER_VIEW_TYPE (player_view_get_type())
 #define PLAYER_VIEW(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLAYER_VIEW_TYPE, PlayerView))
@@ -53,18 +52,11 @@ typedef enum PlayerViewColumns {
         PLAYER_COLUMNS
 } PlayerViewColumns;
 
-/* Private storage */
-struct _PlayerViewPrivate {
-        unsigned int x; /* Reserved */
-};
-
 /* PlayerView object */
 struct _PlayerView {
         GtkBin parent;
 
         GtkWidget *tree;
-
-        PlayerViewPrivate *priv;
 };
 
 /* PlayerView class definition */
