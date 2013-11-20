@@ -114,10 +114,6 @@ static void player_view_init(PlayerView *self)
 
 static void player_view_dispose(GObject *object)
 {
-        PlayerView *self;
-
-        self = PLAYER_VIEW(object);
-
         /* Destruct */
         G_OBJECT_CLASS (player_view_parent_class)->dispose (object);
 }

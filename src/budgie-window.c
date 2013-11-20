@@ -529,7 +529,6 @@ static void reload_cb(GtkWidget *widget, gpointer userdata)
 static void full_screen_cb(GtkWidget *widget, gpointer userdata)
 {
         BudgieWindow *self;
-        gboolean full;
 
         self = BUDGIE_WINDOW(userdata);
         if (self->priv->full_screen) {
@@ -587,7 +586,7 @@ static void store_media(gpointer data1, gpointer data2)
 static gboolean load_media_t(gpointer data)
 {
         BudgieWindow *self;
-        GThread *thread;
+        __attribute__((unused)) GThread *thread;
 
         self = BUDGIE_WINDOW(data);
         budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
@@ -776,11 +775,9 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
 static void seek_cb(BudgieStatusArea *status, gint64 value, gpointer userdata)
 {
         BudgieWindow *self;
-        GstFormat format;
         GstSeekFlags flags;
 
         self = BUDGIE_WINDOW(userdata);
-        format = GST_FORMAT_TIME;
         flags = GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT;
 
         gst_element_seek_simple(GST_ELEMENT(self->gst_player), GST_FORMAT_TIME,

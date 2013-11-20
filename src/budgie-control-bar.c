@@ -241,10 +241,6 @@ static void budgie_control_bar_init(BudgieControlBar *self)
 
 static void budgie_control_bar_dispose(GObject *object)
 {
-        BudgieControlBar *self;
-
-        self = BUDGIE_CONTROL_BAR(object);
-
         /* Destruct */
         G_OBJECT_CLASS (budgie_control_bar_parent_class)->dispose (object);
 }

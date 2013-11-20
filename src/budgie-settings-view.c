@@ -169,10 +169,6 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
 
 static void budgie_settings_view_dispose(GObject *object)
 {
-        BudgieSettingsView *self;
-
-        self = BUDGIE_SETTINGS_VIEW(object);
-
         /* Destruct */
         G_OBJECT_CLASS (budgie_settings_view_parent_class)->dispose (object);
 }
