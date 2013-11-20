@@ -51,18 +51,9 @@ struct _BudgieSettingsViewClass {
         GtkBoxClass parent_class;
 };
 
-
-/* Boilerplate GObject code */
-static void budgie_settings_view_class_init(BudgieSettingsViewClass *klass);
-static void budgie_settings_view_init(BudgieSettingsView *self);
-static void budgie_settings_view_dispose(GObject *object);
 GType budgie_settings_view_get_type(void);
 
 /* BudgieSettingsView methods */
 GtkWidget* budgie_settings_view_new(void);
-
-/* Refresh view from settings */
-static void budgie_settings_refresh(BudgieSettingsView *self);
-static GtkWidget *create_about(BudgieSettingsView *self);
 
 #endif /* budgie_settings_view_h */

@@ -75,7 +75,7 @@ gchar *albumart_name_for_media(MediaInfo *info, gchar *extension);
  * Following are taken from GNOME Wiki/Tracker code to ensure we stay
  * compatible in our mediaart spec
  */
-static gboolean
+gboolean
 strip_find_next_block (const gchar    *original,
                        const gunichar  open_char,
                        const gunichar  close_char,

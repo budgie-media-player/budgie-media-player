@@ -72,11 +72,6 @@ struct _PlayerViewClass {
         GtkBinClass parent_class;
 };
 
-
-/* Boilerplate GObject code */
-static void player_view_class_init(PlayerViewClass *klass);
-static void player_view_init(PlayerView *self);
-static void player_view_dispose(GObject *object);
 GType player_view_get_type(void);
 
 /* PlayerView methods */

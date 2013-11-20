@@ -28,6 +28,11 @@ G_DEFINE_TYPE(BudgieControlBar, budgie_control_bar, GTK_TYPE_TOOLBAR);
 
 static void handler_cb(GtkWidget *widget, gpointer userdata);
 
+/* Boilerplate GObject code */
+static void budgie_control_bar_class_init(BudgieControlBarClass *klass);
+static void budgie_control_bar_init(BudgieControlBar *self);
+static void budgie_control_bar_dispose(GObject *object);
+
 /* Initialisation */
 static void budgie_control_bar_class_init(BudgieControlBarClass *klass)
 {

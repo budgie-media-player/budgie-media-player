@@ -33,6 +33,11 @@ struct TrackAddStore {
         GtkTreeIter iter;
 };
 
+/* Boilerplate GObject code */
+static void player_view_class_init(PlayerViewClass *klass);
+static void player_view_init(PlayerView *self);
+static void player_view_dispose(GObject *object);
+
 /* Initialisation */
 static void player_view_class_init(PlayerViewClass *klass)
 {

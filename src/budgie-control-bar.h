@@ -79,11 +79,6 @@ struct _BudgieControlBarClass {
         GtkToolbarClass parent_class;
 };
 
-
-/* Boilerplate GObject code */
-static void budgie_control_bar_class_init(BudgieControlBarClass *klass);
-static void budgie_control_bar_init(BudgieControlBar *self);
-static void budgie_control_bar_dispose(GObject *object);
 GType budgie_control_bar_get_type(void);
 
 /* BudgieControlBar methods */

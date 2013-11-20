@@ -188,7 +188,7 @@ gchar *format_seconds(gint64 time, gboolean remaining)
         return ret;
 }
 
-static gboolean
+gboolean
 strip_find_next_block (const gchar    *original,
                        const gunichar  open_char,
                        const gunichar  close_char,

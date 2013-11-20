@@ -33,6 +33,11 @@ G_DEFINE_TYPE_WITH_PRIVATE(BudgieDB, budgie_db, G_TYPE_OBJECT);
 static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target);
 static gboolean budgie_db_deserialize(uint8_t* source, MediaInfo **target);
 
+/* Boilerplate GObject code */
+static void budgie_db_class_init(BudgieDBClass *klass);
+static void budgie_db_init(BudgieDB *self);
+static void budgie_db_dispose(GObject *object);
+
 /* MediaInfo API */
 void free_media_info(gpointer p_info)
 {

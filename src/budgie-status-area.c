@@ -29,6 +29,11 @@ G_DEFINE_TYPE_WITH_PRIVATE(BudgieStatusArea, budgie_status_area, GTK_TYPE_EVENT_
 
 static void changed_cb(GtkWidget *widget, gdouble value, gpointer userdata);
 
+/* Boilerplate GObject code */
+static void budgie_status_area_class_init(BudgieStatusAreaClass *klass);
+static void budgie_status_area_init(BudgieStatusArea *self);
+static void budgie_status_area_dispose(GObject *object);
+
 /* Initialisation */
 static void budgie_status_area_class_init(BudgieStatusAreaClass *klass)
 {

@@ -99,10 +99,6 @@ typedef enum {
         MATCH_QUERY_MAX
 } MatchQuery;
 
-/* Boilerplate GObject code */
-static void budgie_db_class_init(BudgieDBClass *klass);
-static void budgie_db_init(BudgieDB *self);
-static void budgie_db_dispose(GObject *object);
 GType budgie_db_get_type(void);
 
 /* BudgieDB methods */

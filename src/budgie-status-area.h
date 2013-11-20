@@ -65,11 +65,6 @@ struct _BudgieStatusAreaClass {
         GtkEventBoxClass parent_class;
 };
 
-
-/* Boilerplate GObject code */
-static void budgie_status_area_class_init(BudgieStatusAreaClass *klass);
-static void budgie_status_area_init(BudgieStatusArea *self);
-static void budgie_status_area_dispose(GObject *object);
 GType budgie_status_area_get_type(void);
 
 /* BudgieStatusArea methods */
