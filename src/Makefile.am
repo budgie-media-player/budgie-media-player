@@ -1,3 +1,4 @@
+-include $(top_srcdir)/common.mk
 
 bin_PROGRAMS = budgie
 

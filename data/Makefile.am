@@ -1,3 +1,5 @@
+-include $(top_srcdir)/common.mk
+
 # Our SVG
 iconsdir=$(datadir)/icons/hicolor/scalable/apps
 icons_DATA = \
