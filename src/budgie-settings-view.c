@@ -26,7 +26,7 @@
 #include "util.h"
 #include "common.h"
 
-G_DEFINE_TYPE(BudgieSettingsView, budgie_settings_view, GTK_TYPE_BOX);
+G_DEFINE_TYPE(BudgieSettingsView, budgie_settings_view, GTK_TYPE_BOX)
 
 enum SettingsColumns {
         SETTINGS_COLUMN_PATH,

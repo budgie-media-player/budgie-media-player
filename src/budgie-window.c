@@ -32,7 +32,7 @@
 #ifdef TESTING
         #include "budgie-media-view.h"
 #endif
-G_DEFINE_TYPE_WITH_PRIVATE(BudgieWindow, budgie_window, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE(BudgieWindow, budgie_window, G_TYPE_OBJECT)
 
 /* BudgieWindow prototypes */
 static void init_styles(BudgieWindow *self);

@@ -27,7 +27,7 @@
 
 #include "budgie-db.h"
 
-G_DEFINE_TYPE_WITH_PRIVATE(BudgieDB, budgie_db, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE(BudgieDB, budgie_db, G_TYPE_OBJECT)
 
 /* Private utilities */
 static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target);

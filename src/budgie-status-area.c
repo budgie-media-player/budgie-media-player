@@ -25,7 +25,7 @@
 #include "budgie-status-area.h"
 #include "util.h"
 
-G_DEFINE_TYPE_WITH_PRIVATE(BudgieStatusArea, budgie_status_area, GTK_TYPE_EVENT_BOX);
+G_DEFINE_TYPE_WITH_PRIVATE(BudgieStatusArea, budgie_status_area, GTK_TYPE_EVENT_BOX)
 
 static void changed_cb(GtkWidget *widget, gdouble value, gpointer userdata);
 

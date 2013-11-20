@@ -24,7 +24,7 @@
 #include "budgie-control-bar.h"
 #include "util.h"
 
-G_DEFINE_TYPE(BudgieControlBar, budgie_control_bar, GTK_TYPE_TOOLBAR);
+G_DEFINE_TYPE(BudgieControlBar, budgie_control_bar, GTK_TYPE_TOOLBAR)
 
 static void handler_cb(GtkWidget *widget, gpointer userdata);
 
