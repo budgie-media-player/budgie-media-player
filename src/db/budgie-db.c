@@ -334,8 +334,8 @@ static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target)
 {
         uint8_t* data = NULL;
         gboolean ret = FALSE;
-        unsigned int length;
-        unsigned int size;
+        unsigned int length = 0;
+        unsigned int size = 0;
         unsigned int offset = 0;
 
         /* 5 member fields */
