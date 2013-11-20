@@ -728,7 +728,8 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
 
         switch (action) {
                 case BUDGIE_ACTION_RELOAD:
-                        return reload_cb(GTK_WIDGET(bar), userdata);
+                        reload_cb(GTK_WIDGET(bar), userdata);
+                        break;
                 case BUDGIE_ACTION_RANDOM:
                         self->priv->random = toggle;
                         g_settings_set_boolean(self->priv->settings,
@@ -741,18 +742,24 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
                         break;
                 case BUDGIE_ACTION_ASPECT_RATIO:
                         self->priv->force_aspect = toggle;
-                        return aspect_cb(GTK_WIDGET(bar), userdata);
+                        aspect_cb(GTK_WIDGET(bar), userdata);
+                        break;
                 case BUDGIE_ACTION_FULL_SCREEN:
                         self->priv->full_screen = toggle;
-                        return full_screen_cb(GTK_WIDGET(bar), userdata);
+                        full_screen_cb(GTK_WIDGET(bar), userdata);
+                        break;
                 case BUDGIE_ACTION_PLAY:
-                        return play_cb(GTK_WIDGET(bar), userdata);
+                        play_cb(GTK_WIDGET(bar), userdata);
+                        break;
                 case BUDGIE_ACTION_PAUSE:
-                        return pause_cb(GTK_WIDGET(bar), userdata);
+                        pause_cb(GTK_WIDGET(bar), userdata);
+                        break;
                 case BUDGIE_ACTION_PREVIOUS:
-                        return prev_cb(GTK_WIDGET(bar), userdata);
+                        prev_cb(GTK_WIDGET(bar), userdata);
+                        break;
                 case BUDGIE_ACTION_NEXT:
-                        return next_cb(GTK_WIDGET(bar), userdata);
+                        next_cb(GTK_WIDGET(bar), userdata);
+                        break;
                 case BUDGIE_ACTION_SETTINGS:
                         if (toggle)
                                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "settings");
