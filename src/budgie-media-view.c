@@ -26,7 +26,25 @@
 #include "budgie-media-view.h"
 #include "util.h"
 
-G_DEFINE_TYPE(BudgieMediaView, budgie_media_view, GTK_TYPE_BIN);
+G_DEFINE_TYPE(BudgieMediaView, budgie_media_view, GTK_TYPE_BIN)
+
+/* Boilerplate GObject code */
+static void budgie_media_view_class_init(BudgieMediaViewClass *klass);
+static void budgie_media_view_init(BudgieMediaView *self);
+static void budgie_media_view_dispose(GObject *object);
+
+static void update_db(BudgieMediaView *self);
+
+
+static void budgie_media_view_get_property(GObject *object,
+                                           guint prop_id,
+                                           GValue *value,
+                                           GParamSpec *pspec);
+
+static void budgie_media_view_set_property(GObject *object,
+                                           guint prop_id,
+                                           const GValue *value,
+                                           GParamSpec *pspec);
 
 enum {
         PROP_0, PROP_DATABASE, N_PROPERTIES
@@ -118,10 +136,6 @@ static void budgie_media_view_init(BudgieMediaView *self)
 
 static void budgie_media_view_dispose(GObject *object)
 {
-        BudgieMediaView *self;
-
-        self = BUDGIE_MEDIA_VIEW(object);
-
         /* Destruct */
         G_OBJECT_CLASS (budgie_media_view_parent_class)->dispose (object);
 }

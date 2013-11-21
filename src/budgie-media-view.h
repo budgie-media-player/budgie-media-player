@@ -51,11 +51,6 @@ struct _BudgieMediaViewClass {
         GtkBinClass parent_class;
 };
 
-
-/* Boilerplate GObject code */
-static void budgie_media_view_class_init(BudgieMediaViewClass *klass);
-static void budgie_media_view_init(BudgieMediaView *self);
-static void budgie_media_view_dispose(GObject *object);
 GType budgie_media_view_get_type(void);
 
 /* BudgieMediaView methods */
@@ -66,18 +61,5 @@ GType budgie_media_view_get_type(void);
  * @return A new BudgieMediaView
  */
 GtkWidget* budgie_media_view_new(BudgieDB *database);
-
-
-static void budgie_media_view_get_property(GObject *object,
-                                           guint prop_id,
-                                           GValue *value,
-                                           GParamSpec *pspec);
-
-static void budgie_media_view_set_property(GObject *object,
-                                           guint prop_id,
-                                           const GValue *value,
-                                           GParamSpec *pspec);
-
-static void update_db(BudgieMediaView *self);
 
 #endif /* budgie_media_view_h */
