@@ -56,6 +56,7 @@ static void player_view_init(PlayerView *self)
 
         /* Create our TreeView */
         tree = gtk_tree_view_new();
+        gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), FALSE);
         self->tree = tree;
         cell_text = gtk_cell_renderer_text_new();
 
@@ -67,43 +68,19 @@ static void player_view_init(PlayerView *self)
         /* Name */
         cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Name",
-                cell_text, "text", PLAYER_COLUMN_NAME, NULL);
+                cell_text, "markup", PLAYER_COLUMN_NAME, NULL);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         g_object_set(cell_text, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
         gtk_tree_view_column_set_resizable(column, TRUE);
         gtk_tree_view_column_set_sort_column_id(column, PLAYER_COLUMN_NAME);
 
-        /* Time not yet handled
-        cell_text = gtk_cell_renderer_text_new();
-        column = gtk_tree_view_column_new_with_attributes("Time",
-                cell_text, "text", PLAYER_COLUMN_TIME, NULL);
-        gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-        gtk_tree_view_column_set_resizable(column, TRUE);*/
-
-        /* Artist */
+        /* Artist  */
         cell_text = gtk_cell_renderer_text_new();
         column = gtk_tree_view_column_new_with_attributes("Artist",
-                cell_text, "text", PLAYER_COLUMN_ARTIST, NULL);
+                cell_text, "markup", PLAYER_COLUMN_ARTIST, NULL);
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
         gtk_tree_view_column_set_resizable(column, TRUE);
-        gtk_tree_view_column_set_sort_column_id(column, PLAYER_COLUMN_ARTIST);
-
-        /* Album */
-        cell_text = gtk_cell_renderer_text_new();
-        column = gtk_tree_view_column_new_with_attributes("Album",
-                cell_text, "text", PLAYER_COLUMN_ALBUM, NULL);
-        gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-        gtk_tree_view_column_set_resizable(column, TRUE);
-        gtk_tree_view_column_set_sort_column_id(column, PLAYER_COLUMN_ALBUM);
-
-        /* Genre */
-        cell_text = gtk_cell_renderer_text_new();
-        column = gtk_tree_view_column_new_with_attributes("Genre",
-                cell_text, "text", PLAYER_COLUMN_GENRE, NULL);
-        g_object_set(cell_text, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-        gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-        gtk_tree_view_column_set_resizable(column, TRUE);
-        gtk_tree_view_column_set_sort_column_id(column, PLAYER_COLUMN_GENRE);
+        gtk_tree_view_column_set_sort_column_id(column, PLAYER_COLUMN_ARTIST);;
 
         scroller = gtk_scrolled_window_new(NULL, NULL);
         gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroller),
@@ -132,32 +109,37 @@ static void append_track(gpointer data, gpointer p_store)
 {
         struct TrackAddStore* store;
         MediaInfo *media;
+        gchar *formatted;
 
         media = (MediaInfo*)data;
         store = (struct TrackAddStore*)p_store;
 
         gtk_list_store_append(store->model, &(store->iter));
-        gtk_list_store_set(store->model, &(store->iter),
-                PLAYER_COLUMN_NAME, media->title, -1);
 
-        if (media->artist)
-                gtk_list_store_set(store->model, &(store->iter),
-                        PLAYER_COLUMN_ARTIST, media->artist, -1);
-        else
-                gtk_list_store_set(store->model, &(store->iter),
-                        PLAYER_COLUMN_ARTIST, "Unknown Artist", -1);
-        if (media->album)
+        if (media->album) {
+                formatted = g_markup_printf_escaped("%s\n<span color='darkgrey'><small>%s</small></span>",
+                        media->title, media->album);
                 gtk_list_store_set(store->model, &(store->iter),
                         PLAYER_COLUMN_ALBUM, media->album, -1);
-        else
+        } else {
+                formatted = g_markup_printf_escaped("%s\n<span color='darkgrey'><small>%s</small></span>",
+                        media->title, "Unknown Album");
                 gtk_list_store_set(store->model, &(store->iter),
                         PLAYER_COLUMN_ALBUM, "Unknown Album", -1);
-        if (media->genre)
-                gtk_list_store_set(store->model, &(store->iter),
-                        PLAYER_COLUMN_GENRE, media->genre, -1);
+        }
+
+        gtk_list_store_set(store->model, &(store->iter),
+                PLAYER_COLUMN_NAME, formatted, -1);
+        g_free(formatted);
+
+        if (media->artist)
+                formatted = g_markup_printf_escaped("<span color='darkgrey'>%s</span>", media->artist);
         else
-                gtk_list_store_set(store->model, &(store->iter),
-                        PLAYER_COLUMN_GENRE, "Unknown Genre", -1);
+                formatted = g_markup_printf_escaped("<span color='darkgrey'>%s</span>", "Unknown Artist");
+
+        gtk_list_store_set(store->model, &(store->iter),
+                PLAYER_COLUMN_ARTIST, formatted, -1);
+        g_free(formatted);
 
         gtk_list_store_set(store->model, &(store->iter),
                 PLAYER_COLUMN_INFO, media, -1);
@@ -173,8 +155,10 @@ void player_view_set_list(PlayerView *self, GSList* list)
 
         store.model = gtk_list_store_new(PLAYER_COLUMNS,
                 G_TYPE_STRING, /* Playing char */
-                G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
-                G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
+                G_TYPE_STRING, G_TYPE_STRING,
+                G_TYPE_STRING, /* < Empty */
+                G_TYPE_STRING, /* Album */
+                G_TYPE_POINTER);
 
         g_slist_foreach(list, &append_track, (gpointer)&store);
         gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store.model),
