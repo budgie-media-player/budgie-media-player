@@ -27,9 +27,6 @@
 
 /* Private storage */
 struct _BudgieStatusAreaPrivate {
-        gchar *title_string;
-        gchar *time_string;
-        gchar *remaining_string;
         gulong seek_id;
 };
 
@@ -124,16 +121,6 @@ static void budgie_status_area_init(BudgieStatusArea *self)
 
 static void budgie_status_area_dispose(GObject *object)
 {
-        BudgieStatusArea *self;
-
-        self = BUDGIE_STATUS_AREA(object);
-        if (self->priv->title_string)
-                g_free(self->priv->title_string);
-        if (self->priv->time_string)
-                g_free(self->priv->time_string);
-        if (self->priv->remaining_string)
-                g_free(self->priv->remaining_string);
-
         /* Destruct */
         G_OBJECT_CLASS (budgie_status_area_parent_class)->dispose (object);
 }
@@ -152,16 +139,14 @@ void budgie_status_area_set_media(BudgieStatusArea *self, MediaInfo *info)
         const gchar *cache;
         gchar *album, *path;
         GdkPixbuf *buf;
-        gchar *fallback;
-
-        if (self->priv->title_string)
-                g_free(self->priv->title_string);
+        gchar *fallback = NULL;
+        gchar *title_string = NULL;
 
         if (info->artist)
-                self->priv->title_string = g_markup_printf_escaped("<b>%s</b>\n<small>%s</small>",
+                title_string = g_markup_printf_escaped("<b>%s</b>\n<small>%s</small>",
                         info->title, info->artist);
         else
-                self->priv->title_string = g_markup_printf_escaped("<b>%s</b>", info->title);
+                title_string = g_markup_printf_escaped("<b>%s</b>", info->title);
 
         /* media-art path for images */
         cache = g_get_user_cache_dir();
@@ -189,23 +174,21 @@ void budgie_status_area_set_media(BudgieStatusArea *self, MediaInfo *info)
                 gtk_image_set_from_icon_name(GTK_IMAGE(self->image),
                         fallback, GTK_ICON_SIZE_DIALOG);
         }
-        gtk_label_set_markup(GTK_LABEL(self->label), self->priv->title_string);
+        gtk_label_set_markup(GTK_LABEL(self->label), title_string);
         gtk_label_set_max_width_chars(GTK_LABEL(self->label), 1);
         gtk_widget_queue_draw(GTK_WIDGET(self));
+
+        g_free(title_string);
 }
 
 void budgie_status_area_set_media_time(BudgieStatusArea *self, gint64 max, gint64 current)
 {
-        if (self->priv->time_string)
-                g_free(self->priv->time_string);
-        if (self->priv->remaining_string)
-                g_free(self->priv->remaining_string);
+        gchar *time_string = NULL;
+        gchar *remaining_string = NULL;
 
         /* Clear info */
         if (max < 0) {
                 gtk_widget_set_visible(self->slider, FALSE);
-                gtk_label_set_markup(GTK_LABEL(self->time_label), "");
-                gtk_label_set_markup(GTK_LABEL(self->remaining_label), "");
                 return;
         }
         gtk_widget_set_visible(self->slider, TRUE);
@@ -213,8 +196,8 @@ void budgie_status_area_set_media_time(BudgieStatusArea *self, gint64 max, gint6
 
         remaining = (max - current)/GST_SECOND;
         elapsed = current/GST_SECOND;
-        self->priv->time_string = format_seconds(elapsed, FALSE);
-        self->priv->remaining_string = format_seconds(remaining, TRUE);
+        time_string = format_seconds(elapsed, FALSE);
+        remaining_string = format_seconds(remaining, TRUE);
 
         /* Update slider */
         current /= GST_SECOND;
@@ -225,8 +208,11 @@ void budgie_status_area_set_media_time(BudgieStatusArea *self, gint64 max, gint6
         g_signal_handler_unblock(self->slider, self->priv->seek_id);
 
         /* Update labels */
-        gtk_label_set_markup(GTK_LABEL(self->time_label), self->priv->time_string);
-        gtk_label_set_markup(GTK_LABEL(self->remaining_label), self->priv->remaining_string);
+        gtk_label_set_markup(GTK_LABEL(self->time_label), time_string);
+        gtk_label_set_markup(GTK_LABEL(self->remaining_label), remaining_string);
+
+        g_free(time_string);
+        g_free(remaining_string);
 }
 
 static void changed_cb(GtkWidget *widget, gdouble value, gpointer userdata)
