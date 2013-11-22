@@ -276,6 +276,17 @@ void budgie_control_bar_set_show_video(BudgieControlBar *self, gboolean show)
 
 void budgie_control_bar_set_show_playback(BudgieControlBar *self, gboolean show)
 {
+        GtkStyleContext *context;
+
+        context = gtk_widget_get_style_context(GTK_WIDGET(self));
+
+        if (show) {
+                gtk_style_context_add_class(context, "view");
+                gtk_style_context_add_class(context, "content-view");
+        } else {
+                gtk_style_context_remove_class(context, "view");
+                gtk_style_context_remove_class(context, "content-view");
+        }
         gtk_widget_set_visible(self->playback, show);
 }
 
