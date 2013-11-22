@@ -118,14 +118,14 @@ void budgie_db_store_media(BudgieDB *self, MediaInfo *info)
         uint8_t *store = NULL;
 
         /* Path is the unique key */
-        datum key = { (char*)info->path, strlen(info->path)+1 };
+        datum key = { (char*)info->path, ((int)strlen(info->path))+1 };
 
         if (!budgie_db_serialize(info, &store)) {
                 g_warning("Unable to serialize data!");
                 goto end;
         }
         value.dptr = (char*)store;
-        value.dsize = malloc_usable_size(store);;
+        value.dsize = (int)malloc_usable_size(store);;
 
         gdbm_store(self->priv->db, key, value, GDBM_REPLACE);
 end:
@@ -138,7 +138,7 @@ MediaInfo* budgie_db_get_media(BudgieDB *self, gchar *path)
         datum value;
         MediaInfo *ret = NULL;
         uint8_t* store = NULL;
-        datum key = { (char*)path, strlen(path)+1 };
+        datum key = { (char*)path, (int)strlen(path)+1 };
 
         memset(&value, 0, sizeof(datum));
         value = gdbm_fetch(self->priv->db, key);
@@ -340,9 +340,9 @@ static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target)
 {
         uint8_t* data = NULL;
         gboolean ret = FALSE;
-        unsigned int length = 0;
-        unsigned int size = 0;
-        unsigned int offset = 0;
+        size_t length = 0;
+        size_t size = 0;
+        size_t offset = 0;
 
         /* 5 member fields */
         if (info->title)
@@ -432,7 +432,7 @@ static gboolean budgie_db_deserialize(uint8_t* source, MediaInfo **target)
         unsigned int title_len, artist_len;
         unsigned int album_len, genre_len;
         unsigned int mime_len;
-        unsigned int offset = 0;
+        size_t offset = 0;
         gboolean op = FALSE;
 
         ret = malloc(sizeof(MediaInfo));
