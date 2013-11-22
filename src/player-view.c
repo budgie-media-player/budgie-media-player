@@ -162,7 +162,7 @@ void player_view_set_list(PlayerView *self, GSList* list)
 
         g_slist_foreach(list, &append_track, (gpointer)&store);
         gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store.model),
-                PLAYER_COLUMN_NAME, GTK_SORT_ASCENDING);
+                PLAYER_COLUMN_ALBUM, GTK_SORT_ASCENDING);
         gtk_tree_view_set_model(GTK_TREE_VIEW(self->tree),
                 GTK_TREE_MODEL(store.model));
         gtk_tree_view_set_search_column(GTK_TREE_VIEW(self->tree),
