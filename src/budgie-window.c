@@ -40,7 +40,7 @@ struct _BudgieWindowPrivate {
         GSList *tracks;
         gchar *uri;
         gulong volume_id;
-        gint64 duration;
+        guint64 duration;
         gboolean repeat;
         gboolean random;
         gboolean force_aspect;
@@ -377,7 +377,7 @@ static void init_styles(BudgieWindow *self)
         const gchar *data = PLAYER_CSS;
 
         css_provider = gtk_css_provider_new();
-        gtk_css_provider_load_from_data(css_provider, data, strlen(data), NULL);
+        gtk_css_provider_load_from_data(css_provider, data, (gssize)strlen(data)+1, NULL);
         screen = gdk_screen_get_default();
         gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(css_provider),
                 GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -522,7 +522,7 @@ static gboolean refresh_cb(gpointer userdata) {
 
         /* Get media duration */
         if (!GST_CLOCK_TIME_IS_VALID (self->priv->duration)) {
-                if (!gst_element_query_duration(self->gst_player, fmt, &self->priv->duration)) {
+                if (!gst_element_query_duration(self->gst_player, fmt, (gint64*)&self->priv->duration)) {
                         /* Not able to get the clock time, fix when
                          * we have added bus-state */
                         self->priv->duration = GST_CLOCK_TIME_NONE;
@@ -533,7 +533,7 @@ static gboolean refresh_cb(gpointer userdata) {
                 return TRUE;
 
         budgie_status_area_set_media_time(BUDGIE_STATUS_AREA(self->status),
-                self->priv->duration, track_current);
+                (gint64)self->priv->duration, track_current);
         return TRUE;
 }
 
