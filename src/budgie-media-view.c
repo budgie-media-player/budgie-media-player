@@ -39,6 +39,9 @@ static void item_activated_cb(GtkWidget *widget,
                               GtkTreePath *tree_path,
                               gpointer userdata);
 static void button_clicked_cb(GtkWidget *widget, gpointer userdata);
+static gint sort_list(GtkListBoxRow *row1,
+                      GtkListBoxRow *row2,
+                      gpointer userdata);
 
 static void budgie_media_view_get_property(GObject *object,
                                            guint prop_id,
@@ -231,6 +234,9 @@ static void budgie_media_view_init(BudgieMediaView *self)
         gtk_widget_set_halign(list, GTK_ALIGN_FILL);
         self->list = list;
 
+        /* Sort the column */
+        gtk_list_box_set_sort_func(GTK_LIST_BOX(list), sort_list,
+                (gpointer)self, NULL);
         /* Scroller for the listbox */
         scroll = gtk_scrolled_window_new(NULL, NULL);
         gtk_container_add(GTK_CONTAINER(scroll), list);
@@ -474,4 +480,31 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
         }
 
         g_ptr_array_free(results, TRUE);
+}
+
+static gint sort_list(GtkListBoxRow *row1,
+                      GtkListBoxRow *row2,
+                      gpointer userdata)
+{
+        /* Must revisit this function, but we need to switch to a new
+         * class first, so that we can track MediaInfo, and do album
+         * comparisons */
+        GList *children;
+        GtkWidget *label1, *label2;
+        const gchar *text1, *text2;
+        int ret;
+
+        children = gtk_container_get_children(GTK_CONTAINER(row1));
+        label1 = (GtkWidget*)g_list_nth_data(children, 0);
+        text1 = gtk_label_get_text(GTK_LABEL(label1));
+        g_list_free(children);
+
+        children = gtk_container_get_children(GTK_CONTAINER(row2));
+        label2 = (GtkWidget*)g_list_nth_data(children, 0);
+        text2 = gtk_label_get_text(GTK_LABEL(label2));
+        g_list_free(children);
+
+        ret = g_ascii_strcasecmp(text1, text2);
+
+        return ret;
 }
