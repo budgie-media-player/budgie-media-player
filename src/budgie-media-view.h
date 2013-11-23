@@ -38,6 +38,12 @@ typedef struct _BudgieMediaViewClass   BudgieMediaViewClass;
 #define IS_BUDGIE_MEDIA_VIEW_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), BUDGIE_MEDIA_VIEW_TYPE))
 #define BUDGIE_MEDIA_VIEW_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), BUDGIE_MEDIA_VIEW_TYPE, BudgieMediaViewClass))
 
+typedef enum {
+        MEDIA_MODE_ALBUMS = 0,
+        MEDIA_MODE_SONGS,
+        MEDIA_MODE_VIDEOS,
+} BudgieMediaMode;
+
 /* BudgieMediaView object */
 struct _BudgieMediaView {
         GtkBin parent;
@@ -48,6 +54,7 @@ struct _BudgieMediaView {
         GtkWidget *icon_view;
 
         /* Selection mode */
+        BudgieMediaMode mode;
         GtkWidget *albums;
         GtkWidget *songs;
         GtkWidget *videos;

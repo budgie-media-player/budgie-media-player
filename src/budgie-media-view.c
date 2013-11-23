@@ -34,6 +34,7 @@ static void budgie_media_view_init(BudgieMediaView *self);
 static void budgie_media_view_dispose(GObject *object);
 
 static void update_db(BudgieMediaView *self);
+static void set_display(BudgieMediaView *self, GPtrArray *results);
 static void item_activated_cb(GtkWidget *widget,
                               GtkTreePath *tree_path,
                               gpointer userdata);
@@ -352,14 +353,8 @@ static void item_activated_cb(GtkWidget *widget,
         GValue v_album = G_VALUE_INIT;
         GValue v_path = G_VALUE_INIT;
         GdkPixbuf *pixbuf;
-        GtkStyleContext *style;
         const char *album, *path;
-        /* Media infos */
         GPtrArray *results = NULL;
-        MediaInfo *current = NULL;
-        int i;
-        /* Item to append to list */
-        GtkWidget *label;
 
         /* Grab the model and iter */
         self = BUDGIE_MEDIA_VIEW(userdata);
@@ -390,6 +385,63 @@ static void item_activated_cb(GtkWidget *widget,
                 MATCH_QUERY_EXACT, (gchar*)album, -1, &results))
                 goto end;
 
+        /* Got this far */
+        set_display(self, results);
+end:
+        g_value_unset(&v_path);
+        g_value_unset(&v_album);
+}
+
+static void button_clicked_cb(GtkWidget *widget, gpointer userdata)
+{
+        BudgieMediaView *self;
+        GPtrArray *results = NULL;
+
+        self = BUDGIE_MEDIA_VIEW(userdata);
+
+        if (widget == self->albums) {
+                self->mode = MEDIA_MODE_ALBUMS;
+                gtk_stack_set_visible_child_name(GTK_STACK(self->stack),
+                        "albums");
+        } else if (widget == self->songs) {
+                self->mode = MEDIA_MODE_SONGS;
+
+                /* Populate all songs */
+                if (!budgie_db_search_field(self->db, MEDIA_QUERY_MIME,
+                        MATCH_QUERY_START, "audio/", -1, &results))
+                        /** Raise a warning somewhere? */
+                        g_warning("No tracks found");
+
+                set_display(self, results);
+                gtk_stack_set_visible_child_name(GTK_STACK(self->stack),
+                        "tracks");
+        } else if (widget == self->videos) {
+                self->mode = MEDIA_MODE_VIDEOS;
+
+                /* Populate all songs */
+                if (!budgie_db_search_field(self->db, MEDIA_QUERY_MIME,
+                        MATCH_QUERY_START, "video/", -1, &results))
+                        /** Raise a warning somewhere? */
+                        g_warning("No tracks found");
+
+                set_display(self, results);
+                gtk_stack_set_visible_child_name(GTK_STACK(self->stack),
+                        "tracks");
+        }
+}
+
+static void set_display(BudgieMediaView *self, GPtrArray *results)
+{
+        GtkStyleContext *style;
+        /* Media infos */
+        MediaInfo *current = NULL;
+        int i;
+        /* Item to append to list */
+        GtkWidget *label;
+
+        gtk_container_foreach(GTK_CONTAINER(self->list),
+                (GtkCallback)gtk_widget_destroy, NULL);
+
         /* Extract the fields */
         for (i=0; i < results->len; i++) {
                 current = (MediaInfo*)results->pdata[i];
@@ -403,16 +455,23 @@ static void item_activated_cb(GtkWidget *widget,
                 style = gtk_widget_get_style_context(label);
                 /* Users need to know that nothing *works* yet as such */
                 gtk_style_context_add_class(style, "dim-label");
+
+                /* Currently free this, won't always be the case */
                 free_media_info((gpointer)current);
         }
 
-        g_ptr_array_free(results, TRUE);
-end:
-        g_value_unset(&v_path);
-        g_value_unset(&v_album);
-}
+        switch (self->mode) {
+                case MEDIA_MODE_SONGS:
+                        gtk_image_set_from_icon_name(GTK_IMAGE(self->image),
+                                "folder-music-symbolic", GTK_ICON_SIZE_INVALID);
+                        break;
+                case MEDIA_MODE_VIDEOS:
+                        gtk_image_set_from_icon_name(GTK_IMAGE(self->image),
+                                "folder-videos-symbolic", GTK_ICON_SIZE_INVALID);
+                        break;
+                default:
+                        break;
+        }
 
-static void button_clicked_cb(GtkWidget *widget, gpointer userdata)
-{
-        /* Implemented in next commit */
+        g_ptr_array_free(results, TRUE);
 }
