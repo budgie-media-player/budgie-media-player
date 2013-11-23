@@ -120,16 +120,45 @@ static void budgie_media_view_get_property(GObject *object,
 
 static void budgie_media_view_init(BudgieMediaView *self)
 {
+        GtkWidget *controls;
+        GtkWidget *main_layout;
         GtkWidget *stack;
         GtkWidget *icon_view, *scroll;
+        GtkWidget *button;
         GtkStyleContext *style;
         GtkWidget *image, *list, *view_page;
+        GtkWidget *top_frame;
+
+        /* Main layout of view */
+        top_frame = gtk_frame_new(NULL);
+        main_layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        gtk_container_add(GTK_CONTAINER(self), top_frame);
+        gtk_container_add(GTK_CONTAINER(top_frame), main_layout);
+
+        style = gtk_widget_get_style_context(top_frame);
+        gtk_style_context_add_class(style, "view");
+        gtk_style_context_add_class(style, "content-view");
+
+        /* To switch between media types */
+        controls = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        gtk_container_set_border_width(GTK_CONTAINER(controls), 3);
+        style = gtk_widget_get_style_context(controls);
+        gtk_style_context_add_class(style, "linked");
+        gtk_box_pack_start(GTK_BOX(main_layout), controls, FALSE, FALSE, 0);
+
+        button = gtk_toggle_button_new_with_label("Albums");
+        gtk_box_pack_start(GTK_BOX(controls), button, FALSE, FALSE, 0);
+
+        button = gtk_toggle_button_new_with_label("All media");
+        gtk_box_pack_start(GTK_BOX(controls), button, FALSE, FALSE, 0);
+
+        gtk_widget_set_halign(controls, GTK_ALIGN_CENTER);
 
         /* Stack happens to be our main content */
         stack = gtk_stack_new();
         gtk_stack_set_transition_type(GTK_STACK(stack),
                 GTK_STACK_TRANSITION_TYPE_CROSSFADE);
-        gtk_container_add(GTK_CONTAINER(self), stack);
+        gtk_box_pack_start(GTK_BOX(main_layout), stack, TRUE, TRUE, 0);
         self->stack = stack;
 
         /* Set up our icon view */
@@ -185,10 +214,10 @@ static void budgie_media_view_init(BudgieMediaView *self)
         gtk_container_add(GTK_CONTAINER(scroll), list);
         gtk_box_pack_start(GTK_BOX(view_page), scroll, TRUE, TRUE, 0);
         gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
-                GTK_SHADOW_ETCHED_IN);
+                GTK_SHADOW_NONE);
 
         style = gtk_widget_get_style_context(list);
-        /* Grainy style seen in Adwaita */
+        /* Grainy style seen in Adwaita, might remove it and add padding */
         gtk_style_context_add_class(style, "view");
         gtk_style_context_add_class(style, "content-view");
         /* Better looking scroll bars */
