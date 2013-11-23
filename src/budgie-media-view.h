@@ -47,6 +47,11 @@ struct _BudgieMediaView {
 
         GtkWidget *icon_view;
 
+        /* Selection mode */
+        GtkWidget *albums;
+        GtkWidget *songs;
+        GtkWidget *videos;
+
         /* Tracks page */
         GtkWidget *image;
         GtkWidget *list;

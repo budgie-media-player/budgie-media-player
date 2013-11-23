@@ -37,6 +37,7 @@ static void update_db(BudgieMediaView *self);
 static void item_activated_cb(GtkWidget *widget,
                               GtkTreePath *tree_path,
                               gpointer userdata);
+static void button_clicked_cb(GtkWidget *widget, gpointer userdata);
 
 static void budgie_media_view_get_property(GObject *object,
                                            guint prop_id,
@@ -146,10 +147,30 @@ static void budgie_media_view_init(BudgieMediaView *self)
         gtk_style_context_add_class(style, "linked");
         gtk_box_pack_start(GTK_BOX(main_layout), controls, FALSE, FALSE, 0);
 
-        button = gtk_toggle_button_new_with_label("Albums");
+        button = gtk_radio_button_new_with_label(NULL, "Albums");
+        self->albums = button;
+        g_object_set(button, "draw-indicator", FALSE, NULL);
+        g_signal_connect(button, "clicked", G_CALLBACK(button_clicked_cb),
+                (gpointer)self);
+        gtk_widget_set_can_focus(button, FALSE);
         gtk_box_pack_start(GTK_BOX(controls), button, FALSE, FALSE, 0);
 
-        button = gtk_toggle_button_new_with_label("All media");
+        button = gtk_radio_button_new_with_label_from_widget(
+                GTK_RADIO_BUTTON(self->albums), "Songs");
+        self->songs = button;
+        g_object_set(button, "draw-indicator", FALSE, NULL);
+        g_signal_connect(button, "clicked", G_CALLBACK(button_clicked_cb),
+                (gpointer)self);
+        gtk_widget_set_can_focus(button, FALSE);
+        gtk_box_pack_start(GTK_BOX(controls), button, FALSE, FALSE, 0);
+
+        button = gtk_radio_button_new_with_label_from_widget(
+                GTK_RADIO_BUTTON(self->albums), "Videos");
+        self->videos = button;
+        g_object_set(button, "draw-indicator", FALSE, NULL);
+        g_signal_connect(button, "clicked", G_CALLBACK(button_clicked_cb),
+                (gpointer)self);
+        gtk_widget_set_can_focus(button, FALSE);
         gtk_box_pack_start(GTK_BOX(controls), button, FALSE, FALSE, 0);
 
         gtk_widget_set_halign(controls, GTK_ALIGN_CENTER);
@@ -388,4 +409,9 @@ static void item_activated_cb(GtkWidget *widget,
 end:
         g_value_unset(&v_path);
         g_value_unset(&v_album);
+}
+
+static void button_clicked_cb(GtkWidget *widget, gpointer userdata)
+{
+        /* Implemented in next commit */
 }
