@@ -34,7 +34,9 @@ static void budgie_media_view_init(BudgieMediaView *self);
 static void budgie_media_view_dispose(GObject *object);
 
 static void update_db(BudgieMediaView *self);
-
+static void item_activated_cb(GtkWidget *widget,
+                              GtkTreePath *tree_path,
+                              gpointer userdata);
 
 static void budgie_media_view_get_property(GObject *object,
                                            guint prop_id,
@@ -51,8 +53,11 @@ enum {
 };
 
 enum {
-        ALBUM_TITLE,
+        ALBUM_TITLE = 0,
         ALBUM_PIXBUF,
+        ALBUM_ALBUM,
+        ALBUM_ARTIST,
+        ALBUM_ART_PATH,
         ALBUM_COLUMNS
 };
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
@@ -118,9 +123,12 @@ static void budgie_media_view_init(BudgieMediaView *self)
         GtkWidget *stack;
         GtkWidget *icon_view, *scroll;
         GtkStyleContext *style;
+        GtkWidget *image, *list, *view_page;
 
         /* Stack happens to be our main content */
         stack = gtk_stack_new();
+        gtk_stack_set_transition_type(GTK_STACK(stack),
+                GTK_STACK_TRANSITION_TYPE_CROSSFADE);
         gtk_container_add(GTK_CONTAINER(self), stack);
         self->stack = stack;
 
@@ -144,6 +152,46 @@ static void budgie_media_view_init(BudgieMediaView *self)
         gtk_icon_view_set_spacing(GTK_ICON_VIEW(icon_view), 10);
         gtk_icon_view_set_item_orientation(GTK_ICON_VIEW(icon_view),
                 GTK_ORIENTATION_HORIZONTAL);
+
+        /* Fire on single click, display tracks */
+        gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(icon_view),
+                TRUE);
+        g_signal_connect(icon_view, "item-activated",
+                G_CALLBACK(item_activated_cb), (gpointer)self);
+
+        /* Set up our view page (tracks) */
+        view_page = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        gtk_container_set_border_width(GTK_CONTAINER(view_page), 0);
+        gtk_stack_add_named(GTK_STACK(stack), view_page, "tracks");
+
+        /* Image for album art */
+        image = gtk_image_new();
+        gtk_widget_set_halign(image, GTK_ALIGN_START);
+        gtk_widget_set_valign(image, GTK_ALIGN_CENTER);
+        g_object_set(image, "margin", 40, NULL);
+        gtk_box_pack_start(GTK_BOX(view_page), image, FALSE, FALSE, 0);
+        gtk_image_set_pixel_size(GTK_IMAGE(image), 256);
+        self->image = image;
+
+        /* Append tracks to a pretty listbox */
+        list = gtk_list_box_new();
+        gtk_widget_set_halign(list, GTK_ALIGN_FILL);
+        self->list = list;
+
+        /* Scroller for the listbox */
+        scroll = gtk_scrolled_window_new(NULL, NULL);
+        gtk_container_add(GTK_CONTAINER(scroll), list);
+        gtk_box_pack_start(GTK_BOX(view_page), scroll, TRUE, TRUE, 0);
+        gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
+                GTK_SHADOW_ETCHED_IN);
+
+        style = gtk_widget_get_style_context(list);
+        /* Grainy style seen in Adwaita */
+        gtk_style_context_add_class(style, "view");
+        gtk_style_context_add_class(style, "content-view");
+        /* Better looking scroll bars */
+        style = gtk_widget_get_style_context(scroll);
+        gtk_style_context_add_class(style, "osd");
 }
 
 static void budgie_media_view_dispose(GObject *object)
@@ -184,7 +232,9 @@ static void update_db(BudgieMediaView *self)
 
         /* We don't *yet* support album art, use generic symbol */
         theme = gtk_icon_theme_get_default();
-        model = gtk_list_store_new(ALBUM_COLUMNS, G_TYPE_STRING, GDK_TYPE_PIXBUF);
+        model = gtk_list_store_new(ALBUM_COLUMNS, G_TYPE_STRING,
+                GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING,
+                G_TYPE_STRING);
 
         /* Fallback */
         default_pixbuf = gtk_icon_theme_load_icon(theme, "folder-music-symbolic",
@@ -210,8 +260,16 @@ static void update_db(BudgieMediaView *self)
                 markup = g_markup_printf_escaped("<big>%s\n<span color='darkgrey'>%s</span></big>",
                         current->album, current->artist);
                 gtk_list_store_append(model, &iter);
-                gtk_list_store_set(model, &iter, ALBUM_TITLE, markup, -1);
-                gtk_list_store_set(model, &iter, ALBUM_PIXBUF, pixbuf, -1);
+
+                /* Set it in the list store */
+                gtk_list_store_set(model, &iter,
+                        ALBUM_TITLE, markup,
+                        ALBUM_PIXBUF, pixbuf,
+                        ALBUM_ALBUM, current->album,
+                        ALBUM_ARTIST, current->artist,
+                        ALBUM_ART_PATH, path,
+                        -1);
+
                 if (pixbuf != default_pixbuf)
                         g_object_unref(pixbuf);
                 g_free(markup);
@@ -229,4 +287,74 @@ fail:
         g_ptr_array_free(albums, TRUE);
         g_object_unref(default_pixbuf);
 
+}
+
+static void item_activated_cb(GtkWidget *widget,
+                              GtkTreePath *tree_path,
+                              gpointer userdata)
+{
+        BudgieMediaView *self;
+        GtkTreeModel *model;
+        GtkTreeIter iter;
+        GValue v_album = G_VALUE_INIT;
+        GValue v_path = G_VALUE_INIT;
+        GdkPixbuf *pixbuf;
+        GtkStyleContext *style;
+        const char *album, *path;
+        /* Media infos */
+        GPtrArray *results = NULL;
+        MediaInfo *current = NULL;
+        int i;
+        /* Item to append to list */
+        GtkWidget *label;
+
+        /* Grab the model and iter */
+        self = BUDGIE_MEDIA_VIEW(userdata);
+        model = gtk_icon_view_get_model(GTK_ICON_VIEW(widget));
+        gtk_tree_model_get_iter(model, &iter, tree_path);
+
+        /* Get the album in question */
+        gtk_tree_model_get_value(model, &iter, ALBUM_ALBUM, &v_album);
+        album = g_value_get_string(&v_album);
+
+        /* Path of image */
+        gtk_tree_model_get_value(model, &iter, ALBUM_ART_PATH, &v_path);
+        path= g_value_get_string(&v_path);
+
+        /* Consider splitting this into another function.. */
+        gtk_stack_set_visible_child_name(GTK_STACK(self->stack),
+                "tracks");
+
+        /* Set the image */
+        pixbuf = gdk_pixbuf_new_from_file_at_size(path, 256, 256, NULL);
+        if (pixbuf)
+                gtk_image_set_from_pixbuf(GTK_IMAGE(self->image), pixbuf);
+        else
+                gtk_image_set_from_icon_name(GTK_IMAGE(self->image),
+                        "folder-music-symbolic", GTK_ICON_SIZE_INVALID);
+
+        if (!budgie_db_search_field(self->db, MEDIA_QUERY_ALBUM,
+                MATCH_QUERY_EXACT, (gchar*)album, -1, &results))
+                goto end;
+
+        /* Extract the fields */
+        for (i=0; i < results->len; i++) {
+                current = (MediaInfo*)results->pdata[i];
+                label = gtk_label_new(current->title);
+                gtk_container_add(GTK_CONTAINER(self->list), label);
+                gtk_widget_set_halign(label, GTK_ALIGN_START);
+                gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+                /* Little bit of left padding */
+                g_object_set(label, "margin-left", 10, NULL);
+                gtk_widget_show(label);
+                style = gtk_widget_get_style_context(label);
+                /* Users need to know that nothing *works* yet as such */
+                gtk_style_context_add_class(style, "dim-label");
+                free_media_info((gpointer)current);
+        }
+
+        g_ptr_array_free(results, TRUE);
+end:
+        g_value_unset(&v_path);
+        g_value_unset(&v_album);
 }

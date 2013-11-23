@@ -44,7 +44,12 @@ struct _BudgieMediaView {
         BudgieDB *db;
 
         GtkWidget *stack;
+
         GtkWidget *icon_view;
+
+        /* Tracks page */
+        GtkWidget *image;
+        GtkWidget *list;
 };
 
 /* BudgieMediaView class definition */
