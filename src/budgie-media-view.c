@@ -234,6 +234,7 @@ static void budgie_media_view_init(BudgieMediaView *self)
         scroll = gtk_scrolled_window_new(NULL, NULL);
         gtk_container_add(GTK_CONTAINER(scroll), list);
         gtk_box_pack_start(GTK_BOX(view_page), scroll, TRUE, TRUE, 0);
+        g_object_set(scroll, "margin-top", 40, NULL);
         gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
                 GTK_SHADOW_NONE);
 
