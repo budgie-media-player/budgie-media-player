@@ -294,6 +294,9 @@ gboolean budgie_db_search_field(BudgieDB *self,
                         case MEDIA_QUERY_GENRE:
                                 test = media->genre;
                                 break;
+                        case MEDIA_QUERY_MIME:
+                                test = media->mime;
+                                break;
                         default:
                                 break;
                 }
