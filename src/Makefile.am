@@ -26,8 +26,6 @@ budgie_SOURCES = \
 	budgie-settings-view.h \
 	budgie-status-area.c \
 	budgie-status-area.h \
-	player-view.c \
-	player-view.h \
 	util.c \
 	util.h \
 	common.h \

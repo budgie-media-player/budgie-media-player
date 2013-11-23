@@ -30,7 +30,6 @@
 #include <gst/gst.h>
 
 #include "budgie-status-area.h"
-#include "player-view.h"
 #include "budgie-control-bar.h"
 #include "budgie-settings-view.h"
 #include "util.h"
@@ -74,7 +73,6 @@ struct _BudgieWindow {
         BudgieDB *db;
 
         GtkWidget *status;
-        GtkWidget *player;
 #ifdef TESTING
         GtkWidget *view;
 #endif

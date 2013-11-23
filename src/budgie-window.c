@@ -103,7 +103,6 @@ static void budgie_window_init(BudgieWindow *self)
         GtkWidget *volume;
         GtkWidget *search;
         GtkWidget *status;
-        GtkWidget *player;
 #ifdef TESTING
         GtkWidget *view;
 #endif
@@ -254,10 +253,6 @@ static void budgie_window_init(BudgieWindow *self)
         self->stack = stack;
         gtk_box_pack_start(GTK_BOX(layout), stack, TRUE, TRUE, 0);
 
-        /* Player */
-        player = player_view_new();
-        self->player = player;
-        gtk_stack_add_named(GTK_STACK(stack), player, "player");
         self->priv->current_page = "player";
 
 #ifdef TESTING
@@ -317,7 +312,6 @@ static void budgie_window_init(BudgieWindow *self)
         g_timeout_add(1000, refresh_cb, (gpointer)self);
 
         length = g_slist_length(self->priv->tracks);
-        player_view_set_list(PLAYER_VIEW(self->player), self->priv->tracks);
         /* Start thread from idle queue */
         if (length == 0)
                 g_idle_add(load_media_t, (gpointer)self);
@@ -393,7 +387,6 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
 
         self = BUDGIE_WINDOW(userdata);
         self->priv->duration = GST_CLOCK_TIME_NONE;
-        media = player_view_get_current_selection(PLAYER_VIEW(self->player));
         if (!media) /* Revisit */
                 return;
 
@@ -426,7 +419,6 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         self->priv->uri = uri;
         g_object_set(self->gst_player, "uri", self->priv->uri, NULL);
         gst_element_set_state(self->gst_player, GST_STATE_PLAYING);
-        player_view_set_current_selection(PLAYER_VIEW(self->player), media);
 
         /* Update media controls */
         gtk_widget_hide(self->play);
@@ -462,15 +454,10 @@ static void next_cb(GtkWidget *widget, gpointer userdata)
         BudgieWindow *self;
 
         self = BUDGIE_WINDOW(userdata);
-        if (!self->priv->random)
-                next = player_view_get_next_item(PLAYER_VIEW(self->player));
-        else
-                next = player_view_get_random_item(PLAYER_VIEW(self->player));
         if (!next) /* Revisit */
                 return;
 
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
-        player_view_set_current_selection(PLAYER_VIEW(self->player), next);
         /* In future only do this if not paused */
         play_cb(NULL, userdata);
 }
@@ -481,15 +468,10 @@ static void prev_cb(GtkWidget *widget, gpointer userdata)
         BudgieWindow *self;
 
         self = BUDGIE_WINDOW(userdata);
-        if (!self->priv->random)
-                prev = player_view_get_previous_item(PLAYER_VIEW(self->player));
-        else
-                prev = player_view_get_random_item(PLAYER_VIEW(self->player));
         if (!prev) /* Revisit */
                 return;
 
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
-        player_view_set_current_selection(PLAYER_VIEW(self->player), prev);
         /* In future only do this if not paused */
         play_cb(NULL, userdata);
 }
@@ -639,7 +621,6 @@ static gpointer load_media(gpointer data)
         g_slist_free_full(tracks, free_media_info);
         /* Use budgiedb's tracks, not our own list */
         self->priv->tracks = budgie_db_get_all_media(self->db);
-        player_view_set_list(PLAYER_VIEW(self->player), self->priv->tracks);
 
         budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
                 BUDGIE_ACTION_RELOAD, TRUE);
