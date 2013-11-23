@@ -225,20 +225,32 @@ static void budgie_media_view_init(BudgieMediaView *self)
         /* Info box stores image, count, etc. */
         info_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
         gtk_box_pack_start(GTK_BOX(view_page), info_box, FALSE, FALSE, 0);
+        gtk_widget_set_valign(info_box, GTK_ALIGN_FILL);
 
         /* Image for album art */
         image = gtk_image_new();
         gtk_widget_set_halign(image, GTK_ALIGN_START);
         gtk_widget_set_valign(image, GTK_ALIGN_CENTER);
-        g_object_set(image, "margin", 40, NULL);
+        g_object_set(image, "margin-top", 20, NULL);
+        g_object_set(image, "margin-left", 20, NULL);
+        g_object_set(image, "margin-right", 20, NULL);
         gtk_box_pack_start(GTK_BOX(info_box), image, FALSE, FALSE, 0);
         gtk_image_set_pixel_size(GTK_IMAGE(image), 256);
         self->image = image;
+
+        /* Album, etc, */
+        label = gtk_label_new("");
+        gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
+        g_object_set(label, "margin-bottom", 10, NULL);
+        self->current_label = label;
+        gtk_box_pack_start(GTK_BOX(info_box), label, FALSE, FALSE, 0);
+        style = gtk_widget_get_style_context(label);
 
         /* Count label */
         label = gtk_label_new("");
         self->count_label = label;
         gtk_box_pack_start(GTK_BOX(info_box), label, FALSE, FALSE, 0);
+        gtk_widget_set_valign(label, GTK_ALIGN_END);
         style = gtk_widget_get_style_context(label);
         gtk_style_context_add_class(style, "dim-label");
 
@@ -254,7 +266,7 @@ static void budgie_media_view_init(BudgieMediaView *self)
         scroll = gtk_scrolled_window_new(NULL, NULL);
         gtk_container_add(GTK_CONTAINER(scroll), list);
         gtk_box_pack_start(GTK_BOX(view_page), scroll, TRUE, TRUE, 0);
-        g_object_set(scroll, "margin-top", 40, NULL);
+        g_object_set(scroll, "margin-top", 20, NULL);
         gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
                 GTK_SHADOW_NONE);
 
@@ -373,7 +385,9 @@ static void item_activated_cb(GtkWidget *widget,
         GValue v_path = G_VALUE_INIT;
         GdkPixbuf *pixbuf;
         const char *album, *path;
+        gchar *artist;
         GPtrArray *results = NULL;
+        gchar *info_string = NULL;
 
         /* Grab the model and iter */
         self = BUDGIE_MEDIA_VIEW(userdata);
@@ -403,6 +417,12 @@ static void item_activated_cb(GtkWidget *widget,
         if (!budgie_db_search_field(self->db, MEDIA_QUERY_ALBUM,
                 MATCH_QUERY_EXACT, (gchar*)album, -1, &results))
                 goto end;
+
+        artist = ((MediaInfo*)results->pdata[0])->artist;
+        info_string = g_strdup_printf("<big>%s</big><span color='darkgrey'>\n%s</span>", album, artist);
+        gtk_label_set_markup(GTK_LABEL(self->current_label),
+                info_string);
+        g_free(info_string);
 
         /* Got this far */
         set_display(self, results);
@@ -520,6 +540,8 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
         }
 
         gtk_label_set_text(GTK_LABEL(self->count_label), info_string);
+        if (self->mode != MEDIA_MODE_ALBUMS)
+                gtk_label_set_text(GTK_LABEL(self->current_label), "");
         g_free(info_string);
         g_ptr_array_free(results, TRUE);
 }

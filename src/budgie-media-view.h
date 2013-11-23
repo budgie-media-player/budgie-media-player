@@ -60,6 +60,7 @@ struct _BudgieMediaView {
         GtkWidget *videos;
 
         GtkWidget *count_label;
+        GtkWidget *current_label;
 
         /* Tracks page */
         GtkWidget *image;
