@@ -192,6 +192,8 @@ static void budgie_media_view_init(BudgieMediaView *self)
         icon_view = gtk_icon_view_new();
         self->icon_view = icon_view;
         scroll = gtk_scrolled_window_new(NULL, NULL);
+        gtk_scrolled_window_set_kinetic_scrolling(GTK_SCROLLED_WINDOW(scroll),
+                TRUE);
         gtk_container_add(GTK_CONTAINER(scroll), icon_view);
         gtk_stack_add_named(GTK_STACK(stack), scroll, "albums");
 
@@ -264,6 +266,8 @@ static void budgie_media_view_init(BudgieMediaView *self)
                 (gpointer)self, NULL);
         /* Scroller for the listbox */
         scroll = gtk_scrolled_window_new(NULL, NULL);
+        gtk_scrolled_window_set_kinetic_scrolling(GTK_SCROLLED_WINDOW(scroll),
+                TRUE);
         gtk_container_add(GTK_CONTAINER(scroll), list);
         gtk_box_pack_start(GTK_BOX(view_page), scroll, TRUE, TRUE, 0);
         g_object_set(scroll, "margin-top", 20, NULL);
