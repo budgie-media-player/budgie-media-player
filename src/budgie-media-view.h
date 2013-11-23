@@ -43,6 +43,7 @@ struct _BudgieMediaView {
         GtkBin parent;
         BudgieDB *db;
 
+        GtkWidget *stack;
         GtkWidget *icon_view;
 };
 

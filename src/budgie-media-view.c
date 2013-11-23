@@ -115,15 +115,21 @@ static void budgie_media_view_get_property(GObject *object,
 
 static void budgie_media_view_init(BudgieMediaView *self)
 {
+        GtkWidget *stack;
         GtkWidget *icon_view, *scroll;
         GtkStyleContext *style;
+
+        /* Stack happens to be our main content */
+        stack = gtk_stack_new();
+        gtk_container_add(GTK_CONTAINER(self), stack);
+        self->stack = stack;
 
         /* Set up our icon view */
         icon_view = gtk_icon_view_new();
         self->icon_view = icon_view;
         scroll = gtk_scrolled_window_new(NULL, NULL);
         gtk_container_add(GTK_CONTAINER(scroll), icon_view);
-        gtk_container_add(GTK_CONTAINER(self), scroll);
+        gtk_stack_add_named(GTK_STACK(stack), scroll, "albums");
 
         style = gtk_widget_get_style_context(icon_view);
         gtk_style_context_add_class(style, "view");
