@@ -142,6 +142,8 @@ static void budgie_media_view_init(BudgieMediaView *self)
         style = gtk_widget_get_style_context(icon_view);
         gtk_style_context_add_class(style, "view");
         gtk_style_context_add_class(style, "content-view");
+        style = gtk_widget_get_style_context(scroll);
+        gtk_style_context_add_class(style, "osd");
 
         /* Relevant columns */
         gtk_icon_view_set_markup_column(GTK_ICON_VIEW(icon_view),
