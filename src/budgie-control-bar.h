@@ -48,9 +48,6 @@ typedef enum {
         BUDGIE_ACTION_PAUSE,
         BUDGIE_ACTION_PREVIOUS,
         BUDGIE_ACTION_NEXT,
-#ifdef TESTING
-        BUDGIE_ACTION_BROWSE_VIEW,
-#endif
         BUDGIE_MAX_ACTIONS
 } BudgieAction;
 

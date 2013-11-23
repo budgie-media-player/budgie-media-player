@@ -73,9 +73,7 @@ struct _BudgieWindow {
         BudgieDB *db;
 
         GtkWidget *status;
-#ifdef TESTING
         GtkWidget *view;
-#endif
         GtkWidget *south_reveal;
 
         /* Header controls */

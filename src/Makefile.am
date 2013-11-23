@@ -22,6 +22,8 @@ budgie_SOURCES = \
 	budgie-window.h \
 	budgie-control-bar.c \
 	budgie-control-bar.h \
+	budgie-media-view.c \
+	budgie-media-view.h \
 	budgie-settings-view.c \
 	budgie-settings-view.h \
 	budgie-status-area.c \
@@ -30,11 +32,6 @@ budgie_SOURCES = \
 	util.h \
 	common.h \
 	main.c
-if TESTING
-budgie_SOURCES += \
-	budgie-media-view.c \
-	budgie-media-view.h
-endif
 
 budgie_CFLAGS = \
 	$(GTK3_CFLAGS) \

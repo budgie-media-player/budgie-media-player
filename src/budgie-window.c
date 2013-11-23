@@ -29,9 +29,7 @@
 
 #include "common.h"
 #include "budgie-window.h"
-#ifdef TESTING
-        #include "budgie-media-view.h"
-#endif
+#include "budgie-media-view.h"
 
 /* Private storage */
 struct _BudgieWindowPrivate {
@@ -103,9 +101,7 @@ static void budgie_window_init(BudgieWindow *self)
         GtkWidget *volume;
         GtkWidget *search;
         GtkWidget *status;
-#ifdef TESTING
         GtkWidget *view;
-#endif
         GtkWidget *toolbar;
         GtkWidget *south_reveal;
         GtkWidget *layout;
@@ -253,15 +249,13 @@ static void budgie_window_init(BudgieWindow *self)
         self->stack = stack;
         gtk_box_pack_start(GTK_BOX(layout), stack, TRUE, TRUE, 0);
 
-        self->priv->current_page = "player";
+        self->priv->current_page = "view";
 
-#ifdef TESTING
         /* Browse view */
         view = budgie_media_view_new(self->db);
         self->view = view;
         gtk_stack_add_named(GTK_STACK(stack), view, "view");
 
-#endif
         /* Video */
         video = gtk_drawing_area_new();
         self->video = video;
@@ -399,7 +393,7 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
                         gtk_widget_realize(self->video);
                 budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(self->toolbar), TRUE);
         } else {
-                next_child = "player";
+                next_child = "view";
                 budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(self->toolbar), FALSE);
                 self->priv->full_screen = FALSE;
                 full_screen_cb(widget, userdata);
@@ -763,14 +757,6 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
                         else
                                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), self->priv->current_page);
                         break;
-#ifdef TESTING
-                case BUDGIE_ACTION_BROWSE_VIEW:
-                        if (toggle)
-                                gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "view");
-                        else
-                                gtk_stack_set_visible_child_name(GTK_STACK(self->stack), self->priv->current_page);
-                        break;
-#endif
                 default:
                         break;
         }
