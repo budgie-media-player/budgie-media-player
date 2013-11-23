@@ -80,6 +80,7 @@ typedef enum {
         MEDIA_QUERY_ARTIST, /**<Query the artist */
         MEDIA_QUERY_ALBUM, /**<Query the album */
         MEDIA_QUERY_GENRE, /**<Query the genre */
+        MEDIA_QUERY_MIME, /**Query the mimetype */
         MEDIA_QUERY_MAX
 } MediaQuery;
 

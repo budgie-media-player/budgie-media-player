@@ -213,6 +213,9 @@ gboolean budgie_db_get_all_by_field(BudgieDB *self,
                         case MEDIA_QUERY_GENRE:
                                 append = media->genre;
                                 break;
+                        case MEDIA_QUERY_MIME:
+                                append = media->mime;
+                                break;
                         default:
                                 break;
                 }
