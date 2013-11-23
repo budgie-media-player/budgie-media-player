@@ -133,6 +133,8 @@ static void budgie_media_view_init(BudgieMediaView *self)
         GtkStyleContext *style;
         GtkWidget *image, *list, *view_page;
         GtkWidget *top_frame;
+        GtkWidget *label;
+        GtkWidget *info_box;
 
         /* Main layout of view */
         top_frame = gtk_frame_new(NULL);
@@ -220,14 +222,25 @@ static void budgie_media_view_init(BudgieMediaView *self)
         gtk_container_set_border_width(GTK_CONTAINER(view_page), 0);
         gtk_stack_add_named(GTK_STACK(stack), view_page, "tracks");
 
+        /* Info box stores image, count, etc. */
+        info_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        gtk_box_pack_start(GTK_BOX(view_page), info_box, FALSE, FALSE, 0);
+
         /* Image for album art */
         image = gtk_image_new();
         gtk_widget_set_halign(image, GTK_ALIGN_START);
         gtk_widget_set_valign(image, GTK_ALIGN_CENTER);
         g_object_set(image, "margin", 40, NULL);
-        gtk_box_pack_start(GTK_BOX(view_page), image, FALSE, FALSE, 0);
+        gtk_box_pack_start(GTK_BOX(info_box), image, FALSE, FALSE, 0);
         gtk_image_set_pixel_size(GTK_IMAGE(image), 256);
         self->image = image;
+
+        /* Count label */
+        label = gtk_label_new("");
+        self->count_label = label;
+        gtk_box_pack_start(GTK_BOX(info_box), label, FALSE, FALSE, 0);
+        style = gtk_widget_get_style_context(label);
+        gtk_style_context_add_class(style, "dim-label");
 
         /* Append tracks to a pretty listbox */
         list = gtk_list_box_new();
@@ -444,6 +457,8 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
         int i;
         /* Item to append to list */
         GtkWidget *label;
+        /* Info label */
+        gchar *info_string = NULL;
 
         gtk_container_foreach(GTK_CONTAINER(self->list),
                 (GtkCallback)gtk_widget_destroy, NULL);
@@ -466,19 +481,46 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
                 free_media_info((gpointer)current);
         }
 
+
         switch (self->mode) {
                 case MEDIA_MODE_SONGS:
                         gtk_image_set_from_icon_name(GTK_IMAGE(self->image),
                                 "folder-music-symbolic", GTK_ICON_SIZE_INVALID);
+                        if (results->len == 0)
+                                info_string = g_strdup_printf("No songs");
+                        else if (results->len == 1)
+                                info_string = g_strdup_printf("%d song",
+                                        results->len);
+                        else
+                                info_string = g_strdup_printf("%d songs",
+                                        results->len);
                         break;
                 case MEDIA_MODE_VIDEOS:
                         gtk_image_set_from_icon_name(GTK_IMAGE(self->image),
                                 "folder-videos-symbolic", GTK_ICON_SIZE_INVALID);
+                        if (results->len == 0)
+                                info_string = g_strdup_printf("No videos");
+                        else if (results->len == 1)
+                                info_string = g_strdup_printf("%d video",
+                                        results->len);
+                        else
+                                info_string = g_strdup_printf("%d videos",
+                                        results->len);
                         break;
                 default:
+                        if (results->len == 0)
+                                info_string = g_strdup_printf("No songs");
+                        else if (results->len == 1)
+                                info_string = g_strdup_printf("%d song",
+                                        results->len);
+                        else
+                                info_string = g_strdup_printf("%d songs",
+                                        results->len);
                         break;
         }
 
+        gtk_label_set_text(GTK_LABEL(self->count_label), info_string);
+        g_free(info_string);
         g_ptr_array_free(results, TRUE);
 }
 

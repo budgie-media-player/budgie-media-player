@@ -59,6 +59,8 @@ struct _BudgieMediaView {
         GtkWidget *songs;
         GtkWidget *videos;
 
+        GtkWidget *count_label;
+
         /* Tracks page */
         GtkWidget *image;
         GtkWidget *list;
