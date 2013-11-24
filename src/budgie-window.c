@@ -35,6 +35,7 @@
 struct _BudgieWindowPrivate {
         const gchar *current_page;
         GSettings *settings;
+        MediaInfo *media;
         GSList *tracks;
         gchar *uri;
         gulong volume_id;
@@ -72,6 +73,7 @@ static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata)
 static void settings_changed(GSettings *settings, gchar *key, gpointer userdata);
 static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpointer userdata);
 static void seek_cb(BudgieStatusArea *status, gint64 value, gpointer userdata);
+static void media_selected_cb(BudgieMediaView *view, gpointer info, gpointer userdata);
 
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
@@ -253,6 +255,8 @@ static void budgie_window_init(BudgieWindow *self)
 
         /* Browse view */
         view = budgie_media_view_new(self->db);
+        g_signal_connect(view, "media-selected",
+                G_CALLBACK(media_selected_cb), (gpointer)self);
         self->view = view;
         gtk_stack_add_named(GTK_STACK(stack), view, "view");
 
@@ -375,11 +379,12 @@ static void init_styles(BudgieWindow *self)
 static void play_cb(GtkWidget *widget, gpointer userdata)
 {
         BudgieWindow *self;
-        MediaInfo *media = NULL;
         gchar *uri;
         const gchar *next_child;
+        MediaInfo *media;
 
         self = BUDGIE_WINDOW(userdata);
+        media = self->priv->media;
         self->priv->duration = GST_CLOCK_TIME_NONE;
         if (!media) /* Revisit */
                 return;
@@ -772,4 +777,15 @@ static void seek_cb(BudgieStatusArea *status, gint64 value, gpointer userdata)
 
         gst_element_seek_simple(GST_ELEMENT(self->gst_player), GST_FORMAT_TIME,
                 flags, value);
+}
+
+static void media_selected_cb(BudgieMediaView *view, gpointer info, gpointer userdata)
+{
+        BudgieWindow *self;
+        MediaInfo *media;
+
+        self = BUDGIE_WINDOW(userdata);
+        media = (MediaInfo*)info;
+        self->priv->media = media;
+        play_cb(NULL, userdata);
 }
