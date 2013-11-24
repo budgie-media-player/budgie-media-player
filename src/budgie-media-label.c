@@ -44,7 +44,7 @@ static void budgie_media_label_set_property(GObject *object,
                                            GParamSpec *pspec);
 
 enum {
-        PROP_0, PROP_INFO, N_PROPERTIES
+        PROP_0, PROP_INFO, PROP_PLAYING, N_PROPERTIES
 };
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
@@ -58,6 +58,9 @@ static void budgie_media_label_class_init(BudgieMediaLabelClass *klass)
         obj_properties[PROP_INFO] =
         g_param_spec_pointer("info", "Info", "Info",
                 G_PARAM_CONSTRUCT | G_PARAM_WRITABLE);
+        obj_properties[PROP_PLAYING] =
+        g_param_spec_boolean("playing", "Playing", "Playing",
+                FALSE, G_PARAM_READWRITE);
 
         g_object_class->dispose = &budgie_media_label_dispose;
         g_object_class->set_property = &budgie_media_label_set_property;
@@ -78,7 +81,10 @@ static void budgie_media_label_set_property(GObject *object,
                 case PROP_INFO:
                         self->info = g_value_get_pointer((GValue*)value);
                         update_ui(self);
-                        /* TODO: Add update_ui */
+                        break;
+                case PROP_PLAYING:
+                        self->playing = g_value_get_boolean((GValue*)value);
+                        budgie_media_label_set_playing(self, self->playing);
                         break;
                 default:
                         G_OBJECT_WARN_INVALID_PROPERTY_ID (object,
@@ -98,6 +104,9 @@ static void budgie_media_label_get_property(GObject *object,
         switch (prop_id) {
                 case PROP_INFO:
                         g_value_set_pointer((GValue *)value, (gpointer)self->info);
+                        break;
+                case PROP_PLAYING:
+                        g_value_set_boolean((GValue *)value, self->playing);
                         break;
                 default:
                         G_OBJECT_WARN_INVALID_PROPERTY_ID (object,
@@ -132,8 +141,23 @@ GtkWidget* budgie_media_label_new(MediaInfo *info)
         self = g_object_new(BUDGIE_MEDIA_LABEL_TYPE,
                 "info", info,
                 "orientation", GTK_ORIENTATION_HORIZONTAL,
+                "playing", FALSE,
                 NULL);
         return GTK_WIDGET(self);
+}
+
+void budgie_media_label_set_playing(BudgieMediaLabel *self,
+                                    gboolean playing)
+{
+        GtkStyleContext *style;
+
+        style = gtk_widget_get_style_context(self->display);
+        if (playing)
+                gtk_style_context_remove_class(style, "dim-label");
+        else
+                gtk_style_context_add_class(style, "dim-label");
+
+        self->playing = playing;
 }
 
 static void update_ui(BudgieMediaLabel *self)

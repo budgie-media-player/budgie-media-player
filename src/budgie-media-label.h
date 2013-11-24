@@ -43,6 +43,7 @@ struct _BudgieMediaLabel {
         GtkBox parent;
         MediaInfo *info;
         GtkWidget *display;
+        gboolean playing;
 };
 
 /* BudgieMediaLabel class definition */
@@ -60,5 +61,13 @@ GType budgie_media_label_get_type(void);
  * @return A new BudgieMediaLabel
  */
 GtkWidget* budgie_media_label_new(MediaInfo *info);
+
+/**
+ * Marks this item as playing or not playing
+ * @param self Current BudgieMediaLabel instance
+ * @param playing Whether this item is considered to be playing
+ */
+void budgie_media_label_set_playing(BudgieMediaLabel *self,
+                                    gboolean playing);
 
 #endif /* budgie_media_label_h */
