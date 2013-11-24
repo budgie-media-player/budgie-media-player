@@ -423,7 +423,9 @@ static void item_activated_cb(GtkWidget *widget,
                 goto end;
 
         artist = ((MediaInfo*)results->pdata[0])->artist;
-        info_string = g_strdup_printf("<big>%s</big><span color='darkgrey'>\n%s</span>", album, artist);
+        info_string = g_markup_printf_escaped(
+                "<big>%s</big><span color='darkgrey'>\n%s</span>", album,
+                artist);
         gtk_label_set_markup(GTK_LABEL(self->current_label),
                 info_string);
         g_free(info_string);
