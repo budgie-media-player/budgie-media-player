@@ -53,6 +53,9 @@ struct _BudgieMediaView {
 
         GtkWidget *icon_view;
 
+        /* Current results */
+        GPtrArray *results;
+
         /* Selection mode */
         BudgieMediaMode mode;
         GtkWidget *albums;

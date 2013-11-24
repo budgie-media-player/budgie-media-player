@@ -286,6 +286,15 @@ static void budgie_media_view_init(BudgieMediaView *self)
 
 static void budgie_media_view_dispose(GObject *object)
 {
+        BudgieMediaView *self;
+
+        self = BUDGIE_MEDIA_VIEW(object);
+
+        if (self->results) {
+                g_ptr_array_free(self->results, TRUE);
+                self->results = NULL;
+        }
+
         /* Destruct */
         G_OBJECT_CLASS (budgie_media_view_parent_class)->dispose (object);
 }
@@ -489,6 +498,12 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
         gtk_container_foreach(GTK_CONTAINER(self->list),
                 (GtkCallback)gtk_widget_destroy, NULL);
 
+        /* Only store one set at a time */
+        if (self->results) {
+                g_ptr_array_free(self->results, TRUE);
+                self->results = NULL;
+        }
+
         /* Extract the fields */
         for (i=0; i < results->len; i++) {
                 current = (MediaInfo*)results->pdata[i];
@@ -498,8 +513,6 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
                 /* Little bit of left padding */
                 g_object_set(label, "margin-left", 10, NULL);
                 gtk_widget_show(label);
-                /* Currently free this, won't always be the case */
-                free_media_info((gpointer)current);
         }
 
 
@@ -544,7 +557,7 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
         if (self->mode != MEDIA_MODE_ALBUMS)
                 gtk_label_set_text(GTK_LABEL(self->current_label), "");
         g_free(info_string);
-        g_ptr_array_free(results, TRUE);
+        self->results = results;
 }
 
 static gint sort_list(GtkListBoxRow *row1,

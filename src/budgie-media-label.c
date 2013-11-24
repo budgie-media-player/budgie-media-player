@@ -129,6 +129,14 @@ static void budgie_media_label_init(BudgieMediaLabel *self)
 
 static void budgie_media_label_dispose(GObject *object)
 {
+        BudgieMediaLabel *self;
+
+        self = BUDGIE_MEDIA_LABEL(object);
+        if (self->info) {
+                free_media_info(self->info);
+                /* GtkListBox actually revisits us twice sometimes.. */
+                self->info = NULL;
+        }
         /* Destruct */
         G_OBJECT_CLASS (budgie_media_label_parent_class)->dispose (object);
 }
