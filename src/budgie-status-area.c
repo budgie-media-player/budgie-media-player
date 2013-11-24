@@ -59,28 +59,16 @@ static void budgie_status_area_init(BudgieStatusArea *self)
         GtkWidget *time_label, *remaining_label;
         GtkWidget *slider;
         GtkStyleContext *context;
-        GtkWidget *box, *top, *bottom;
-        GtkWidget *image;
+        GtkWidget *box, *bottom;
 
         self->priv = budgie_status_area_get_instance_private(self);
 
         box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-        top = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-        gtk_box_pack_start(GTK_BOX(box), top, TRUE, TRUE, 0);
-
-        /* Album art image */
-        image = gtk_image_new_from_icon_name("folder-music-symbolic",
-                GTK_ICON_SIZE_DIALOG);
-        self->image = image;
-        gtk_box_pack_start(GTK_BOX(top), image, FALSE, FALSE, 0);
-        g_object_set(image, "margin", 5, NULL);
 
         /* Construct our main label */
         label = gtk_label_new("Budgie");
-        gtk_box_pack_start(GTK_BOX(top), label, TRUE, TRUE, 0);
-        gtk_widget_set_halign(label, GTK_ALIGN_FILL);
+        gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
         gtk_widget_set_name(label, "title");
-        gtk_misc_set_alignment(GTK_MISC(label), 0.3, 0.5);
         gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
         self->label = label;
 
@@ -136,10 +124,6 @@ GtkWidget* budgie_status_area_new(void)
 
 void budgie_status_area_set_media(BudgieStatusArea *self, MediaInfo *info)
 {
-        const gchar *cache;
-        gchar *album, *path;
-        GdkPixbuf *buf;
-        gchar *fallback = NULL;
         gchar *title_string = NULL;
 
         if (info->artist)
@@ -148,32 +132,6 @@ void budgie_status_area_set_media(BudgieStatusArea *self, MediaInfo *info)
         else
                 title_string = g_markup_printf_escaped("<b>%s</b>", info->title);
 
-        /* media-art path for images */
-        cache = g_get_user_cache_dir();
-        album = albumart_name_for_media(info, "jpeg");
-        path = g_strdup_printf("%s/media-art/%s", cache, album);
-        g_free(album);
-
-        fallback = g_str_has_prefix(info->mime, "video/") ?
-                "folder-videos-symbolic" : "folder-music-symbolic";
-
-        if (path) {
-                /* We ignore the error and rely on this being NULL, simply
-                 * because GdkPixbuf will test for the existence anyway,
-                 * and we'd stat() twice. No need to be slow about things */
-                buf = gdk_pixbuf_new_from_file_at_size(path, 48, 48, NULL);
-                if (buf) {
-                        gtk_image_set_from_pixbuf(GTK_IMAGE(self->image), buf);
-                        g_object_unref(buf);
-                } else {
-                        gtk_image_set_from_icon_name(GTK_IMAGE(self->image),
-                                fallback, GTK_ICON_SIZE_DIALOG);
-                }
-                g_free(path);
-        } else {
-                gtk_image_set_from_icon_name(GTK_IMAGE(self->image),
-                        fallback, GTK_ICON_SIZE_DIALOG);
-        }
         gtk_label_set_markup(GTK_LABEL(self->label), title_string);
         gtk_label_set_max_width_chars(GTK_LABEL(self->label), 1);
         gtk_widget_queue_draw(GTK_WIDGET(self));

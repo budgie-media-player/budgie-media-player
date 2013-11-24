@@ -47,7 +47,6 @@ struct _BudgieStatusArea {
         GtkWidget *time_label;
         GtkWidget *remaining_label;
         GtkWidget *slider;
-        GtkWidget *image;
 
         BudgieStatusAreaPrivate *priv;
 };
