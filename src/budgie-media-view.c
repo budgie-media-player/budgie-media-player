@@ -40,6 +40,9 @@ static void item_activated_cb(GtkWidget *widget,
                               GtkTreePath *tree_path,
                               gpointer userdata);
 static void button_clicked_cb(GtkWidget *widget, gpointer userdata);
+static void list_selection_cb(GtkListBox *list, GtkListBoxRow *row,
+                              gpointer userdata);
+
 static gint sort_list(GtkListBoxRow *row1,
                       GtkListBoxRow *row2,
                       gpointer userdata);
@@ -83,6 +86,11 @@ static void budgie_media_view_class_init(BudgieMediaViewClass *klass)
         g_object_class->get_property = &budgie_media_view_get_property;
         g_object_class_install_properties(g_object_class, N_PROPERTIES,
                 obj_properties);
+
+        g_signal_new("media-selected",
+                G_TYPE_OBJECT, G_SIGNAL_RUN_FIRST,
+                0, NULL, NULL, NULL, G_TYPE_NONE,
+                1, G_TYPE_POINTER);
 }
 
 static void budgie_media_view_set_property(GObject *object,
@@ -259,6 +267,8 @@ static void budgie_media_view_init(BudgieMediaView *self)
 
         /* Append tracks to a pretty listbox */
         list = gtk_list_box_new();
+        g_signal_connect(list, "row-activated",
+                G_CALLBACK(list_selection_cb), (gpointer)self);
         gtk_widget_set_halign(list, GTK_ALIGN_FILL);
         self->list = list;
 
@@ -560,6 +570,26 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
         self->results = results;
 }
 
+static void list_selection_cb(GtkListBox *list, GtkListBoxRow *row,
+                              gpointer userdata)
+{
+        BudgieMediaView *self;
+        BudgieMediaLabel *label;
+        MediaInfo *info;
+        GList *children;
+
+        self = BUDGIE_MEDIA_VIEW(userdata);
+        if (!row)
+                return;
+
+        children = gtk_container_get_children(GTK_CONTAINER(row));
+        label = (BudgieMediaLabel*)g_list_nth_data(children, 0);
+        info = label->info;
+
+        g_signal_emit_by_name(self, "media-selected", (gpointer)info);
+        g_list_free(children);
+
+}
 static gint sort_list(GtkListBoxRow *row1,
                       GtkListBoxRow *row2,
                       gpointer userdata)
