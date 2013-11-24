@@ -22,6 +22,8 @@ budgie_SOURCES = \
 	budgie-window.h \
 	budgie-control-bar.c \
 	budgie-control-bar.h \
+	budgie-media-label.c \
+	budgie-media-label.h \
 	budgie-media-view.c \
 	budgie-media-view.h \
 	budgie-settings-view.c \
