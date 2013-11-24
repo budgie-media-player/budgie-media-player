@@ -42,6 +42,7 @@ typedef struct _BudgieMediaLabelClass   BudgieMediaLabelClass;
 struct _BudgieMediaLabel {
         GtkBox parent;
         MediaInfo *info;
+        GtkWidget *display;
 };
 
 /* BudgieMediaLabel class definition */

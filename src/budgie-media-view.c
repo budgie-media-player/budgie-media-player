@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "budgie-media-view.h"
+#include "budgie-media-label.h"
 #include "util.h"
 
 G_DEFINE_TYPE(BudgieMediaView, budgie_media_view, GTK_TYPE_BIN)
@@ -477,7 +478,6 @@ static void button_clicked_cb(GtkWidget *widget, gpointer userdata)
 
 static void set_display(BudgieMediaView *self, GPtrArray *results)
 {
-        GtkStyleContext *style;
         /* Media infos */
         MediaInfo *current = NULL;
         int i;
@@ -492,17 +492,12 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
         /* Extract the fields */
         for (i=0; i < results->len; i++) {
                 current = (MediaInfo*)results->pdata[i];
-                label = gtk_label_new(current->title);
+                label = budgie_media_label_new(current);
                 gtk_container_add(GTK_CONTAINER(self->list), label);
                 gtk_widget_set_halign(label, GTK_ALIGN_START);
-                gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
                 /* Little bit of left padding */
                 g_object_set(label, "margin-left", 10, NULL);
                 gtk_widget_show(label);
-                style = gtk_widget_get_style_context(label);
-                /* Users need to know that nothing *works* yet as such */
-                gtk_style_context_add_class(style, "dim-label");
-
                 /* Currently free this, won't always be the case */
                 free_media_info((gpointer)current);
         }
@@ -560,18 +555,19 @@ static gint sort_list(GtkListBoxRow *row1,
          * class first, so that we can track MediaInfo, and do album
          * comparisons */
         GList *children;
-        GtkWidget *label1, *label2;
-        const gchar *text1, *text2;
+        BudgieMediaLabel *label1, *label2;
+        gchar *text1 = NULL;
+        gchar *text2 = NULL;
         int ret;
 
         children = gtk_container_get_children(GTK_CONTAINER(row1));
-        label1 = (GtkWidget*)g_list_nth_data(children, 0);
-        text1 = gtk_label_get_text(GTK_LABEL(label1));
+        label1 = (BudgieMediaLabel*)g_list_nth_data(children, 0);
+        text1 = label1->info->title;
         g_list_free(children);
 
         children = gtk_container_get_children(GTK_CONTAINER(row2));
-        label2 = (GtkWidget*)g_list_nth_data(children, 0);
-        text2 = gtk_label_get_text(GTK_LABEL(label2));
+        label2 = (BudgieMediaLabel*)g_list_nth_data(children, 0);
+        text2 = label2->info->title;
         g_list_free(children);
 
         ret = g_ascii_strcasecmp(text1, text2);

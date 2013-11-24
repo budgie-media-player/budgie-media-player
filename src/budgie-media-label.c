@@ -25,6 +25,9 @@
 
 G_DEFINE_TYPE(BudgieMediaLabel, budgie_media_label, GTK_TYPE_BOX)
 
+/* Private methods */
+static void update_ui(BudgieMediaLabel *self);
+
 /* Boilerplate GObject code */
 static void budgie_media_label_class_init(BudgieMediaLabelClass *klass);
 static void budgie_media_label_init(BudgieMediaLabel *self);
@@ -74,6 +77,7 @@ static void budgie_media_label_set_property(GObject *object,
         switch (prop_id) {
                 case PROP_INFO:
                         self->info = g_value_get_pointer((GValue*)value);
+                        update_ui(self);
                         /* TODO: Add update_ui */
                         break;
                 default:
@@ -104,7 +108,14 @@ static void budgie_media_label_get_property(GObject *object,
 
 static void budgie_media_label_init(BudgieMediaLabel *self)
 {
-        /* TODO: Implement */
+        GtkWidget *label;
+
+        label = gtk_label_new("");
+        gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
+        self->display = label;
+        gtk_box_pack_start(GTK_BOX(self), label, TRUE, TRUE, 0);
+
+        gtk_widget_show_all(GTK_WIDGET(self));
 }
 
 static void budgie_media_label_dispose(GObject *object)
@@ -123,4 +134,9 @@ GtkWidget* budgie_media_label_new(MediaInfo *info)
                 "orientation", GTK_ORIENTATION_HORIZONTAL,
                 NULL);
         return GTK_WIDGET(self);
+}
+
+static void update_ui(BudgieMediaLabel *self)
+{
+        gtk_label_set_text(GTK_LABEL(self->display), self->info->title);
 }
