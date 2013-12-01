@@ -254,7 +254,8 @@ static void budgie_media_view_init(BudgieMediaView *self)
         gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
         gtk_label_set_max_width_chars(GTK_LABEL(label), 30);
         gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
-        g_object_set(label, "margin-bottom", 10, NULL);
+        g_object_set(label, "margin-bottom", 10,
+                "margin-left", 5, NULL);
         self->current_label = label;
         gtk_box_pack_start(GTK_BOX(info_box), label, FALSE, FALSE, 0);
         style = gtk_widget_get_style_context(label);
