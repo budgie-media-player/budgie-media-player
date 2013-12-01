@@ -78,6 +78,8 @@ static MediaInfo* media_from_file(gchar *path, GFileInfo *file_info, const gchar
 
                 set_field(&(media->album), tag, ID3FN_TEXT, ID3FID_ALBUM);
 
+                set_field(&(media->band), tag, ID3FN_TEXT, ID3FID_BAND);
+
                 set_field(&(media->genre), tag, ID3FN_TEXT, ID3FID_CONTENTTYPE);
         }
         if (!media->title)

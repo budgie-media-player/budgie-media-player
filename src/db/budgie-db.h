@@ -67,6 +67,7 @@ typedef struct MediaInfo {
         gchar *title; /**<Title */
         gchar *artist; /**<Artist or author */
         gchar *album; /**<Album */
+        gchar *band; /**<Band */
         gchar *genre; /**<Genre */
         gchar *path; /**<File system path */
         gchar *mime; /**<File mime type */

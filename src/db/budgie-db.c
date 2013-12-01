@@ -56,6 +56,8 @@ void free_media_info(gpointer p_info)
                 g_free(info->artist);
         if (info->album)
                 g_free(info->album);
+        if (info->band)
+                g_free(info->band);
         if (info->genre)
                 g_free(info->genre);
         if (info->path)
@@ -350,19 +352,21 @@ static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target)
         size_t size = 0;
         size_t offset = 0;
 
-        /* 5 member fields */
+        /* 6 member fields */
         if (info->title)
                 size = strlen(info->title)+1;
         if (info->artist)
                 size += strlen(info->artist)+1;
         if (info->album)
                 size += strlen(info->album)+1;
+        if (info->band)
+                size += strlen(info->band)+1;
         if (info->genre)
                 size += strlen(info->genre)+1;
         size += strlen(info->mime)+1;
 
-        /* 5 size fields */
-        size += sizeof(unsigned int)*5;
+        /* 6 size fields */
+        size += sizeof(unsigned int)*6;
 
         data = malloc(size);
         if (!data)
@@ -401,6 +405,17 @@ static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target)
                 memcpy(data+offset, info->album, length);
         offset += length;
 
+        /* Band */
+        if (info->band)
+                length = strlen(info->band)+1;
+        else
+                length = 0;
+        memcpy(data+offset, &length, sizeof(unsigned int));
+        offset += sizeof(unsigned int);
+        if (info->band)
+                memcpy(data+offset, info->band, length);
+        offset += length;
+
         /* Genre */
         if (info->genre)
                 length = strlen(info->genre)+1;
@@ -433,11 +448,12 @@ static gboolean budgie_db_deserialize(uint8_t* source, MediaInfo **target)
         gchar *title = NULL;
         gchar *artist = NULL;
         gchar *album = NULL;
+        gchar *band = NULL;
         gchar *genre = NULL;
         gchar *mime = NULL;
         unsigned int title_len, artist_len;
         unsigned int album_len, genre_len;
-        unsigned int mime_len;
+        unsigned int band_len, mime_len;
         size_t offset = 0;
         gboolean op = FALSE;
 
@@ -473,6 +489,15 @@ static gboolean budgie_db_deserialize(uint8_t* source, MediaInfo **target)
         }
         offset += album_len;
 
+        /* Band */
+        memcpy(&band_len, source+offset, sizeof(unsigned int));
+        offset += sizeof(unsigned int);
+        if (band_len > 0) {
+                band = malloc(band_len);
+                memcpy(band, source+offset, band_len);
+        }
+        offset += band_len;
+
         /* Genre */
         memcpy(&genre_len, source+offset, sizeof(unsigned int));
         offset += sizeof(unsigned int);
@@ -496,6 +521,8 @@ static gboolean budgie_db_deserialize(uint8_t* source, MediaInfo **target)
                 ret->artist = g_strdup(artist);
         if (album)
                 ret->album = g_strdup(album);
+        if (band)
+                ret->band = g_strdup(band);
         if (genre)
                 ret->genre = g_strdup(genre);
 
@@ -510,6 +537,8 @@ end:
                 free(artist);
         if (album)
                 free(album);
+        if (band)
+                free(band);
         if (genre)
                 free(genre);
         if (mime)
