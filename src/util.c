@@ -53,7 +53,7 @@ static void set_field(char** out, ID3Tag *tag, ID3_FieldID id, ID3_FrameID fid)
         if (!set)
                 goto end;
         ID3Field_GetASCII(field, set, size);
-        *out = g_strescape(set, NULL);
+        *out = g_utf8_normalize(set, (gssize)size, G_NORMALIZE_ALL);
         free(set);
 end:
         if (!frame || !field)
