@@ -366,8 +366,12 @@ static void update_db(BudgieMediaView *self)
                 if (!pixbuf)
                         pixbuf = default_pixbuf;
                 /* Pretty label */
-                markup = g_markup_printf_escaped("<big>%s\n<span color='darkgrey'>%s</span></big>",
-                        current->album, current->artist);
+                if (current->band)
+                        markup = g_markup_printf_escaped("<big>%s\n<span color='darkgrey'>%s</span></big>",
+                                current->album, current->band);
+                else
+                        markup = g_markup_printf_escaped("<big>%s\n<span color='darkgrey'>%s</span></big>",
+                                current->album, current->artist);
                 gtk_list_store_append(model, &iter);
 
                 /* Set it in the list store */
