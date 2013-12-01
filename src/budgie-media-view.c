@@ -418,6 +418,7 @@ static void item_activated_cb(GtkWidget *widget,
         gchar *artist;
         GPtrArray *results = NULL;
         gchar *info_string = NULL;
+        MediaInfo *current = NULL;
 
         /* Grab the model and iter */
         self = BUDGIE_MEDIA_VIEW(userdata);
@@ -448,7 +449,12 @@ static void item_activated_cb(GtkWidget *widget,
                 MATCH_QUERY_EXACT, (gchar*)album, -1, &results))
                 goto end;
 
-        artist = ((MediaInfo*)results->pdata[0])->artist;
+        current = (MediaInfo*)results->pdata[0];
+        if (current->band)
+                artist = current->band;
+        else
+                artist = current->artist;
+
         info_string = g_markup_printf_escaped(
                 "<big>%s</big><span color='darkgrey'>\n%s</span>", album,
                 artist);
