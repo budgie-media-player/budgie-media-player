@@ -36,7 +36,8 @@ static void budgie_media_view_class_init(BudgieMediaViewClass *klass);
 static void budgie_media_view_init(BudgieMediaView *self);
 static void budgie_media_view_dispose(GObject *object);
 
-static void update_db(BudgieMediaView *self);
+static gboolean update_db_t(gpointer userdata);
+static gpointer update_db(gpointer userdata);
 static void set_display(BudgieMediaView *self, GPtrArray *results);
 static void item_activated_cb(GtkWidget *widget,
                               GtkTreePath *tree_path,
@@ -98,6 +99,13 @@ static void budgie_media_view_class_init(BudgieMediaViewClass *klass)
                 1, G_TYPE_POINTER);
 }
 
+static gboolean update_db_t(gpointer userdata)
+{
+        __attribute__((unused)) GThread *thread;
+        thread = g_thread_new("update-db", &update_db, userdata);
+        return FALSE;
+}
+
 static void budgie_media_view_set_property(GObject *object,
                                            guint prop_id,
                                            const GValue *value,
@@ -109,7 +117,7 @@ static void budgie_media_view_set_property(GObject *object,
         switch (prop_id) {
                 case PROP_DATABASE:
                         self->db = g_value_get_pointer((GValue*)value);
-                        update_db(self);
+                        g_idle_add(update_db_t, (gpointer)self);
                         break;
                 default:
                         G_OBJECT_WARN_INVALID_PROPERTY_ID (object,
@@ -327,8 +335,9 @@ GtkWidget* budgie_media_view_new(BudgieDB *database)
         return GTK_WIDGET(self);
 }
 
-static void update_db(BudgieMediaView *self)
+static gpointer update_db(gpointer userdata)
 {
+        BudgieMediaView *self;
         GtkListStore *model;
         GPtrArray *albums = NULL;
         GPtrArray *results = NULL;
@@ -342,9 +351,11 @@ static void update_db(BudgieMediaView *self)
         gchar *album_id = NULL, *path = NULL;
         int i;
 
+        self = BUDGIE_MEDIA_VIEW(userdata);
+
         /* No albums */
         if (!budgie_db_get_all_by_field(self->db, MEDIA_QUERY_ALBUM, &albums))
-                return;
+                return NULL;
 
         cache = g_get_user_cache_dir();
         model = gtk_list_store_new(ALBUM_COLUMNS, G_TYPE_STRING,
@@ -408,6 +419,8 @@ fail:
         g_ptr_array_free(albums, TRUE);
         g_object_unref(base);
         g_object_unref(overlay);
+
+        return NULL;
 }
 
 static void item_activated_cb(GtkWidget *widget,
