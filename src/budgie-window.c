@@ -452,10 +452,13 @@ static void next_cb(GtkWidget *widget, gpointer userdata)
 {
         MediaInfo *next = NULL;
         BudgieWindow *self;
+        BudgieMediaSelection mode;
 
         self = BUDGIE_WINDOW(userdata);
+        mode = self->priv->random ?
+                MEDIA_SELECTION_RANDOM : MEDIA_SELECTION_NEXT;
         next = budgie_media_view_get_info(BUDGIE_MEDIA_VIEW(self->view),
-                MEDIA_SELECTION_NEXT);
+                mode);
         if (!next) /* Revisit */
                 return;
         self->priv->media = next;
@@ -468,10 +471,13 @@ static void prev_cb(GtkWidget *widget, gpointer userdata)
 {
         MediaInfo *prev = NULL;
         BudgieWindow *self;
+        BudgieMediaSelection mode;
 
         self = BUDGIE_WINDOW(userdata);
+        mode = self->priv->random ?
+                MEDIA_SELECTION_RANDOM : MEDIA_SELECTION_PREVIOUS;
         prev = budgie_media_view_get_info(BUDGIE_MEDIA_VIEW(self->view),
-                MEDIA_SELECTION_PREVIOUS);
+                mode);
         if (!prev) /* Revisit */
                 return;
         self->priv->media = prev;

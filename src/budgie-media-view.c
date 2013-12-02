@@ -673,7 +673,8 @@ MediaInfo* budgie_media_view_get_info(BudgieMediaView *self,
                                       BudgieMediaSelection select)
 {
         MediaInfo *ret = NULL;
-        int index = self->index;
+        gint index = self->index;
+        GRand *rand = NULL;
 
         /* No results yet */
         if (!self->results)
@@ -685,6 +686,11 @@ MediaInfo* budgie_media_view_get_info(BudgieMediaView *self,
                         break;
                 case MEDIA_SELECTION_PREVIOUS:
                         index--;
+                        break;
+                case MEDIA_SELECTION_RANDOM:
+                        rand = g_rand_new();
+                        index = g_random_int_range(0, self->results->len);
+                        g_rand_free(rand);
                         break;
                 default:
                         /* Random not yet implemented */
