@@ -316,6 +316,11 @@ static void budgie_media_view_dispose(GObject *object)
                 self->results = NULL;
         }
 
+        if (self->current_path) {
+                g_free(self->current_path);
+                self->current_path = NULL;
+        }
+
         /* Destruct */
         G_OBJECT_CLASS (budgie_media_view_parent_class)->dispose (object);
 }
@@ -550,6 +555,12 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
                 /* Little bit of left padding */
                 g_object_set(label, "margin-left", 10, NULL);
                 gtk_widget_show(label);
+
+                if (!self->current_path)
+                        continue;
+                /* If this is already playing, update the appearance */
+                if (g_str_equal(self->current_path, current->path))
+                        g_object_set(label, "playing", TRUE, NULL);
         }
 
 
@@ -723,6 +734,11 @@ void budgie_media_view_set_active(BudgieMediaView *self,
                         g_object_set(label, "playing", TRUE, NULL);
                 }
         }
+
+        /* So we can track current item */
+        if (self->current_path)
+                g_free(self->current_path);
+        self->current_path = g_strdup(active->path);
 
         g_list_free(children);
 }

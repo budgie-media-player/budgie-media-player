@@ -75,6 +75,7 @@ struct _BudgieMediaView {
         /* Tracks page */
         GtkWidget *image;
         GtkWidget *list;
+        gchar *current_path;
         gint index;
 };
 
