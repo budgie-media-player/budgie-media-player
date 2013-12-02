@@ -44,6 +44,13 @@ typedef enum {
         MEDIA_MODE_VIDEOS,
 } BudgieMediaMode;
 
+typedef enum {
+        MEDIA_SELECTION_PREVIOUS = 0,
+        MEDIA_SELECTION_CURRENT,
+        MEDIA_SELECTION_NEXT,
+        MEDIA_SELECTION_RANDOM,
+} BudgieMediaSelection;
+
 /* BudgieMediaView object */
 struct _BudgieMediaView {
         GtkBin parent;
@@ -68,6 +75,7 @@ struct _BudgieMediaView {
         /* Tracks page */
         GtkWidget *image;
         GtkWidget *list;
+        gint index;
 };
 
 /* BudgieMediaView class definition */
@@ -85,5 +93,20 @@ GType budgie_media_view_get_type(void);
  * @return A new BudgieMediaView
  */
 GtkWidget* budgie_media_view_new(BudgieDB *database);
+
+/**
+ * Get a media info from the current view
+ * @param select Selection mode
+ * @return The specific media info, or NULL
+ */
+MediaInfo* budgie_media_view_get_info(BudgieMediaView *self,
+                                      BudgieMediaSelection select);
+
+/**
+ * Set the currently active media
+ * @param info Currently active media
+ */
+void budgie_media_view_set_active(BudgieMediaView *self,
+                                  MediaInfo *active);
 
 #endif /* budgie_media_view_h */

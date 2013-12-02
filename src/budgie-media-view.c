@@ -698,3 +698,56 @@ static GdkPixbuf *beautify(GdkPixbuf **source,
 
         return ret;
 }
+
+
+MediaInfo* budgie_media_view_get_info(BudgieMediaView *self,
+                                      BudgieMediaSelection select)
+{
+        MediaInfo *ret = NULL;
+        int index = self->index;
+
+        /* No results yet */
+        if (!self->results)
+                return NULL;
+
+        switch (select) {
+                case MEDIA_SELECTION_NEXT:
+                        index++;
+                        break;
+                case MEDIA_SELECTION_PREVIOUS:
+                        index--;
+                        break;
+                default:
+                        /* Random not yet implemented */
+                        break;
+        }
+        /* Out of bounds */
+        if (index < 0 || index >= self->results->len)
+                return NULL;
+
+        ret = self->results->pdata[index];
+        return ret;
+}
+
+void budgie_media_view_set_active(BudgieMediaView *self,
+                                  MediaInfo *active)
+{
+        BudgieMediaLabel *label;
+        GList *children, *child;
+        GtkListBoxRow *row;
+
+        /* Visit all children in our list box */
+        children = gtk_container_get_children(GTK_CONTAINER(self->list));
+        for (child = g_list_first(children); child; child = child->next) {
+                row = GTK_LIST_BOX_ROW(child->data);
+                label = (BudgieMediaLabel*)gtk_bin_get_child(GTK_BIN(row));
+                if (label->info != active)
+                        g_object_set(label, "playing", FALSE, NULL);
+                else {
+                        self->index = gtk_list_box_row_get_index(row);
+                        g_object_set(label, "playing", TRUE, NULL);
+                }
+        }
+
+        g_list_free(children);
+}

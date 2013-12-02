@@ -429,6 +429,7 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
 
         /* Update status label */
         budgie_status_area_set_media(BUDGIE_STATUS_AREA(self->status), media);
+        budgie_media_view_set_active(BUDGIE_MEDIA_VIEW(self->view), media);
         refresh_cb(self);
 }
 
@@ -453,9 +454,11 @@ static void next_cb(GtkWidget *widget, gpointer userdata)
         BudgieWindow *self;
 
         self = BUDGIE_WINDOW(userdata);
+        next = budgie_media_view_get_info(BUDGIE_MEDIA_VIEW(self->view),
+                MEDIA_SELECTION_NEXT);
         if (!next) /* Revisit */
                 return;
-
+        self->priv->media = next;
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         /* In future only do this if not paused */
         play_cb(NULL, userdata);
@@ -467,9 +470,11 @@ static void prev_cb(GtkWidget *widget, gpointer userdata)
         BudgieWindow *self;
 
         self = BUDGIE_WINDOW(userdata);
+        prev = budgie_media_view_get_info(BUDGIE_MEDIA_VIEW(self->view),
+                MEDIA_SELECTION_PREVIOUS);
         if (!prev) /* Revisit */
                 return;
-
+        self->priv->media = prev;
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         /* In future only do this if not paused */
         play_cb(NULL, userdata);
