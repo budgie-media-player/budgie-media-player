@@ -156,4 +156,9 @@ gboolean budgie_db_search_field(BudgieDB *self,
                                 guint max,
                                 GPtrArray **results);
 
+/**
+ * Default sort mechanism for BudgieDB arrays
+ */
+gint budgie_db_sort(gconstpointer a, gconstpointer b);
+
 #endif /* budgie_db_h */

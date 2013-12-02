@@ -46,9 +46,6 @@ static void button_clicked_cb(GtkWidget *widget, gpointer userdata);
 static void list_selection_cb(GtkListBox *list, GtkListBoxRow *row,
                               gpointer userdata);
 
-static gint sort_list(GtkListBoxRow *row1,
-                      GtkListBoxRow *row2,
-                      gpointer userdata);
 static GdkPixbuf *beautify(GdkPixbuf **source,
                            GdkPixbuf *base,
                            GdkPixbuf *overlay);
@@ -289,9 +286,6 @@ static void budgie_media_view_init(BudgieMediaView *self)
         gtk_widget_set_halign(list, GTK_ALIGN_FILL);
         self->list = list;
 
-        /* Sort the column */
-        gtk_list_box_set_sort_func(GTK_LIST_BOX(list), sort_list,
-                (gpointer)self, NULL);
         /* Scroller for the listbox */
         scroll = gtk_scrolled_window_new(NULL, NULL);
         gtk_scrolled_window_set_kinetic_scrolling(GTK_SCROLLED_WINDOW(scroll),
@@ -545,6 +539,8 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
                 self->results = NULL;
         }
 
+        g_ptr_array_sort(results, budgie_db_sort);
+
         /* Extract the fields */
         for (i=0; i < results->len; i++) {
                 current = (MediaInfo*)results->pdata[i];
@@ -620,33 +616,6 @@ static void list_selection_cb(GtkListBox *list, GtkListBoxRow *row,
         g_signal_emit_by_name(self, "media-selected", (gpointer)info);
         g_list_free(children);
 
-}
-static gint sort_list(GtkListBoxRow *row1,
-                      GtkListBoxRow *row2,
-                      gpointer userdata)
-{
-        /* Must revisit this function, but we need to switch to a new
-         * class first, so that we can track MediaInfo, and do album
-         * comparisons */
-        GList *children;
-        BudgieMediaLabel *label1, *label2;
-        gchar *text1 = NULL;
-        gchar *text2 = NULL;
-        int ret;
-
-        children = gtk_container_get_children(GTK_CONTAINER(row1));
-        label1 = (BudgieMediaLabel*)g_list_nth_data(children, 0);
-        text1 = label1->info->title;
-        g_list_free(children);
-
-        children = gtk_container_get_children(GTK_CONTAINER(row2));
-        label2 = (BudgieMediaLabel*)g_list_nth_data(children, 0);
-        text2 = label2->info->title;
-        g_list_free(children);
-
-        ret = g_ascii_strcasecmp(text1, text2);
-
-        return ret;
 }
 
 static GdkPixbuf *beautify(GdkPixbuf **source,

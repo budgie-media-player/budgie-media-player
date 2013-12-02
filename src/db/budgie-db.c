@@ -545,3 +545,18 @@ end:
                 free(mime);
         return op;
 }
+
+gint budgie_db_sort(gconstpointer a, gconstpointer b)
+{
+        MediaInfo* m1 = NULL;
+        MediaInfo* m2 = NULL;
+
+        /* Alphabetically compare */
+        m1 = *(MediaInfo**)a;
+        m2 = *(MediaInfo**)b;
+
+        if (!m1 || !m2)
+                return 0;
+
+        return g_ascii_strcasecmp(m1->title, m2->title);
+}
