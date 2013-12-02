@@ -20,6 +20,8 @@
  * 
  * 
  */
+#include "config.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -46,6 +48,9 @@ static void list_selection_cb(GtkListBox *list, GtkListBoxRow *row,
 static gint sort_list(GtkListBoxRow *row1,
                       GtkListBoxRow *row2,
                       gpointer userdata);
+static GdkPixbuf *beautify(GdkPixbuf **source,
+                           GdkPixbuf *base,
+                           GdkPixbuf *overlay);
 
 static void budgie_media_view_get_property(GObject *object,
                                            guint prop_id,
@@ -219,6 +224,7 @@ static void budgie_media_view_init(BudgieMediaView *self)
                 ALBUM_PIXBUF);
         gtk_icon_view_set_item_padding(GTK_ICON_VIEW(icon_view), 15);
         gtk_icon_view_set_spacing(GTK_ICON_VIEW(icon_view), 10);
+        gtk_icon_view_set_item_width(GTK_ICON_VIEW(icon_view), 290);
         gtk_icon_view_set_item_orientation(GTK_ICON_VIEW(icon_view),
                 GTK_ORIENTATION_HORIZONTAL);
 
@@ -323,11 +329,11 @@ GtkWidget* budgie_media_view_new(BudgieDB *database)
 
 static void update_db(BudgieMediaView *self)
 {
-        GtkIconTheme *theme;
         GtkListStore *model;
         GPtrArray *albums = NULL;
         GPtrArray *results = NULL;
-        GdkPixbuf *pixbuf, *default_pixbuf;
+        GdkPixbuf *pixbuf;
+        GdkPixbuf *base, *overlay;
         GtkTreeIter iter;
         gchar *album = NULL;
         gchar *markup = NULL;
@@ -341,16 +347,13 @@ static void update_db(BudgieMediaView *self)
                 return;
 
         cache = g_get_user_cache_dir();
-
-        /* We don't *yet* support album art, use generic symbol */
-        theme = gtk_icon_theme_get_default();
         model = gtk_list_store_new(ALBUM_COLUMNS, G_TYPE_STRING,
                 GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING,
                 G_TYPE_STRING);
 
-        /* Fallback */
-        default_pixbuf = gtk_icon_theme_load_icon(theme, "folder-music-symbolic",
-                64, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
+        /* base and overlay image for album art */
+        base = gdk_pixbuf_new_from_file(DATADIR "/budgie/album-base.png", NULL);
+        overlay = gdk_pixbuf_new_from_file(DATADIR "/budgie/album-overlay.png", NULL);
 
         for (i=0; i < albums->len; i++) {
                 album = (gchar *)albums->pdata[i];
@@ -365,9 +368,11 @@ static void update_db(BudgieMediaView *self)
                 album_id = albumart_name_for_media(current, "jpeg");
                 path = g_strdup_printf("%s/media-art/%s", cache, album_id);
                 g_free(album_id);
-                pixbuf = gdk_pixbuf_new_from_file_at_size(path, 64, 64, NULL);
+                pixbuf = gdk_pixbuf_new_from_file(path, NULL);
                 if (!pixbuf)
-                        pixbuf = default_pixbuf;
+                        pixbuf = beautify(NULL, base, overlay);
+                else
+                        pixbuf = beautify(&pixbuf, base, overlay);
                 /* Pretty label */
                 if (current->band)
                         markup = g_markup_printf_escaped("<big>%s\n<span color='darkgrey'>%s</span></big>",
@@ -386,7 +391,7 @@ static void update_db(BudgieMediaView *self)
                         ALBUM_ART_PATH, path,
                         -1);
 
-                if (pixbuf != default_pixbuf)
+                if (pixbuf)
                         g_object_unref(pixbuf);
                 g_free(markup);
 
@@ -401,8 +406,8 @@ fail:
         gtk_icon_view_set_model(GTK_ICON_VIEW(self->icon_view),
                 GTK_TREE_MODEL(model));
         g_ptr_array_free(albums, TRUE);
-        g_object_unref(default_pixbuf);
-
+        g_object_unref(base);
+        g_object_unref(overlay);
 }
 
 static void item_activated_cb(GtkWidget *widget,
@@ -627,6 +632,56 @@ static gint sort_list(GtkListBoxRow *row1,
         g_list_free(children);
 
         ret = g_ascii_strcasecmp(text1, text2);
+
+        return ret;
+}
+
+static GdkPixbuf *beautify(GdkPixbuf **source,
+                           GdkPixbuf *base,
+                           GdkPixbuf *overlay)
+{
+        int width, height;
+        int new_width, new_height;
+        cairo_surface_t *surface;
+        cairo_t *ctx;
+        int x_pad = 20;
+        int y_pad = 6;
+        GdkPixbuf *scaled, *ret;
+
+        /* Create a new surface to work from */
+        width = gdk_pixbuf_get_width(base);
+        height = gdk_pixbuf_get_height(base);
+        surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+                width, height);
+        ctx = cairo_create(surface);
+
+        /* Draw the base first */
+        gdk_cairo_set_source_pixbuf(ctx, base, 0, 0);
+        cairo_paint(ctx);
+
+        /* Draw the source image (album cover) */
+        if (source) {
+                new_width = (width-x_pad)-7;
+                new_height = (height-y_pad)-10;
+                scaled = gdk_pixbuf_scale_simple(*source,
+                        new_width, new_height, GDK_INTERP_BILINEAR);
+                g_object_unref(*source);
+                *source = NULL;
+                gdk_cairo_set_source_pixbuf(ctx, scaled, x_pad, y_pad);
+                cairo_paint(ctx);
+                g_object_unref(scaled);
+        }
+
+        /* Draw the overlay */
+        gdk_cairo_set_source_pixbuf(ctx, overlay, 0, 0);
+        cairo_paint(ctx);
+
+        /* Create a new image to return from this painting op */
+        ret = gdk_pixbuf_get_from_surface(surface, 0, 0, width, height);
+
+        /* Cleanup */
+        cairo_surface_destroy(surface);
+        cairo_destroy(ctx);
 
         return ret;
 }
