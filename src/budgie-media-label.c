@@ -119,12 +119,17 @@ static void budgie_media_label_init(BudgieMediaLabel *self)
 {
         GtkWidget *label;
 
+        label = gtk_label_new("\u25B6");
+        gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
+        self->play_sign = label;
+        gtk_box_pack_start(GTK_BOX(self), label, FALSE, FALSE, 0);
+
         label = gtk_label_new("");
         gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
         self->display = label;
         gtk_box_pack_start(GTK_BOX(self), label, TRUE, TRUE, 0);
 
-        gtk_widget_show_all(GTK_WIDGET(self));
+        gtk_widget_show_all(self->display);
 }
 
 static void budgie_media_label_dispose(GObject *object)
@@ -160,11 +165,15 @@ void budgie_media_label_set_playing(BudgieMediaLabel *self,
         GtkStyleContext *style;
 
         style = gtk_widget_get_style_context(self->display);
-        if (playing)
+        if (playing) {
                 gtk_style_context_remove_class(style, "dim-label");
-        else
+                g_object_set(self->display, "margin-left", 15, NULL);
+        } else {
                 gtk_style_context_add_class(style, "dim-label");
+                g_object_set(self->display, "margin-left", 25, NULL);
+        }
 
+        gtk_widget_set_visible(self->play_sign, playing);
         self->playing = playing;
 }
 

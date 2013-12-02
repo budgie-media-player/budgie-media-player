@@ -43,6 +43,7 @@ struct _BudgieMediaLabel {
         GtkBox parent;
         MediaInfo *info;
         GtkWidget *display;
+        GtkWidget *play_sign;
         gboolean playing;
 };
 
