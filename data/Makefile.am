@@ -1,5 +1,10 @@
 -include $(top_srcdir)/common.mk
 
+budgiedir=$(datadir)/budgie
+budgie_DATA = \
+	album-base.png \
+	album-overlay.png
+
 # Our SVG
 iconsdir=$(datadir)/icons/hicolor/scalable/apps
 icons_DATA = \
@@ -16,6 +21,8 @@ glib_DATA = \
 	io.github.ikeydoherty.Budgie.gschema.xml
 
 EXTRA_DIST = \
+	album-base.png \
+	album-overlay.png \
 	budgie.desktop \
 	io.github.ikeydoherty.Budgie.gschema.xml \
 	budgie.svg \
