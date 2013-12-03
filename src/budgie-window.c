@@ -36,7 +36,6 @@ struct _BudgieWindowPrivate {
         const gchar *current_page;
         GSettings *settings;
         MediaInfo *media;
-        GSList *tracks;
         gchar *uri;
         gulong volume_id;
         guint64 duration;
@@ -109,6 +108,7 @@ static void budgie_window_init(BudgieWindow *self)
         GtkWidget *layout;
         GtkWidget *settings_view;
         GstBus *bus;
+        GSList *tracks;
         GtkSettings *settings;
         GdkVisual *visual;
         guint length;
@@ -291,9 +291,6 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_widget_set_margin_right(search, 10);
         self->search = search;
 
-        /* Initialise our tracks list */
-        self->priv->tracks = NULL;
-
         /* Initialise gstreamer */
         self->gst_player = gst_element_factory_make("playbin", "player");
         bus = gst_element_get_bus(self->gst_player);
@@ -305,11 +302,11 @@ static void budgie_window_init(BudgieWindow *self)
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         self->priv->duration = GST_CLOCK_TIME_NONE;
 
-        self->priv->tracks = budgie_db_get_all_media(self->db);
-
         g_timeout_add(1000, refresh_cb, (gpointer)self);
 
-        length = g_slist_length(self->priv->tracks);
+        tracks = budgie_db_get_all_media(self->db);
+        length = g_slist_length(tracks);
+        g_slist_free_full(tracks, free_media_info);
         /* Start thread from idle queue */
         if (length == 0)
                 g_idle_add(load_media_t, (gpointer)self);
@@ -339,8 +336,6 @@ static void budgie_window_dispose(GObject *object)
 
         g_object_unref(self->icon_theme);
         g_object_unref(self->css_provider);
-        if (self->priv->tracks)
-                g_slist_free_full(self->priv->tracks, free_media_info);
 
         if (self->priv->uri)
                 g_free(self->priv->uri);
@@ -627,12 +622,7 @@ static gpointer load_media(gpointer data)
                 search_directory(self->media_dirs[i], &tracks, 2, mimes);
 
         g_slist_foreach(tracks, store_media, (gpointer)self);
-        /* Reset tracks */
-        if (self->priv->tracks)
-                g_slist_free_full (self->priv->tracks, free_media_info);
         g_slist_free_full(tracks, free_media_info);
-        /* Use budgiedb's tracks, not our own list */
-        self->priv->tracks = budgie_db_get_all_media(self->db);
 
         budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
                 BUDGIE_ACTION_RELOAD, TRUE);
