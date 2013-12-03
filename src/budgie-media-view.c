@@ -38,7 +38,7 @@ static void budgie_media_view_dispose(GObject *object);
 
 static gboolean update_db_t(gpointer userdata);
 static gpointer update_db(gpointer userdata);
-static void set_display(BudgieMediaView *self, GPtrArray *results);
+static GtkListBoxRow* set_display(BudgieMediaView *self, GPtrArray *results);
 static void item_activated_cb(GtkWidget *widget,
                               GtkTreePath *tree_path,
                               gpointer userdata);
@@ -440,6 +440,7 @@ static void item_activated_cb(GtkWidget *widget,
         GValue v_album = G_VALUE_INIT;
         GValue v_path = G_VALUE_INIT;
         GdkPixbuf *pixbuf;
+        GtkListBoxRow *row = NULL;
         const char *album, *path;
         gchar *artist;
         GPtrArray *results = NULL;
@@ -489,7 +490,10 @@ static void item_activated_cb(GtkWidget *widget,
         g_free(info_string);
 
         /* Got this far */
-        set_display(self, results);
+        row = set_display(self, results);
+        if (row)
+                gtk_list_box_select_row(GTK_LIST_BOX(self->list),
+                        row);
 end:
         g_value_unset(&v_path);
         g_value_unset(&v_album);
@@ -501,6 +505,7 @@ static gboolean load_media_cb(gpointer userdata)
         GtkWidget *widget;
         BudgieMediaView *self;
         struct LoadStruct *load;
+        GtkListBoxRow *row = NULL;
 
         load = (struct LoadStruct*)userdata;
         widget = GTK_WIDGET(load->data);
@@ -518,7 +523,7 @@ static gboolean load_media_cb(gpointer userdata)
                         /** Raise a warning somewhere? */
                         g_warning("No tracks found");
 
-                set_display(self, results);
+                row = set_display(self, results);
         } else if (widget == self->videos) {
                 self->mode = MEDIA_MODE_VIDEOS;
 
@@ -528,7 +533,7 @@ static gboolean load_media_cb(gpointer userdata)
                         /** Raise a warning somewhere? */
                         g_warning("No tracks found");
 
-                set_display(self, results);
+                row = set_display(self, results);
         }
         switch (self->mode) {
                 case MEDIA_MODE_ALBUMS:
@@ -541,6 +546,13 @@ static gboolean load_media_cb(gpointer userdata)
                                 "tracks");
                         break;
         }
+
+        while (gtk_events_pending())
+                gtk_main_iteration();
+
+        if (row)
+                gtk_list_box_select_row(GTK_LIST_BOX(self->list),
+                        row);
         return FALSE;
 }
 
@@ -557,10 +569,11 @@ static void button_clicked_cb(GtkWidget *widget, gpointer userdata)
         g_idle_add(load_media_cb, load);
 }
 
-static void set_display(BudgieMediaView *self, GPtrArray *results)
+static GtkListBoxRow* set_display(BudgieMediaView *self, GPtrArray *results)
 {
         /* Media infos */
         MediaInfo *current = NULL;
+        GtkListBoxRow *row = NULL;
         int i;
         /* Item to append to list */
         GtkWidget *label;
@@ -591,8 +604,12 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
                 if (!self->current_path)
                         continue;
                 /* If this is already playing, update the appearance */
-                if (g_str_equal(self->current_path, current->path))
+                if (g_str_equal(self->current_path, current->path)) {
                         g_object_set(label, "playing", TRUE, NULL);
+                        row = gtk_list_box_get_row_at_index(
+                                GTK_LIST_BOX(self->list), i);
+                }
+
         }
 
 
@@ -638,6 +655,10 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
                 gtk_label_set_text(GTK_LABEL(self->current_label), "");
         g_free(info_string);
         self->results = results;
+
+        while (gtk_events_pending())
+                gtk_main_iteration();
+        return row;
 }
 
 static void list_selection_cb(GtkListBox *list, GtkListBoxRow *row,
@@ -764,6 +785,8 @@ void budgie_media_view_set_active(BudgieMediaView *self,
                 else {
                         self->index = gtk_list_box_row_get_index(row);
                         g_object_set(label, "playing", TRUE, NULL);
+                        gtk_list_box_select_row(GTK_LIST_BOX(self->list),
+                                row);
                 }
         }
 
