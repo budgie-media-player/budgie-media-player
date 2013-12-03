@@ -44,6 +44,9 @@ static void budgie_db_class_init(BudgieDBClass *klass);
 static void budgie_db_init(BudgieDB *self);
 static void budgie_db_dispose(GObject *object);
 
+/* Used to keep the database thread safe */
+static GMutex _lock;
+
 /* MediaInfo API */
 void free_media_info(gpointer p_info)
 {
@@ -119,6 +122,7 @@ void budgie_db_store_media(BudgieDB *self, MediaInfo *info)
         datum value;
         uint8_t *store = NULL;
 
+        g_mutex_lock(&_lock);
         /* Path is the unique key */
         datum key = { (char*)info->path, ((int)strlen(info->path))+1 };
 
@@ -133,6 +137,8 @@ void budgie_db_store_media(BudgieDB *self, MediaInfo *info)
 end:
         if (store)
                 free(store);
+
+        g_mutex_unlock(&_lock);
 }
 
 MediaInfo* budgie_db_get_media(BudgieDB *self, gchar *path)
@@ -156,6 +162,7 @@ MediaInfo* budgie_db_get_media(BudgieDB *self, gchar *path)
 end:
         if (store)
                 free(store);
+
         return ret;
 }
 
@@ -166,6 +173,8 @@ GSList* budgie_db_get_all_media(BudgieDB* self)
         char *path;
         MediaInfo *cur = NULL;
 
+        g_mutex_lock(&_lock);
+
         key = gdbm_firstkey(self->priv->db);
         while (key.dptr) {
                 path = (char*)key.dptr;
@@ -175,6 +184,8 @@ GSList* budgie_db_get_all_media(BudgieDB* self)
                 free(key.dptr);
                 key = nextkey;
         }
+        g_mutex_unlock(&_lock);
+
         return ret;
 }
 
@@ -192,6 +203,8 @@ gboolean budgie_db_get_all_by_field(BudgieDB *self,
         char *append = NULL;
         gboolean should_append = TRUE;
         int i;
+
+        g_mutex_lock(&_lock);
 
         _results = g_ptr_array_new();
 
@@ -239,6 +252,8 @@ gboolean budgie_db_get_all_by_field(BudgieDB *self,
                 key = nextkey;
                 append = NULL;
         }
+        g_mutex_unlock(&_lock);
+
         /* No results */
         if (_results->len < 1) {
                 g_ptr_array_free(_results, TRUE);
@@ -246,6 +261,7 @@ gboolean budgie_db_get_all_by_field(BudgieDB *self,
         }
         ret = TRUE;
         *results = _results;
+
         return ret;
 }
 
@@ -268,6 +284,8 @@ gboolean budgie_db_search_field(BudgieDB *self,
         char *test = NULL;
         int count = 0;
         gboolean succ = FALSE;
+
+        g_mutex_lock(&_lock);
 
         _results = g_ptr_array_new();
 
@@ -340,6 +358,7 @@ next:
         }
         ret = TRUE;
         *results = _results;
+        g_mutex_unlock(&_lock);
         return ret;
 }
 
