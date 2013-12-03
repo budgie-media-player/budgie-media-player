@@ -508,8 +508,6 @@ static gboolean load_media_cb(gpointer userdata)
 
         if (widget == self->albums) {
                 self->mode = MEDIA_MODE_ALBUMS;
-                gtk_stack_set_visible_child_name(GTK_STACK(self->stack),
-                        "albums");
         } else if (widget == self->songs) {
                 self->mode = MEDIA_MODE_SONGS;
 
@@ -520,8 +518,6 @@ static gboolean load_media_cb(gpointer userdata)
                         g_warning("No tracks found");
 
                 set_display(self, results);
-                gtk_stack_set_visible_child_name(GTK_STACK(self->stack),
-                        "tracks");
         } else if (widget == self->videos) {
                 self->mode = MEDIA_MODE_VIDEOS;
 
@@ -532,8 +528,17 @@ static gboolean load_media_cb(gpointer userdata)
                         g_warning("No tracks found");
 
                 set_display(self, results);
-                gtk_stack_set_visible_child_name(GTK_STACK(self->stack),
-                        "tracks");
+        }
+        switch (self->mode) {
+                case MEDIA_MODE_ALBUMS:
+                        gtk_stack_set_visible_child_name(GTK_STACK(self->stack),
+                                "albums");
+                        break;
+                case MEDIA_MODE_SONGS:
+                case MEDIA_MODE_VIDEOS:
+                        gtk_stack_set_visible_child_name(GTK_STACK(self->stack),
+                                "tracks");
+                        break;
         }
         return FALSE;
 }
@@ -587,9 +592,6 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
                 /* If this is already playing, update the appearance */
                 if (g_str_equal(self->current_path, current->path))
                         g_object_set(label, "playing", TRUE, NULL);
-
-                while (gtk_events_pending())
-                        gtk_main_iteration();
         }
 
 
