@@ -64,6 +64,11 @@ enum {
         PROP_0, PROP_DATABASE, N_PROPERTIES
 };
 
+struct LoadStruct {
+        BudgieMediaView *self;
+        gpointer data;
+};
+
 enum {
         ALBUM_TITLE = 0,
         ALBUM_PIXBUF,
@@ -489,12 +494,17 @@ end:
         g_value_unset(&v_album);
 }
 
-static void button_clicked_cb(GtkWidget *widget, gpointer userdata)
+static gboolean load_media_cb(gpointer userdata)
 {
-        BudgieMediaView *self;
         GPtrArray *results = NULL;
+        GtkWidget *widget;
+        BudgieMediaView *self;
+        struct LoadStruct *load;
 
-        self = BUDGIE_MEDIA_VIEW(userdata);
+        load = (struct LoadStruct*)userdata;
+        widget = GTK_WIDGET(load->data);
+        self = load->self;
+        g_free(load);
 
         if (widget == self->albums) {
                 self->mode = MEDIA_MODE_ALBUMS;
@@ -525,6 +535,20 @@ static void button_clicked_cb(GtkWidget *widget, gpointer userdata)
                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack),
                         "tracks");
         }
+        return FALSE;
+}
+
+static void button_clicked_cb(GtkWidget *widget, gpointer userdata)
+{
+        BudgieMediaView *self;
+        struct LoadStruct *load;
+
+        self = BUDGIE_MEDIA_VIEW(userdata);
+        load = g_new0(struct LoadStruct, 1);
+        load->self = self;
+        load->data = widget;
+
+        g_idle_add(load_media_cb, load);
 }
 
 static void set_display(BudgieMediaView *self, GPtrArray *results)
@@ -563,6 +587,9 @@ static void set_display(BudgieMediaView *self, GPtrArray *results)
                 /* If this is already playing, update the appearance */
                 if (g_str_equal(self->current_path, current->path))
                         g_object_set(label, "playing", TRUE, NULL);
+
+                while (gtk_events_pending())
+                        gtk_main_iteration();
         }
 
 
