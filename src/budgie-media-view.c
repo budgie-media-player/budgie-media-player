@@ -210,7 +210,8 @@ static void budgie_media_view_init(BudgieMediaView *self)
         /* Stack happens to be our main content */
         stack = gtk_stack_new();
         gtk_stack_set_transition_type(GTK_STACK(stack),
-                GTK_STACK_TRANSITION_TYPE_CROSSFADE);
+                GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);
+        gtk_stack_set_transition_duration(GTK_STACK(stack), 400);
         gtk_box_pack_start(GTK_BOX(main_layout), stack, TRUE, TRUE, 0);
         self->stack = stack;
 
