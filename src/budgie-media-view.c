@@ -114,6 +114,8 @@ static void budgie_media_view_set_property(GObject *object,
         switch (prop_id) {
                 case PROP_DATABASE:
                         self->db = g_value_get_pointer((GValue*)value);
+                        if (!self->db)
+                                return;
                         g_idle_add(update_db_t, (gpointer)self);
                         break;
                 default:

@@ -254,7 +254,7 @@ static void budgie_window_init(BudgieWindow *self)
         self->priv->current_page = "view";
 
         /* Browse view */
-        view = budgie_media_view_new(self->db);
+        view = budgie_media_view_new(NULL);
         g_signal_connect(view, "media-selected",
                 G_CALLBACK(media_selected_cb), (gpointer)self);
         self->view = view;
@@ -313,6 +313,8 @@ static void budgie_window_init(BudgieWindow *self)
         /* Start thread from idle queue */
         if (length == 0)
                 g_idle_add(load_media_t, (gpointer)self);
+        else
+                g_object_set(view, "database", self->db, NULL);
 
         gtk_widget_realize(window);
         gtk_widget_show_all(window);
@@ -634,6 +636,8 @@ static gpointer load_media(gpointer data)
 
         budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
                 BUDGIE_ACTION_RELOAD, TRUE);
+
+        g_object_set(BUDGIE_MEDIA_VIEW(self->view), "database", self->db, NULL);
 
         return NULL;
 }
