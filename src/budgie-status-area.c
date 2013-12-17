@@ -81,7 +81,7 @@ static void budgie_status_area_init(BudgieStatusArea *self)
         /* Time passed */
         time_label = gtk_label_new("");
         context = gtk_widget_get_style_context(time_label);
-        gtk_style_context_add_class(context, "dim-label");
+        gtk_style_context_add_class(context, "info-label");
         gtk_box_pack_start(GTK_BOX(bottom), time_label, FALSE, FALSE, 2);
         self->time_label = time_label;
 
@@ -98,7 +98,7 @@ static void budgie_status_area_init(BudgieStatusArea *self)
         /* Remaining time */
         remaining_label = gtk_label_new("");
         context = gtk_widget_get_style_context(remaining_label);
-        gtk_style_context_add_class(context, "dim-label");
+        gtk_style_context_add_class(context, "info-label");
         gtk_box_pack_end(GTK_BOX(bottom), remaining_label, FALSE, FALSE, 2);
         self->remaining_label = remaining_label;
 

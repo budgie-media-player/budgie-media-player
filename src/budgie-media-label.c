@@ -166,10 +166,10 @@ void budgie_media_label_set_playing(BudgieMediaLabel *self,
 
         style = gtk_widget_get_style_context(self->display);
         if (playing) {
-                gtk_style_context_remove_class(style, "dim-label");
+                gtk_style_context_remove_class(style, "info-label");
                 g_object_set(self->display, "margin-left", 15, NULL);
         } else {
-                gtk_style_context_add_class(style, "dim-label");
+                gtk_style_context_add_class(style, "info-label");
                 g_object_set(self->display, "margin-left", 25, NULL);
         }
 

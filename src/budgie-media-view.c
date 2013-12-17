@@ -168,10 +168,6 @@ static void budgie_media_view_init(BudgieMediaView *self)
         gtk_container_add(GTK_CONTAINER(self), top_frame);
         gtk_container_add(GTK_CONTAINER(top_frame), main_layout);
 
-        style = gtk_widget_get_style_context(top_frame);
-        gtk_style_context_add_class(style, "view");
-        gtk_style_context_add_class(style, "content-view");
-
         /* To switch between media types */
         controls = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
         gtk_container_set_border_width(GTK_CONTAINER(controls), 3);
@@ -223,12 +219,6 @@ static void budgie_media_view_init(BudgieMediaView *self)
                 TRUE);
         gtk_container_add(GTK_CONTAINER(scroll), icon_view);
         gtk_stack_add_named(GTK_STACK(stack), scroll, "albums");
-
-        style = gtk_widget_get_style_context(icon_view);
-        gtk_style_context_add_class(style, "view");
-        gtk_style_context_add_class(style, "content-view");
-        style = gtk_widget_get_style_context(scroll);
-        gtk_style_context_add_class(style, "osd");
 
         /* Relevant columns */
         gtk_icon_view_set_markup_column(GTK_ICON_VIEW(icon_view),
@@ -285,7 +275,7 @@ static void budgie_media_view_init(BudgieMediaView *self)
         gtk_box_pack_start(GTK_BOX(info_box), label, FALSE, FALSE, 0);
         gtk_widget_set_valign(label, GTK_ALIGN_END);
         style = gtk_widget_get_style_context(label);
-        gtk_style_context_add_class(style, "dim-label");
+        gtk_style_context_add_class(style, "info-label");
 
         /* Append tracks to a pretty listbox */
         list = gtk_list_box_new();
@@ -303,14 +293,6 @@ static void budgie_media_view_init(BudgieMediaView *self)
         g_object_set(scroll, "margin-top", 20, NULL);
         gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
                 GTK_SHADOW_NONE);
-
-        style = gtk_widget_get_style_context(list);
-        /* Grainy style seen in Adwaita, might remove it and add padding */
-        gtk_style_context_add_class(style, "view");
-        gtk_style_context_add_class(style, "content-view");
-        /* Better looking scroll bars */
-        style = gtk_widget_get_style_context(scroll);
-        gtk_style_context_add_class(style, "osd");
 }
 
 static void budgie_media_view_dispose(GObject *object)
@@ -393,10 +375,10 @@ static gpointer update_db(gpointer userdata)
                         pixbuf = beautify(&pixbuf, base, overlay);
                 /* Pretty label */
                 if (current->band)
-                        markup = g_markup_printf_escaped("<big>%s\n<span color='darkgrey'>%s</span></big>",
+                        markup = g_markup_printf_escaped("<big>%s\n<span color='#707070'>%s</span></big>",
                                 current->album, current->band);
                 else
-                        markup = g_markup_printf_escaped("<big>%s\n<span color='darkgrey'>%s</span></big>",
+                        markup = g_markup_printf_escaped("<big>%s\n<span color='#707070'>%s</span></big>",
                                 current->album, current->artist);
                 gtk_list_store_append(model, &iter);
 

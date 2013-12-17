@@ -109,7 +109,6 @@ static void budgie_window_init(BudgieWindow *self)
         GtkWidget *settings_view;
         GstBus *bus;
         GSList *tracks;
-        GtkSettings *settings;
         GdkVisual *visual;
         guint length;
         gchar **media_dirs = NULL;
@@ -145,11 +144,7 @@ static void budgie_window_init(BudgieWindow *self)
         /* Initialize our window */
         window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
         self->window = window;
-        settings = gtk_widget_get_settings(window);
         visual = gtk_widget_get_visual(window);
-        g_object_set(settings,
-                "gtk-application-prefer-dark-theme", TRUE, NULL);
-        g_object_unref(settings);
 
         /* Set our window up */
         gtk_window_set_title(GTK_WINDOW(window), "Music Player");
@@ -369,7 +364,7 @@ static void init_styles(BudgieWindow *self)
         gtk_css_provider_load_from_data(css_provider, data, (gssize)strlen(data)+1, NULL);
         screen = gdk_screen_get_default();
         gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(css_provider),
-                GTK_STYLE_PROVIDER_PRIORITY_USER);
+                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
         self->css_provider = css_provider;
 }
 

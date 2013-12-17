@@ -37,11 +37,19 @@
 
 #define PLAYER_CSS "BudgieStatusArea {\
     border-radius: 4px;\
-    border-width: 1px;\
     background-image: linear-gradient(to bottom,\
-                                      shade(shade(@theme_bg_color, 0.89), 1.05),\
-                                      shade(shade(@theme_bg_color, 0.96), 0.97)\
-                                      );\
+                shade(@theme_bg_color, 0.9),\
+                shade(@theme_bg_color, 1.1));\
+    border: 1px shade(@theme_bg_color, 0.85) solid;\
+}\
+GtkIconView {\
+    background-color: @theme_bg_color;\
+}\
+.info-label {\
+    color: #707070;\
+}\
+.trough {\
+    background-color: alpha(white, 0.0);\
 }"
 
 typedef struct _BudgieWindow BudgieWindow;
