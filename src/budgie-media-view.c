@@ -562,6 +562,10 @@ static GtkListBoxRow* set_display(BudgieMediaView *self, GPtrArray *results)
         /* Info label */
         gchar *info_string = NULL;
 
+        /* Do nothing when results is null */
+        if (!results)
+                return NULL;
+
         gtk_container_foreach(GTK_CONTAINER(self->list),
                 (GtkCallback)gtk_widget_destroy, NULL);
 
