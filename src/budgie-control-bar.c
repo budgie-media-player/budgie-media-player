@@ -93,7 +93,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_REPEAT;
         g_object_set_data_full(G_OBJECT(repeat), "budgie", data, g_free);
-        g_signal_connect(repeat, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        g_signal_connect(repeat, "clicked", G_CALLBACK(handler_cb), self);
         gtk_box_pack_start(GTK_BOX(control_box), repeat, FALSE, FALSE, 0);
 
         /* random */
@@ -103,7 +103,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_RANDOM;
         g_object_set_data_full(G_OBJECT(random), "budgie", data, g_free);
-        g_signal_connect(random, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        g_signal_connect(random, "clicked", G_CALLBACK(handler_cb), self);
         gtk_box_pack_start(GTK_BOX(control_box), random, FALSE, FALSE, 0);
 
         /* Visual separation between generic media and video controls */
@@ -127,7 +127,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_FULL_SCREEN;
         g_object_set_data_full(G_OBJECT(full_screen), "budgie", data, g_free);
-        g_signal_connect(full_screen, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        g_signal_connect(full_screen, "clicked", G_CALLBACK(handler_cb), self);
         gtk_container_add(GTK_CONTAINER(control_video_box), full_screen);
         self->full_screen = full_screen;
 
@@ -137,7 +137,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_ASPECT_RATIO;
         g_object_set_data_full(G_OBJECT(aspect), "budgie", data, g_free);
-        g_signal_connect(aspect, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        g_signal_connect(aspect, "clicked", G_CALLBACK(handler_cb), self);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(aspect), TRUE);
         gtk_container_add(GTK_CONTAINER(control_video_box), aspect);
 
@@ -162,7 +162,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_PREVIOUS;
         g_object_set_data_full(G_OBJECT(prev), "budgie", data, g_free);
-        g_signal_connect(prev, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        g_signal_connect(prev, "clicked", G_CALLBACK(handler_cb), self);
         gtk_box_pack_start(GTK_BOX(playback), prev, FALSE, FALSE, 0);
 
         /* play */
@@ -172,7 +172,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         *data = BUDGIE_ACTION_PLAY;
         self->play = play;
         g_object_set_data_full(G_OBJECT(play), "budgie", data, g_free);
-        g_signal_connect(play, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        g_signal_connect(play, "clicked", G_CALLBACK(handler_cb), self);
         gtk_box_pack_start(GTK_BOX(playback), play, FALSE, FALSE, 0);
 
         /* pause */
@@ -182,7 +182,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         *data = BUDGIE_ACTION_PAUSE;
         self->pause = pause;
         g_object_set_data_full(G_OBJECT(pause), "budgie", data, g_free);
-        g_signal_connect(pause, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        g_signal_connect(pause, "clicked", G_CALLBACK(handler_cb), self);
         gtk_box_pack_start(GTK_BOX(playback), pause, FALSE, FALSE, 0);
 
         /* next */
@@ -191,7 +191,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_NEXT;
         g_object_set_data_full(G_OBJECT(next), "budgie", data, g_free);
-        g_signal_connect(next, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        g_signal_connect(next, "clicked", G_CALLBACK(handler_cb), self);
         gtk_box_pack_start(GTK_BOX(playback), next, FALSE, FALSE, 0);
 
         /* separator (shift following items to right hand side */
@@ -207,7 +207,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         data = g_malloc(sizeof(guint));
         *data = BUDGIE_ACTION_RELOAD;
         g_object_set_data_full(G_OBJECT(reload), "budgie", data, g_free);
-        g_signal_connect(reload, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        g_signal_connect(reload, "clicked", G_CALLBACK(handler_cb), self);
         reload_item = gtk_tool_item_new();
         self->reload = reload;
         gtk_container_add(GTK_CONTAINER(reload_item), reload);
@@ -220,7 +220,7 @@ static void budgie_control_bar_init(BudgieControlBar *self)
         *data = BUDGIE_ACTION_SETTINGS;
         self->settings = settings;
         g_object_set_data_full(G_OBJECT(settings), "budgie", data, g_free);
-        g_signal_connect(settings, "clicked", G_CALLBACK(handler_cb), (gpointer)self);
+        g_signal_connect(settings, "clicked", G_CALLBACK(handler_cb), self);
         settings_item = gtk_tool_item_new();
         gtk_container_add(GTK_CONTAINER(settings_item), settings);
         gtk_container_add(GTK_CONTAINER(self), GTK_WIDGET(settings_item));

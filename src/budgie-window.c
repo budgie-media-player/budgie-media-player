@@ -116,7 +116,7 @@ static void budgie_window_init(BudgieWindow *self)
         /* Init our settings */
         self->priv->settings = g_settings_new(BUDGIE_SCHEMA);
         g_signal_connect(self->priv->settings, "changed",
-                G_CALLBACK(settings_changed), (gpointer)self);
+                G_CALLBACK(settings_changed), self);
 
         /* Retrieve media directories */
         media_dirs = g_settings_get_strv(self->priv->settings, BUDGIE_MEDIA_DIRS);
@@ -166,7 +166,7 @@ static void budgie_window_init(BudgieWindow *self)
         prev = new_button_with_icon(self->icon_theme, "media-seek-backward-symbolic",
                 FALSE, FALSE, "Previous track");
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), prev);
-        g_signal_connect(prev, "clicked", G_CALLBACK(prev_cb), (gpointer)self);
+        g_signal_connect(prev, "clicked", G_CALLBACK(prev_cb), self);
         self->prev = prev;
         /* Set some left padding */
 #if GTK_MICRO_VERSION >= 11
@@ -178,25 +178,25 @@ static void budgie_window_init(BudgieWindow *self)
         play = new_button_with_icon(self->icon_theme, "media-playback-start-symbolic",
                 FALSE, FALSE, "Play");
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), play);
-        g_signal_connect(play, "clicked", G_CALLBACK(play_cb), (gpointer)self);
+        g_signal_connect(play, "clicked", G_CALLBACK(play_cb), self);
         self->play = play;
 
         pause = new_button_with_icon(self->icon_theme, "media-playback-pause-symbolic",
                 FALSE, FALSE, "Pause");
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), pause);
-        g_signal_connect(pause, "clicked", G_CALLBACK(pause_cb), (gpointer)self);
+        g_signal_connect(pause, "clicked", G_CALLBACK(pause_cb), self);
         self->pause = pause;
 
         next = new_button_with_icon(self->icon_theme, "media-seek-forward-symbolic",
                 FALSE, FALSE, "Next track");
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), next);
-        g_signal_connect(next, "clicked", G_CALLBACK(next_cb), (gpointer)self);
+        g_signal_connect(next, "clicked", G_CALLBACK(next_cb), self);
         self->next = next;
 
         /* Status area */
         status = budgie_status_area_new();
         gtk_header_bar_set_custom_title(GTK_HEADER_BAR(header), status);
-        g_signal_connect(status, "seek", G_CALLBACK(seek_cb), (gpointer)self);
+        g_signal_connect(status, "seek", G_CALLBACK(seek_cb), self);
         self->status = status;
 
         /* main layout */
@@ -212,7 +212,7 @@ static void budgie_window_init(BudgieWindow *self)
         toolbar = budgie_control_bar_new();
         self->toolbar = toolbar;
         g_signal_connect(toolbar, "action-selected",
-                G_CALLBACK(toolbar_cb), (gpointer)self);
+                G_CALLBACK(toolbar_cb), self);
 
         /* Initialise repeat setting */
         b_value = g_settings_get_boolean(self->priv->settings, BUDGIE_REPEAT);
@@ -240,7 +240,7 @@ static void budgie_window_init(BudgieWindow *self)
         /* Browse view */
         view = budgie_media_view_new(NULL);
         g_signal_connect(view, "media-selected",
-                G_CALLBACK(media_selected_cb), (gpointer)self);
+                G_CALLBACK(media_selected_cb), self);
         self->view = view;
         gtk_stack_add_named(GTK_STACK(stack), view, "view");
 
@@ -251,14 +251,14 @@ static void budgie_window_init(BudgieWindow *self)
         self->priv->window_handle = 0;
         gtk_stack_add_named(GTK_STACK(stack), video, "video");
         gtk_widget_set_visual(video, visual);
-        g_signal_connect(video, "realize", G_CALLBACK(realize_cb), (gpointer)self);
-        g_signal_connect(video, "draw", G_CALLBACK(draw_cb), (gpointer)self);
+        g_signal_connect(video, "realize", G_CALLBACK(realize_cb), self);
+        g_signal_connect(video, "draw", G_CALLBACK(draw_cb), self);
 
         /* Hook up events for video box */
         g_signal_connect(video, "motion-notify-event",
-                G_CALLBACK(motion_notify_cb), (gpointer)self);
+                G_CALLBACK(motion_notify_cb), self);
         g_signal_connect(window, "key-release-event",
-                G_CALLBACK(key_cb), (gpointer)self);
+                G_CALLBACK(key_cb), self);
         gtk_widget_set_events (video, gtk_widget_get_events (video) |
              GDK_LEAVE_NOTIFY_MASK | GDK_POINTER_MOTION_MASK |
              GDK_POINTER_MOTION_HINT_MASK | GDK_KEY_RELEASE_MASK);
@@ -285,19 +285,19 @@ static void budgie_window_init(BudgieWindow *self)
 
         gst_bus_enable_sync_message_emission(bus);
         gst_bus_add_signal_watch(bus);
-        g_signal_connect(bus, "message::eos", G_CALLBACK(_gst_eos_cb), (gpointer)self);
+        g_signal_connect(bus, "message::eos", G_CALLBACK(_gst_eos_cb), self);
         g_object_unref(bus);
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         self->priv->duration = GST_CLOCK_TIME_NONE;
 
-        g_timeout_add(1000, refresh_cb, (gpointer)self);
+        g_timeout_add(1000, refresh_cb, self);
 
         tracks = budgie_db_get_all_media(self->db);
         length = g_slist_length(tracks);
         g_slist_free_full(tracks, free_media_info);
         /* Start thread from idle queue */
         if (length == 0)
-                g_idle_add(load_media_t, (gpointer)self);
+                g_idle_add(load_media_t, self);
         else
                 g_object_set(view, "database", self->db, NULL);
 
@@ -543,7 +543,7 @@ static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata)
         }
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         /* repeat the same track again */
-        play_cb(NULL, (gpointer)self);
+        play_cb(NULL, self);
 }
 
 static void store_media(gpointer data1, gpointer data2)
@@ -590,7 +590,7 @@ static gpointer load_media(gpointer data)
         for (i=0; i < length; i++)
                 search_directory(self->media_dirs[i], &tracks, 2, mimes);
 
-        g_slist_foreach(tracks, store_media, (gpointer)self);
+        g_slist_foreach(tracks, store_media, self);
         g_slist_free_full(tracks, free_media_info);
 
         budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),

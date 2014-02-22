@@ -103,7 +103,7 @@ static void budgie_media_label_get_property(GObject *object,
         self = BUDGIE_MEDIA_LABEL(object);
         switch (prop_id) {
                 case PROP_INFO:
-                        g_value_set_pointer((GValue *)value, (gpointer)self->info);
+                        g_value_set_pointer((GValue *)value, self->info);
                         break;
                 case PROP_PLAYING:
                         g_value_set_boolean((GValue *)value, self->playing);

@@ -118,7 +118,7 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
         tree = gtk_tree_view_new();
         gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), FALSE);
         g_signal_connect(tree, "cursor-changed",
-                G_CALLBACK(paths_cursor_cb), (gpointer)self);
+                G_CALLBACK(paths_cursor_cb), self);
         self->paths = tree;
         scroll = gtk_scrolled_window_new(NULL, NULL);
         gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
@@ -150,7 +150,7 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
         tool = gtk_tool_button_new(NULL, "Add");
         self->path_add = GTK_WIDGET(tool);
         g_signal_connect(tool, "clicked", G_CALLBACK(paths_add_cb),
-                (gpointer)self);
+                self);
         gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(tool),
                 "list-add-symbolic");
         gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(tool));
@@ -158,7 +158,7 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
         tool = gtk_tool_button_new(NULL, "Remove");
         self->path_remove = GTK_WIDGET(tool);
         g_signal_connect(tool, "clicked", G_CALLBACK(paths_remove_cb),
-                (gpointer)self);
+                self);
         gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(tool),
                 "list-remove-symbolic");
         gtk_widget_set_sensitive(GTK_WIDGET(tool), FALSE);

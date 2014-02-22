@@ -121,7 +121,7 @@ static void budgie_media_view_set_property(GObject *object,
                         self->db = g_value_get_pointer((GValue*)value);
                         if (!self->db)
                                 return;
-                        g_idle_add(update_db_t, (gpointer)self);
+                        g_idle_add(update_db_t, self);
                         break;
                 default:
                         G_OBJECT_WARN_INVALID_PROPERTY_ID (object,
@@ -140,7 +140,7 @@ static void budgie_media_view_get_property(GObject *object,
         self = BUDGIE_MEDIA_VIEW(object);
         switch (prop_id) {
                 case PROP_DATABASE:
-                        g_value_set_pointer((GValue *)value, (gpointer)self->db);
+                        g_value_set_pointer((GValue *)value, self->db);
                         break;
                 default:
                         G_OBJECT_WARN_INVALID_PROPERTY_ID (object,
@@ -179,7 +179,7 @@ static void budgie_media_view_init(BudgieMediaView *self)
         self->albums = button;
         g_object_set(button, "draw-indicator", FALSE, NULL);
         g_signal_connect(button, "clicked", G_CALLBACK(button_clicked_cb),
-                (gpointer)self);
+                self);
         gtk_widget_set_can_focus(button, FALSE);
         gtk_box_pack_start(GTK_BOX(controls), button, FALSE, FALSE, 0);
 
@@ -188,7 +188,7 @@ static void budgie_media_view_init(BudgieMediaView *self)
         self->songs = button;
         g_object_set(button, "draw-indicator", FALSE, NULL);
         g_signal_connect(button, "clicked", G_CALLBACK(button_clicked_cb),
-                (gpointer)self);
+                self);
         gtk_widget_set_can_focus(button, FALSE);
         gtk_box_pack_start(GTK_BOX(controls), button, FALSE, FALSE, 0);
 
@@ -197,7 +197,7 @@ static void budgie_media_view_init(BudgieMediaView *self)
         self->videos = button;
         g_object_set(button, "draw-indicator", FALSE, NULL);
         g_signal_connect(button, "clicked", G_CALLBACK(button_clicked_cb),
-                (gpointer)self);
+                self);
         gtk_widget_set_can_focus(button, FALSE);
         gtk_box_pack_start(GTK_BOX(controls), button, FALSE, FALSE, 0);
 
@@ -235,7 +235,7 @@ static void budgie_media_view_init(BudgieMediaView *self)
         gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(icon_view),
                 TRUE);
         g_signal_connect(icon_view, "item-activated",
-                G_CALLBACK(item_activated_cb), (gpointer)self);
+                G_CALLBACK(item_activated_cb), self);
 
         /* Set up our view page (tracks) */
         view_page = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -280,7 +280,7 @@ static void budgie_media_view_init(BudgieMediaView *self)
         /* Append tracks to a pretty listbox */
         list = gtk_list_box_new();
         g_signal_connect(list, "row-activated",
-                G_CALLBACK(list_selection_cb), (gpointer)self);
+                G_CALLBACK(list_selection_cb), self);
         gtk_widget_set_halign(list, GTK_ALIGN_FILL);
         self->list = list;
 
@@ -663,7 +663,7 @@ static void list_selection_cb(GtkListBox *list, GtkListBoxRow *row,
         label = (BudgieMediaLabel*)g_list_nth_data(children, 0);
         info = label->info;
 
-        g_signal_emit_by_name(self, "media-selected", (gpointer)info);
+        g_signal_emit_by_name(self, "media-selected", info);
         g_list_free(children);
 
 }

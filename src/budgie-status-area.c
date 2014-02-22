@@ -94,7 +94,7 @@ static void budgie_status_area_init(BudgieStatusArea *self)
         gtk_scale_set_draw_value(GTK_SCALE(slider), FALSE);
         gtk_widget_set_can_focus(slider, FALSE);
         self->priv->seek_id = g_signal_connect(slider, "value-changed",
-                G_CALLBACK(changed_cb), (gpointer)self);
+                G_CALLBACK(changed_cb), self);
 
         /* Remaining time */
         remaining_label = gtk_label_new("");
