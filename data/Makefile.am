@@ -1,5 +1,9 @@
 -include $(top_srcdir)/common.mk
 
+#@INTLTOOL_XML_NOMERGE_RULE@
+gsettings_SCHEMAS = com.evolve-os.budgie.media-player.gschema.xml
+@GSETTINGS_RULES@
+
 budgiedir=$(datadir)/budgie
 budgie_DATA = \
 	album-base.png \
@@ -14,11 +18,6 @@ icons_DATA = \
 desktopdir=$(datadir)/applications
 desktop_DATA = \
 	budgie-media-player.desktop
-
-# GLib Schema
-glibdir=$(datadir)/glib-2.0/schemas
-glib_DATA = \
-	com.evolve-os.budgie.media-player.gschema.xml
 
 EXTRA_DIST = \
 	album-base.png \
