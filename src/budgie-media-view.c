@@ -225,9 +225,9 @@ static void budgie_media_view_init(BudgieMediaView *self)
                 ALBUM_TITLE);
         gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(icon_view),
                 ALBUM_PIXBUF);
-        gtk_icon_view_set_item_padding(GTK_ICON_VIEW(icon_view), 15);
-        gtk_icon_view_set_spacing(GTK_ICON_VIEW(icon_view), 10);
-        gtk_icon_view_set_item_width(GTK_ICON_VIEW(icon_view), 290);
+        gtk_icon_view_set_item_padding(GTK_ICON_VIEW(icon_view), 5);
+        gtk_icon_view_set_spacing(GTK_ICON_VIEW(icon_view), 5);
+        gtk_icon_view_set_item_width(GTK_ICON_VIEW(icon_view), 260);
         gtk_icon_view_set_item_orientation(GTK_ICON_VIEW(icon_view),
                 GTK_ORIENTATION_HORIZONTAL);
 
