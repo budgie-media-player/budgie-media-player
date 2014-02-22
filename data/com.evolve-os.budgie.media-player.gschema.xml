@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="budgie">
-  <schema path="/io/github/ikeydoherty/Budgie/" id="io.github.ikeydoherty.Budgie">
+  <schema path="/com/evolve-os/budgie/media-player/" id="com.evolve-os.budgie.media-player">
     <key type="as" name="media-directories">
       <default>[]</default>
       <summary>Configured media directories</summary>

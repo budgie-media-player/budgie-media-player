@@ -26,7 +26,7 @@
 /**
  * Budgie GSettings schema
  */
-#define BUDGIE_SCHEMA "io.github.ikeydoherty.Budgie"
+#define BUDGIE_SCHEMA "com.evolve-os.budgie.media-player"
 /**
  * Media directory GSettings key
  */
