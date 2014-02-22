@@ -37,7 +37,6 @@ struct _BudgieWindowPrivate {
         GSettings *settings;
         MediaInfo *media;
         gchar *uri;
-        gulong volume_id;
         guint64 duration;
         gboolean repeat;
         gboolean random;
@@ -60,7 +59,6 @@ static void play_cb(GtkWidget *widget, gpointer userdata);
 static void pause_cb(GtkWidget *widget, gpointer userdata);
 static void next_cb(GtkWidget *widget, gpointer userdata);
 static void prev_cb(GtkWidget *widget, gpointer userdata);
-static void volume_cb(GtkWidget *widget, gpointer userdata);
 static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata);
 static void realize_cb(GtkWidget *widget, gpointer userdata);
 static gboolean refresh_cb(gpointer userdata);
@@ -99,7 +97,6 @@ static void budgie_window_init(BudgieWindow *self)
         GtkWidget *stack;
         /* header buttons */
         GtkWidget *prev, *play, *pause, *next;
-        GtkWidget *volume;
         GtkWidget *search;
         GtkWidget *status;
         GtkWidget *view;
@@ -191,18 +188,6 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_header_bar_pack_start(GTK_HEADER_BAR(header), next);
         g_signal_connect(next, "clicked", G_CALLBACK(next_cb), (gpointer)self);
         self->next = next;
-
-        /* volume control */
-        volume = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,
-                0.0, 1.0, 1.0/100);
-        gtk_header_bar_pack_start(GTK_HEADER_BAR(header), volume);
-        gtk_scale_set_draw_value(GTK_SCALE(volume), FALSE);
-        gtk_widget_set_size_request(volume, 100, 10);
-        gtk_widget_set_can_focus(volume, FALSE);
-        gtk_widget_set_margin_right(volume, 20);
-        self->priv->volume_id = g_signal_connect(volume, "value-changed",
-                G_CALLBACK(volume_cb), (gpointer)self);
-        self->volume = volume;
 
         /* Status area */
         status = budgie_status_area_new();
@@ -478,31 +463,12 @@ static void prev_cb(GtkWidget *widget, gpointer userdata)
         play_cb(NULL, userdata);
 }
 
-static void volume_cb(GtkWidget *widget, gpointer userdata)
-{
-        BudgieWindow *self;
-        gdouble volume_level;
-
-        self = BUDGIE_WINDOW(userdata);
-        volume_level = gtk_range_get_value(GTK_RANGE(self->volume));
-        g_object_set(self->gst_player, "volume", volume_level, NULL);
-}
-
 static gboolean refresh_cb(gpointer userdata) {
         BudgieWindow *self;
-        gdouble volume_level;
         gint64 track_current;
         GstFormat fmt = GST_FORMAT_TIME;
 
         self = BUDGIE_WINDOW(userdata);
-        g_object_get(self->gst_player, "volume", &volume_level, NULL);
-
-        /* Don't cause events for this, endless volume battle */
-        g_signal_handler_block(self->volume, self->priv->volume_id);
-        gtk_range_set_value(GTK_RANGE(self->volume), volume_level);
-
-        /* Reenable events */
-        g_signal_handler_unblock(self->volume, self->priv->volume_id);
 
         /* Get media duration */
         if (!GST_CLOCK_TIME_IS_VALID (self->priv->duration)) {
