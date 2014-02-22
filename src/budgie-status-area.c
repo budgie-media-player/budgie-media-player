@@ -66,7 +66,8 @@ static void budgie_status_area_init(BudgieStatusArea *self)
         box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
         /* Construct our main label */
-        label = gtk_label_new("Budgie");
+        label = gtk_label_new("<b>Budgie\n</b>");
+        gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
         gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
         gtk_widget_set_name(label, "title");
         gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
