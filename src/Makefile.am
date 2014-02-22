@@ -1,6 +1,6 @@
 -include $(top_srcdir)/common.mk
 
-bin_PROGRAMS = budgie
+bin_PROGRAMS = budgie-media-player
 
 noinst_LTLIBRARIES = \
 	libbudgiedb.la
@@ -17,7 +17,7 @@ libbudgiedb_la_LIBADD = \
 	$(GIO_LIBS) \
 	-lgdbm
 
-budgie_SOURCES = \
+budgie_media_player_SOURCES = \
 	budgie-window.c \
 	budgie-window.h \
 	budgie-control-bar.c \
@@ -35,14 +35,14 @@ budgie_SOURCES = \
 	common.h \
 	main.c
 
-budgie_CFLAGS = \
+budgie_media_player_CFLAGS = \
 	$(GTK3_CFLAGS) \
 	$(GSTREAMER_CFLAGS) \
 	$(GSTREAMER_VIDEO_CFLAGS) \
 	$(ID3_FLAGS) \
 	$(AM_CFLAGS)
 
-budgie_LDADD = \
+budgie_media_player_LDADD = \
 	$(GTK3_LIBS) \
 	$(GSTREAMER_LIBS) \
 	$(GSTREAMER_VIDEO_LIBS) \
