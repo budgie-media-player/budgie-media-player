@@ -39,6 +39,9 @@ static void paths_remove_cb(GtkWidget *widget, gpointer userdata);
 /* Refresh view from settings */
 static void budgie_settings_refresh(BudgieSettingsView *self);
 static GtkWidget *create_about(BudgieSettingsView *self);
+static void settings_changed(GSettings *settings,
+                             gchar *key,
+                             gpointer userdata);
 
 /* Boilerplate GObject code */
 static void budgie_settings_view_class_init(BudgieSettingsViewClass *klass);
@@ -75,6 +78,10 @@ static void budgie_settings_view_init(BudgieSettingsView *self)
          * i.e. someone being rightfully awkward and doing this in
          * dconf-editor */
         self->settings = g_settings_new(BUDGIE_SCHEMA);
+        g_signal_connect(self->settings, "changed",
+                G_CALLBACK(settings_changed), self);
+        /* Fire settings */
+        settings_changed(self->settings, BUDGIE_DARK, self);
 
         layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
         gtk_container_add(GTK_CONTAINER(self), layout);
@@ -356,4 +363,23 @@ static GtkWidget *create_about(BudgieSettingsView *self)
         gtk_box_pack_start(GTK_BOX(verti), link, FALSE, FALSE, 0);
 
         return horiz;
+}
+
+static void settings_changed(GSettings *settings,
+                             gchar *key,
+                             gpointer userdata)
+{
+        BudgieSettingsView *self;
+        GtkSettings *ui_settings;
+        gboolean b_ret;
+
+        self = BUDGIE_SETTINGS_VIEW(userdata);
+
+        if (g_str_equal(key, BUDGIE_DARK)) {
+                /* Set a dark theme :) */
+                ui_settings = gtk_widget_get_settings(GTK_WIDGET(self));
+                b_ret = g_settings_get_boolean(settings, key);
+                g_object_set(ui_settings, "gtk-application-prefer-dark-theme",
+                        b_ret, NULL);
+        }
 }

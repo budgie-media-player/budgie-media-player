@@ -39,5 +39,9 @@
  * Random GSettings key
  */
 #define BUDGIE_RANDOM "random"
+/**
+ * Whether we sport a dark theme or not
+ */
+#define BUDGIE_DARK "dark-theme"
 
 #endif /* common_h */
