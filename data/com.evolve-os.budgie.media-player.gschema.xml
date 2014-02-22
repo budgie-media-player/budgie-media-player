@@ -16,5 +16,10 @@
       <summary>Randomly choode media</summary>
       <description>Whether to play media sequentially or in a random order</description>
     </key>
+    <key type="b" name="dark-theme">
+      <default>false</default>
+      <summary>Use the dark theme</summary>
+      <description>Whether Budgie should use a dark theme or not</description>
+    </key>
   </schema>
 </schemalist>
