@@ -42,8 +42,9 @@
                 shade(@theme_bg_color, 1.1));\
     border: 1px shade(@theme_bg_color, 0.85) solid;\
 }\
-GtkIconView {\
-    background-color: @theme_bg_color;\
+GtkIconView,\
+GtkListBox {\
+    background-color: transparent;\
 }\
 .info-label {\
     color: #707070;\
