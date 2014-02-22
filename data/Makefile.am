@@ -13,7 +13,7 @@ icons_DATA = \
 # Our .desktop file
 desktopdir=$(datadir)/applications
 desktop_DATA = \
-	budgie.desktop
+	budgie-media-player.desktop
 
 # GLib Schema
 glibdir=$(datadir)/glib-2.0/schemas
@@ -23,7 +23,7 @@ glib_DATA = \
 EXTRA_DIST = \
 	album-base.png \
 	album-overlay.png \
-	budgie.desktop \
+	budgie-media-player.desktop \
 	io.github.ikeydoherty.Budgie.gschema.xml \
 	budgie.svg \
 	budgie-128x128.png \
