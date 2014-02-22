@@ -169,7 +169,11 @@ static void budgie_window_init(BudgieWindow *self)
         g_signal_connect(prev, "clicked", G_CALLBACK(prev_cb), (gpointer)self);
         self->prev = prev;
         /* Set some left padding */
+#if GTK_MICRO_VERSION >= 11
+        gtk_widget_set_margin_start(prev, 10);
+#else
         gtk_widget_set_margin_left(prev, 10);
+#endif
 
         play = new_button_with_icon(self->icon_theme, "media-playback-start-symbolic",
                 FALSE, FALSE, "Play");
@@ -268,7 +272,11 @@ static void budgie_window_init(BudgieWindow *self)
         search = gtk_search_entry_new();
         gtk_entry_set_placeholder_text(GTK_ENTRY(search), "Search...");
         gtk_header_bar_pack_end(GTK_HEADER_BAR(header), search);
+#if GTK_MICRO_VERSION >= 11
+        gtk_widget_set_margin_end(search, 10);
+#else
         gtk_widget_set_margin_right(search, 10);
+#endif
         self->search = search;
 
         /* Initialise gstreamer */
