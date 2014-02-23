@@ -42,6 +42,9 @@
                 shade(@theme_bg_color, 1.1));\
     border: 1px shade(@theme_bg_color, 0.85) solid;\
 }\
+.titlebar, .header {\
+    padding: 2px 2px 0px 2px;\
+}\
 GtkIconView,\
 GtkListBox {\
     background-color: transparent;\
