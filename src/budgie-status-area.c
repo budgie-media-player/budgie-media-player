@@ -105,7 +105,7 @@ static void budgie_status_area_init(BudgieStatusArea *self)
 
         gtk_container_add(GTK_CONTAINER(self), box);
 
-        gtk_widget_set_size_request(GTK_WIDGET(self), 300, 70);
+        gtk_widget_set_size_request(GTK_WIDGET(self), 300, -1);
 }
 
 static void budgie_status_area_dispose(GObject *object)

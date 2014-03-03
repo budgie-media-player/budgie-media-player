@@ -151,7 +151,7 @@ GtkWidget* new_button_with_icon(GtkIconTheme *theme,
         GtkWidget *image;
         gint size;
 
-        size = toolbar ? GTK_ICON_SIZE_SMALL_TOOLBAR : GTK_ICON_SIZE_DIALOG;
+        size = toolbar ? GTK_ICON_SIZE_SMALL_TOOLBAR : GTK_ICON_SIZE_BUTTON;
         image = gtk_image_new_from_icon_name(icon_name, size);
         /* Create the button */
         if (toggle)

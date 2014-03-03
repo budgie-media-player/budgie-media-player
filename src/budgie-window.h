@@ -35,13 +35,7 @@
 #include "util.h"
 #include "db/budgie-db.h"
 
-#define PLAYER_CSS "BudgieStatusArea {\
-    border-radius: 4px;\
-    background-image: linear-gradient(to bottom,\
-                shade(@theme_bg_color, 0.9),\
-                shade(@theme_bg_color, 1.1));\
-    border: 1px shade(@theme_bg_color, 0.85) solid;\
-}\
+#define PLAYER_CSS "\
 .titlebar, .header {\
     padding: 2px 2px 0px 2px;\
 }\
