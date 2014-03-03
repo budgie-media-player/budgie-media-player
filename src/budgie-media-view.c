@@ -678,7 +678,7 @@ static GdkPixbuf *beautify(GdkPixbuf **source,
         cairo_t *ctx;
         int x_pad = 20;
         int y_pad = 6;
-        GdkPixbuf *scaled, *ret;
+        GdkPixbuf *scaled, *ret, *scaled_ret;
 
         /* Create a new surface to work from */
         width = gdk_pixbuf_get_width(base);
@@ -711,11 +711,14 @@ static GdkPixbuf *beautify(GdkPixbuf **source,
         /* Create a new image to return from this painting op */
         ret = gdk_pixbuf_get_from_surface(surface, 0, 0, width, height);
 
+        scaled_ret = gdk_pixbuf_scale_simple(ret, (width*0.75), (height*0.75), GDK_INTERP_BILINEAR);
+        g_object_unref(ret);
+
         /* Cleanup */
         cairo_surface_destroy(surface);
         cairo_destroy(ctx);
 
-        return ret;
+        return scaled_ret;
 }
 
 
