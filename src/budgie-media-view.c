@@ -227,7 +227,7 @@ static void budgie_media_view_init(BudgieMediaView *self)
                 ALBUM_PIXBUF);
         gtk_icon_view_set_item_padding(GTK_ICON_VIEW(icon_view), 5);
         gtk_icon_view_set_spacing(GTK_ICON_VIEW(icon_view), 5);
-        gtk_icon_view_set_item_width(GTK_ICON_VIEW(icon_view), 260);
+        gtk_icon_view_set_item_width(GTK_ICON_VIEW(icon_view), 220);
         gtk_icon_view_set_item_orientation(GTK_ICON_VIEW(icon_view),
                 GTK_ORIENTATION_HORIZONTAL);
 
@@ -668,6 +668,9 @@ static void list_selection_cb(GtkListBox *list, GtkListBoxRow *row,
 
 }
 
+/**
+ * TODO: CACHE!!!
+ */
 static GdkPixbuf *beautify(GdkPixbuf **source,
                            GdkPixbuf *base,
                            GdkPixbuf *overlay)
