@@ -152,6 +152,11 @@ GtkWidget* new_button_with_icon(GtkIconTheme *theme,
         gint size;
 
         size = toolbar ? GTK_ICON_SIZE_SMALL_TOOLBAR : GTK_ICON_SIZE_BUTTON;
+        /* Ugly hack to force play button to be a *tiny* bit larger */
+        if (g_str_has_prefix(icon_name, "media-playback-start") ||
+            g_str_has_prefix(icon_name, "media-playback-pause"))
+                size = GTK_ICON_SIZE_LARGE_TOOLBAR;
+
         image = gtk_image_new_from_icon_name(icon_name, size);
         /* Create the button */
         if (toggle)

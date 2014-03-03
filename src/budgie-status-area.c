@@ -56,19 +56,23 @@ static void budgie_status_area_class_init(BudgieStatusAreaClass *klass)
 static void budgie_status_area_init(BudgieStatusArea *self)
 {
         GtkWidget *label;
-        GtkWidget *time_label, *remaining_label;
+        GtkWidget *time_label;
         GtkWidget *slider;
         GtkStyleContext *context;
-        GtkWidget *box, *bottom;
+        GtkWidget *box, *bottom, *top;
 
         self->priv = budgie_status_area_get_instance_private(self);
 
         box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
+        top = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        gtk_box_pack_start(GTK_BOX(box), top, TRUE, TRUE, 0);
+
         /* Construct our main label */
         label = gtk_label_new("<b>Budgie\n</b>");
+        gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.0);
         gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
-        gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
+        gtk_box_pack_start(GTK_BOX(top), label, TRUE, TRUE, 0);
         gtk_widget_set_name(label, "title");
         gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
         self->label = label;
@@ -83,7 +87,7 @@ static void budgie_status_area_init(BudgieStatusArea *self)
         time_label = gtk_label_new("");
         context = gtk_widget_get_style_context(time_label);
         gtk_style_context_add_class(context, "info-label");
-        gtk_box_pack_start(GTK_BOX(bottom), time_label, FALSE, FALSE, 2);
+        gtk_box_pack_end(GTK_BOX(top), time_label, FALSE, FALSE, 0);
         self->time_label = time_label;
 
         /* Slider */
@@ -96,16 +100,9 @@ static void budgie_status_area_init(BudgieStatusArea *self)
         self->priv->seek_id = g_signal_connect(slider, "value-changed",
                 G_CALLBACK(changed_cb), self);
 
-        /* Remaining time */
-        remaining_label = gtk_label_new("");
-        context = gtk_widget_get_style_context(remaining_label);
-        gtk_style_context_add_class(context, "info-label");
-        gtk_box_pack_end(GTK_BOX(bottom), remaining_label, FALSE, FALSE, 2);
-        self->remaining_label = remaining_label;
-
         gtk_container_add(GTK_CONTAINER(self), box);
 
-        gtk_widget_set_size_request(GTK_WIDGET(self), 300, -1);
+        gtk_widget_set_size_request(GTK_WIDGET(self), 400, -1);
 }
 
 static void budgie_status_area_dispose(GObject *object)
@@ -128,7 +125,7 @@ void budgie_status_area_set_media(BudgieStatusArea *self, MediaInfo *info)
         gchar *title_string = NULL;
 
         if (info->artist)
-                title_string = g_markup_printf_escaped("<b>%s</b>\n<small>%s</small>",
+                title_string = g_markup_printf_escaped("<b>%s</b> <i>by</i> <b>%s</b>",
                         info->title, info->artist);
         else
                 title_string = g_markup_printf_escaped("<b>%s</b>", info->title);
@@ -143,7 +140,8 @@ void budgie_status_area_set_media(BudgieStatusArea *self, MediaInfo *info)
 void budgie_status_area_set_media_time(BudgieStatusArea *self, gint64 max, gint64 current)
 {
         gchar *time_string = NULL;
-        gchar *remaining_string = NULL;
+        gchar *total_string = NULL;
+        gchar *lab_string = NULL;
 
         /* Clear info */
         if (max < 0) {
@@ -151,27 +149,32 @@ void budgie_status_area_set_media_time(BudgieStatusArea *self, gint64 max, gint6
                 return;
         }
         gtk_widget_set_visible(self->slider, TRUE);
-        gint64 remaining, elapsed;
+        gint elapsed;
 
+        /*
+        __attribute__ ((unused)) gint64 remaining, 
         remaining = (max - current)/GST_SECOND;
+        */
         elapsed = current/GST_SECOND;
         time_string = format_seconds(elapsed, FALSE);
-        remaining_string = format_seconds(remaining, TRUE);
 
         /* Update slider */
         current /= GST_SECOND;
         max /= GST_SECOND;
+        total_string = format_seconds(max, FALSE);
+
         g_signal_handler_block(self->slider, self->priv->seek_id);
         gtk_range_set_range(GTK_RANGE(self->slider), 0, max);
         gtk_range_set_value(GTK_RANGE(self->slider), current);
         g_signal_handler_unblock(self->slider, self->priv->seek_id);
 
         /* Update labels */
-        gtk_label_set_markup(GTK_LABEL(self->time_label), time_string);
-        gtk_label_set_markup(GTK_LABEL(self->remaining_label), remaining_string);
+        lab_string = g_strdup_printf("%s / %s", time_string, total_string);
+        gtk_label_set_markup(GTK_LABEL(self->time_label), lab_string);
 
+        g_free(lab_string);
         g_free(time_string);
-        g_free(remaining_string);
+        g_free(total_string);
 }
 
 static void changed_cb(GtkWidget *widget, gdouble value, gpointer userdata)
