@@ -53,20 +53,27 @@ void free_media_info(gpointer p_info)
         MediaInfo *info;
 
         info = (MediaInfo*)p_info;
-        if (info->title)
+        if (info->title) {
                 g_free(info->title);
-        if (info->artist)
+        }
+        if (info->artist) {
                 g_free(info->artist);
-        if (info->album)
+        }
+        if (info->album) {
                 g_free(info->album);
-        if (info->band)
+        }
+        if (info->band) {
                 g_free(info->band);
-        if (info->genre)
+        }
+        if (info->genre) {
                 g_free(info->genre);
-        if (info->path)
+        }
+        if (info->path) {
                 g_free(info->path);
-        if (info->mime)
+        }
+        if (info->mime) {
                 g_free(info->mime);
+        }
 }
 
 /* Initialisation */
@@ -91,8 +98,9 @@ static void budgie_db_init(BudgieDB *self)
         /* Open the database */
         self->priv->db = gdbm_open(self->priv->storage_path, 0,
                 GDBM_WRCREAT, 0600, NULL);
-        if (!self->priv->db)
+        if (!self->priv->db) {
                 g_error("Failed to initialise database!");
+        }
 }
 
 static void budgie_db_dispose(GObject *object)
@@ -100,8 +108,10 @@ static void budgie_db_dispose(GObject *object)
         BudgieDB *self;
 
         self = BUDGIE_DB(object);
-        if (self->priv->storage_path)
+        if (self->priv->storage_path) {
                 g_free(self->priv->storage_path);
+                self->priv->storage_path = NULL;
+        }
 
         gdbm_close(self->priv->db);
         /* Destruct */
@@ -135,8 +145,9 @@ void budgie_db_store_media(BudgieDB *self, MediaInfo *info)
 
         gdbm_store(self->priv->db, key, value, GDBM_REPLACE);
 end:
-        if (store)
+        if (store) {
                 free(store);
+        }
 
         g_mutex_unlock(&_lock);
 }
@@ -150,8 +161,9 @@ MediaInfo* budgie_db_get_media(BudgieDB *self, gchar *path)
 
         memset(&value, 0, sizeof(datum));
         value = gdbm_fetch(self->priv->db, key);
-        if (value.dsize < 0 || value.dptr == NULL)
+        if (value.dsize < 0 || value.dptr == NULL) {
                 goto end;
+        }
         store = (uint8_t*)value.dptr;
 
         if (!budgie_db_deserialize(store, &ret)) {
@@ -160,8 +172,9 @@ MediaInfo* budgie_db_get_media(BudgieDB *self, gchar *path)
         }
         ret->path = g_strdup(path);
 end:
-        if (store)
+        if (store) {
                 free(store);
+        }
 
         return ret;
 }
@@ -242,8 +255,9 @@ gboolean budgie_db_get_all_by_field(BudgieDB *self,
                                 }
                         }
                 }
-                if (should_append && append != NULL)
+                if (should_append && append != NULL) {
                         g_ptr_array_add(_results, g_strdup(append));
+                }
                 should_append = TRUE;
                 free_media_info(media);
                 /* Visit the next key */
@@ -320,8 +334,9 @@ gboolean budgie_db_search_field(BudgieDB *self,
                         default:
                                 break;
                 }
-                if (!test)
+                if (!test) {
                         goto clear;
+                }
                 /* Test the search term */
                 switch (match) {
                         case MATCH_QUERY_END:
@@ -372,78 +387,94 @@ static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target)
         size_t offset = 0;
 
         /* 6 member fields */
-        if (info->title)
+        if (info->title) {
                 size = strlen(info->title)+1;
-        if (info->artist)
+        }
+        if (info->artist) {
                 size += strlen(info->artist)+1;
-        if (info->album)
+        }
+        if (info->album) {
                 size += strlen(info->album)+1;
-        if (info->band)
+        }
+        if (info->band) {
                 size += strlen(info->band)+1;
-        if (info->genre)
+        }
+        if (info->genre) {
                 size += strlen(info->genre)+1;
+        }
         size += strlen(info->mime)+1;
 
         /* 6 size fields */
         size += sizeof(unsigned int)*6;
 
         data = malloc(size);
-        if (!data)
+        if (!data) {
                 goto end;
+        }
 
         /* Title */
-        if (info->title)
+        if (info->title) {
                 length = strlen(info->title)+1;
-        else
+        } else {
                 length = 0;
+        }
         memcpy(data, &length, sizeof(unsigned int));
         offset += sizeof(unsigned int);
-        if (info->title)
+        if (info->title) {
                 memcpy(data+offset, info->title, length);
+        }
         offset += length;
 
         /* Artist */
-        if (info->artist)
+        if (info->artist) {
                 length = strlen(info->artist)+1;
-        else
+        } else {
                 length = 0;
+        }
         memcpy(data+offset, &length, sizeof(unsigned int));
         offset += sizeof(unsigned int);
-        if (info->artist)
+        if (info->artist) {
                 memcpy(data+offset, info->artist, length);
+        }
         offset += length;
 
         /* Album */
-        if (info->album)
+        if (info->album) {
                 length = strlen(info->album)+1;
-        else
+        } else {
                 length = 0;
+        }
         memcpy(data+offset, &length, sizeof(unsigned int));
         offset += sizeof(unsigned int);
-        if (info->album)
+        if (info->album) {
                 memcpy(data+offset, info->album, length);
+        }
         offset += length;
 
         /* Band */
-        if (info->band)
+        if (info->band) {
                 length = strlen(info->band)+1;
-        else
+        } else {
                 length = 0;
+        }
         memcpy(data+offset, &length, sizeof(unsigned int));
         offset += sizeof(unsigned int);
-        if (info->band)
+        if (info->band) {
                 memcpy(data+offset, info->band, length);
+        }
         offset += length;
 
         /* Genre */
-        if (info->genre)
+        if (info->genre) {
                 length = strlen(info->genre)+1;
-        else
+        } else {
                 length = 0;
+        }
         memcpy(data+offset, &length, sizeof(unsigned int));
         offset += sizeof(unsigned int);
-        if (info->genre)
+        if (info->genre) {
                 memcpy(data+offset, info->genre, length);
+        }
         offset += length;
 
         /* Mime */
@@ -456,8 +487,9 @@ static gboolean budgie_db_serialize(MediaInfo *info, uint8_t **target)
         ret = TRUE;
         *target = data;
 end:
-        if (!ret && data)
+        if (!ret && data) {
                 free(data);
+        }
         return ret;
 }
 
@@ -477,8 +509,9 @@ static gboolean budgie_db_deserialize(uint8_t* source, MediaInfo **target)
         gboolean op = FALSE;
 
         ret = malloc(sizeof(MediaInfo));
-        if (!ret)
+        if (!ret) {
                 goto end;
+        }
 
         memset(ret, 0, sizeof(MediaInfo));
         /* Title */
@@ -534,34 +567,45 @@ static gboolean budgie_db_deserialize(uint8_t* source, MediaInfo **target)
 
         offset += mime_len; /* Reserved */
         /* Copy the data instead of exposing internals */
-        if (title)
+        if (title) {
                 ret->title = g_strdup(title);
-        if (artist)
+        }
+        if (artist) {
                 ret->artist = g_strdup(artist);
-        if (album)
+        }
+        if (album) {
                 ret->album = g_strdup(album);
-        if (band)
+        }
+        if (band) {
                 ret->band = g_strdup(band);
-        if (genre)
+        }
+        if (genre) {
                 ret->genre = g_strdup(genre);
+        }
 
         ret->mime = g_strdup(mime);
         op = TRUE;
         *target = ret;
 
 end:
-        if (title)
+        if (title) {
                 free(title);
-        if (artist)
+        }
+        if (artist) {
                 free(artist);
-        if (album)
+        }
+        if (album) {
                 free(album);
-        if (band)
+        }
+        if (band) {
                 free(band);
-        if (genre)
+        }
+        if (genre) {
                 free(genre);
-        if (mime)
+        }
+        if (mime) {
                 free(mime);
+        }
         return op;
 }
 
@@ -574,8 +618,9 @@ gint budgie_db_sort(gconstpointer a, gconstpointer b)
         m1 = *(MediaInfo**)a;
         m2 = *(MediaInfo**)b;
 
-        if (!m1 || !m2)
+        if (!m1 || !m2) {
                 return 0;
+        }
 
         return g_ascii_strcasecmp(m1->title, m2->title);
 }

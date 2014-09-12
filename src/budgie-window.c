@@ -124,11 +124,13 @@ static void budgie_window_init(BudgieWindow *self)
                 /* Set defaults */
                 g_strfreev(media_dirs);
                 dirs[0] = g_get_user_special_dir(G_USER_DIRECTORY_MUSIC);
-                if (!dirs[0])
-                        g_warning("Music directory not found\n");
+                if (!dirs[0]) {
+                        g_warning("Music directory not found");
+                }
                 dirs[1] = g_get_user_special_dir(G_USER_DIRECTORY_VIDEOS);
-                if (!dirs[1])
-                        g_warning("Video directory not found\n");
+                if (!dirs[1]) {
+                        g_warning("Video directory not found");
+                }
                 dirs[2] = NULL;
                 g_settings_set_strv(self->priv->settings, BUDGIE_MEDIA_DIRS, dirs);
                 media_dirs = g_settings_get_strv(self->priv->settings, BUDGIE_MEDIA_DIRS);
@@ -288,10 +290,11 @@ static void budgie_window_init(BudgieWindow *self)
         length = g_slist_length(tracks);
         g_slist_free_full(tracks, free_media_info);
         /* Start thread from idle queue */
-        if (length == 0)
+        if (length == 0) {
                 g_idle_add(load_media_t, self);
-        else
+        } else {
                 g_object_set(view, "database", self->db, NULL);
+        }
 
         gtk_widget_realize(window);
         gtk_widget_show_all(window);
@@ -317,8 +320,10 @@ static void budgie_window_dispose(GObject *object)
         g_object_unref(self->icon_theme);
         g_object_unref(self->css_provider);
 
-        if (self->priv->uri)
+        if (self->priv->uri) {
                 g_free(self->priv->uri);
+                self->priv->uri = NULL;
+        }
 
         g_strfreev(self->media_dirs);
         g_object_unref(self->priv->settings);
@@ -363,16 +368,18 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         self = BUDGIE_WINDOW(userdata);
         media = self->priv->media;
         self->priv->duration = GST_CLOCK_TIME_NONE;
-        if (!media) /* Revisit */
+        if (!media) {
+                /* Revisit */
                 return;
-
+        }
         self->priv->current_page = gtk_stack_get_visible_child_name(GTK_STACK(self->stack));
 
         /* Switch to video view for video content */
         if (g_str_has_prefix(media->mime, "video/")) {
                 next_child = "video";
-                if (!self->video_realized)
+                if (!self->video_realized) {
                         gtk_widget_realize(self->video);
+                }
                 budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(self->toolbar), TRUE);
         } else {
                 next_child = "view";
@@ -380,9 +387,9 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
                 self->priv->full_screen = FALSE;
                 full_screen_cb(widget, userdata);
         }
-        if (!g_str_equal(self->priv->current_page, "settings"))
+        if (!g_str_equal(self->priv->current_page, "settings")) {
                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), next_child);
-
+        }
         self->priv->current_page = next_child;
 
         uri = g_filename_to_uri(media->path, NULL, NULL);
@@ -390,8 +397,9 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
                 /* Media change between pausing */
                 gst_element_set_state(self->gst_player, GST_STATE_NULL);
         }
-        if (self->priv->uri)
+        if (self->priv->uri) {
                 g_free(self->priv->uri);
+        }
         self->priv->uri = uri;
         g_object_set(self->gst_player, "uri", self->priv->uri, NULL);
         gst_element_set_state(self->gst_player, GST_STATE_PLAYING);
@@ -436,8 +444,10 @@ static void next_cb(GtkWidget *widget, gpointer userdata)
                 MEDIA_SELECTION_RANDOM : MEDIA_SELECTION_NEXT;
         next = budgie_media_view_get_info(BUDGIE_MEDIA_VIEW(self->view),
                 mode);
-        if (!next) /* Revisit */
+        if (!next) {
+                /* Revisit */
                 return;
+        }
         self->priv->media = next;
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         /* In future only do this if not paused */
@@ -455,8 +465,10 @@ static void prev_cb(GtkWidget *widget, gpointer userdata)
                 MEDIA_SELECTION_RANDOM : MEDIA_SELECTION_PREVIOUS;
         prev = budgie_media_view_get_info(BUDGIE_MEDIA_VIEW(self->view),
                 mode);
-        if (!prev) /* Revisit */
+        if (!prev) {
+                /* Revisit */
                 return;
+        }
         self->priv->media = prev;
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         /* In future only do this if not paused */
@@ -479,8 +491,9 @@ static gboolean refresh_cb(gpointer userdata) {
                         return TRUE;
                 }
         }
-        if (!gst_element_query_position(self->gst_player, fmt, &track_current))
+        if (!gst_element_query_position(self->gst_player, fmt, &track_current)) {
                 return TRUE;
+        }
 
         budgie_status_area_set_media_time(BUDGIE_STATUS_AREA(self->status),
                 (gint64)self->priv->duration, track_current);
@@ -609,8 +622,9 @@ static void realize_cb(GtkWidget *widg, gpointer userdata)
 
         self = BUDGIE_WINDOW(userdata);
         window = gtk_widget_get_window(self->video);
-        if (!gdk_window_ensure_native(window))
+        if (!gdk_window_ensure_native(window)) {
                 g_error("Unable to initialize video");
+        }
         self->priv->window_handle = GDK_WINDOW_XID(window);
         gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(self->gst_player), self->priv->window_handle);
         self->video_realized = TRUE;
@@ -622,10 +636,11 @@ static gboolean hide_bar(gpointer udata)
 
         self = BUDGIE_WINDOW(udata);
 
-        if (self->priv->full_screen)
+        if (self->priv->full_screen) {
                 gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), FALSE);
-        else
+        } else {
                 gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), TRUE);
+        }
         return FALSE;
 }
 
@@ -634,10 +649,12 @@ static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpoin
         BudgieWindow *self;
 
         self = BUDGIE_WINDOW(userdata);
-        if (gtk_revealer_get_child_revealed(GTK_REVEALER(self->south_reveal)))
+        if (gtk_revealer_get_child_revealed(GTK_REVEALER(self->south_reveal))) {
                 return FALSE;
-        if (!self->priv->full_screen)
+        }
+        if (!self->priv->full_screen) {
                 return FALSE;
+        }
 
         gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), TRUE);
         g_timeout_add(3000, hide_bar, userdata);
@@ -649,11 +666,13 @@ static gboolean key_cb(GtkWidget *widget, GdkEventKey *event, gpointer userdata)
         BudgieWindow *self;
 
         self = BUDGIE_WINDOW(userdata);
-        if (event->keyval != GDK_KEY_Escape)
+        if (event->keyval != GDK_KEY_Escape) {
                 return FALSE;
+        }
 
-        if (!self->priv->full_screen)
+        if (!self->priv->full_screen) {
                 return FALSE;
+        }
         gtk_window_unfullscreen(GTK_WINDOW(self->window));
         gtk_revealer_set_reveal_child(GTK_REVEALER(self->south_reveal), TRUE);
         self->priv->full_screen = FALSE;
@@ -723,10 +742,11 @@ static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpoin
                         next_cb(GTK_WIDGET(bar), userdata);
                         break;
                 case BUDGIE_ACTION_SETTINGS:
-                        if (toggle)
+                        if (toggle) {
                                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), "settings");
-                        else
+                        } else {
                                 gtk_stack_set_visible_child_name(GTK_STACK(self->stack), self->priv->current_page);
+                        }
                         break;
                 default:
                         break;

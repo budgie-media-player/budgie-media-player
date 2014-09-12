@@ -44,8 +44,9 @@ static void perform_migration(void)
                 file = g_file_new_for_path(path);
                 /* Attempt to delete old database files */
                 if (g_file_query_exists(file, NULL)) {
-                        if (!g_file_delete(file, NULL, NULL))
+                        if (!g_file_delete(file, NULL, NULL)) {
                                 g_warning("Unable to delete old DB: %s", path);
+                        }
                 }
                 g_object_unref(file);
                 g_free(path);

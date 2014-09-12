@@ -213,8 +213,9 @@ static void budgie_settings_refresh(BudgieSettingsView *self)
         gtk_tree_view_set_model(GTK_TREE_VIEW(self->paths),
                 GTK_TREE_MODEL(store));
 
-        if (media_dirs)
+        if (media_dirs) {
                 g_strfreev(media_dirs);
+        }
 }
 
 static void paths_cursor_cb(GtkWidget *widget, gpointer userdata)
@@ -254,8 +255,9 @@ static void paths_add_cb(GtkWidget *widget, gpointer userdata)
                 "Select", GTK_RESPONSE_ACCEPT, NULL);
 
         /* Present the dialog */
-        if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT)
+        if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT) {
                 goto end;
+        }
 
         /* Get paths */
         filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
@@ -265,8 +267,9 @@ static void paths_add_cb(GtkWidget *widget, gpointer userdata)
         /* Make a new array to copy the original */
         new_paths = g_ptr_array_new();
         for (i=0; i < length; i++) {
-                if (!g_str_equal(filename, paths[i]))
+                if (!g_str_equal(filename, paths[i])) {
                         g_ptr_array_add(new_paths, paths[i]);
+                }
         }
         /* Copy path in */
         g_ptr_array_add(new_paths, filename);
@@ -300,8 +303,9 @@ static void paths_remove_cb(GtkWidget *widget, gpointer userdata)
 
         /* Shouldn't be a null selection. */
         selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(self->paths));
-        if (!gtk_tree_selection_get_selected(selection, &model, &iter))
+        if (!gtk_tree_selection_get_selected(selection, &model, &iter)) {
                 return;
+        }
 
         /* Retrieve old values */
         paths = g_settings_get_strv(self->settings, BUDGIE_MEDIA_DIRS);
@@ -313,8 +317,9 @@ static void paths_remove_cb(GtkWidget *widget, gpointer userdata)
         new_paths = g_ptr_array_new();
         /* Copy all elements except the one we're removing */
         for (i=0; i < length; i++) {
-                if (!g_str_equal(path, paths[i]))
+                if (!g_str_equal(path, paths[i])) {
                         g_ptr_array_add(new_paths, paths[i]);
+                }
         }
         g_ptr_array_add(new_paths, NULL);
 

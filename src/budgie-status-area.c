@@ -124,12 +124,12 @@ void budgie_status_area_set_media(BudgieStatusArea *self, MediaInfo *info)
 {
         gchar *title_string = NULL;
 
-        if (info->artist)
+        if (info->artist) {
                 title_string = g_markup_printf_escaped("<b>%s</b> <i>by</i> <b>%s</b>",
                         info->title, info->artist);
-        else
+        } else {
                 title_string = g_markup_printf_escaped("<b>%s</b>", info->title);
-
+        }
         gtk_label_set_markup(GTK_LABEL(self->label), title_string);
         gtk_label_set_max_width_chars(GTK_LABEL(self->label), 1);
         gtk_widget_queue_draw(GTK_WIDGET(self));

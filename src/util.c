@@ -84,8 +84,9 @@ clean:
         taglib_file_free(tagfile);
 end:
 
-        if (!media->title)
+        if (!media->title) {
                 media->title = g_strdup(g_file_info_get_display_name(file_info));
+        }
         media->path = g_strdup(path);
         media->mime = g_strdup(file_mime);
 
@@ -154,23 +155,27 @@ GtkWidget* new_button_with_icon(GtkIconTheme *theme,
         size = toolbar ? GTK_ICON_SIZE_SMALL_TOOLBAR : GTK_ICON_SIZE_BUTTON;
         /* Ugly hack to force play button to be a *tiny* bit larger */
         if (g_str_has_prefix(icon_name, "media-playback-start") ||
-            g_str_has_prefix(icon_name, "media-playback-pause"))
+            g_str_has_prefix(icon_name, "media-playback-pause")) {
                 size = GTK_ICON_SIZE_LARGE_TOOLBAR;
+        }
 
         image = gtk_image_new_from_icon_name(icon_name, size);
         /* Create the button */
-        if (toggle)
+        if (toggle) {
                 button = gtk_toggle_button_new();
-        else
+        } else {
                 button = gtk_button_new();
+        }
         gtk_widget_set_can_focus(button, FALSE);
-        if (!toolbar)
+        if (!toolbar) {
                 gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+        }
         gtk_container_add(GTK_CONTAINER(button), image);
 
         /* Set a helpful tooltip for toolbar buttons */
-        if (toolbar)
+        if (toolbar) {
                 gtk_widget_set_tooltip_text(button, description);
+        }
         return button;
 }
 
@@ -180,10 +185,11 @@ gchar *format_seconds(gint64 time, gboolean remaining)
         gchar *ret;
         gchar *prefix;
 
-        if (remaining)
+        if (remaining) {
                 prefix = "-";
-        else
+        } else {
                 prefix = "";
+        }
 
         dv = div(time, 60);
         if (dv.quot < 60) {
@@ -336,8 +342,9 @@ gchar *cleaned_string(gchar *string)
 
 gchar *albumart_name_for_media(MediaInfo *info, gchar *extension)
 {
-        if (!info->album || ! info->artist)
+        if (!info->album || ! info->artist) {
                 return NULL;
+        }
 
         char *album = cleaned_string(info->album);
         gchar *artist = cleaned_string(info->artist);

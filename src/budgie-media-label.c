@@ -139,7 +139,6 @@ static void budgie_media_label_dispose(GObject *object)
         self = BUDGIE_MEDIA_LABEL(object);
         if (self->info) {
                 free_media_info(self->info);
-                /* GtkListBox actually revisits us twice sometimes.. */
                 self->info = NULL;
         }
         /* Destruct */
