@@ -30,8 +30,6 @@ budgie_media_player_SOURCES = \
 	budgie-settings-view.h \
 	budgie-status-area.c \
 	budgie-status-area.h \
-	budgie-popover.h \
-	budgie-popover.c \
 	util.c \
 	util.h \
 	common.h \
