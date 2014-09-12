@@ -74,6 +74,7 @@ static void media_selected_cb(BudgieMediaView *view, gpointer info, gpointer use
 
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
+static void _gst_error_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
 
 /* Boilerplate GObject code */
 static void budgie_window_class_init(BudgieWindowClass *klass);
@@ -280,6 +281,7 @@ static void budgie_window_init(BudgieWindow *self)
         gst_bus_enable_sync_message_emission(bus);
         gst_bus_add_signal_watch(bus);
         g_signal_connect(bus, "message::eos", G_CALLBACK(_gst_eos_cb), self);
+        g_signal_connect(bus, "message::error", G_CALLBACK(_gst_error_cb), self);
         g_object_unref(bus);
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         self->priv->duration = GST_CLOCK_TIME_NONE;
@@ -549,6 +551,38 @@ static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata)
         gst_element_set_state(self->gst_player, GST_STATE_NULL);
         /* repeat the same track again */
         play_cb(NULL, self);
+}
+
+static void _gst_error_cb(GstBus *bus, GstMessage *msg, gpointer userdata)
+{
+        BudgieWindow *self;
+        GError *error = NULL;
+        gchar *debug_info = NULL;
+
+        self = BUDGIE_WINDOW(userdata);
+
+        gst_message_parse_error(msg, &error, &debug_info);
+        g_message("GStreamer issue: %s", error->message);
+        g_message("GStreamer debug info: %s", debug_info);
+
+        g_error_free(error);
+        if (debug_info) {
+                g_free(debug_info);
+        }
+
+        /* Stop everything */
+        gst_element_set_state(self->gst_player, GST_STATE_NULL);
+        gtk_widget_hide(self->pause);
+        budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
+                BUDGIE_ACTION_PAUSE, FALSE);
+        gtk_widget_show(self->play);
+        budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
+                BUDGIE_ACTION_PLAY, TRUE);
+
+        /* Reset playing info */
+        budgie_status_area_set_media_time(BUDGIE_STATUS_AREA(self->status),
+                -1, -1);
+        budgie_status_area_set_media(BUDGIE_STATUS_AREA(self->status), NULL);
 }
 
 static void store_media(gpointer data1, gpointer data2)

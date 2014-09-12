@@ -124,6 +124,11 @@ void budgie_status_area_set_media(BudgieStatusArea *self, MediaInfo *info)
 {
         gchar *title_string = NULL;
 
+        /* Cleanup or error. */
+        if (info == NULL) {
+                gtk_label_set_markup(GTK_LABEL(self->label), "<b>Budgie Media Player</b>");
+                return;
+        }
         if (info->artist) {
                 title_string = g_markup_printf_escaped("<b>%s</b> <i>by</i> <b>%s</b>",
                         info->title, info->artist);
