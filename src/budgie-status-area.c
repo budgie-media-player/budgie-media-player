@@ -58,7 +58,6 @@ static void budgie_status_area_init(BudgieStatusArea *self)
         GtkWidget *label;
         GtkWidget *time_label;
         GtkWidget *slider;
-        GtkStyleContext *context;
         GtkWidget *box, *bottom, *top;
 
         self->priv = budgie_status_area_get_instance_private(self);
@@ -77,16 +76,13 @@ static void budgie_status_area_init(BudgieStatusArea *self)
         gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
         self->label = label;
 
-        context = gtk_widget_get_style_context(label);
-
         /* Bottom row */
         bottom = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
         gtk_box_pack_start(GTK_BOX(box), bottom, FALSE, FALSE, 0);
 
         /* Time passed */
         time_label = gtk_label_new("");
-        context = gtk_widget_get_style_context(time_label);
-        gtk_style_context_add_class(context, "info-label");
+        gtk_widget_set_name(label, "title");
         gtk_box_pack_end(GTK_BOX(top), time_label, FALSE, FALSE, 0);
         self->time_label = time_label;
 

@@ -313,6 +313,7 @@ static void budgie_window_init(BudgieWindow *self)
         search = gtk_search_entry_new();
         gtk_entry_set_placeholder_text(GTK_ENTRY(search), "Search...");
         gtk_header_bar_pack_end(GTK_HEADER_BAR(header), search);
+        gtk_widget_set_margin_start(search, 10);
         gtk_widget_set_margin_end(search, 10);
         self->search = search;
 
