@@ -1,5 +1,5 @@
 AC_INIT([Budgie], 2, [ikey.doherty@gmail.com], [budgie], [http://ikeydoherty.github.io/budgie/])
-AM_INIT_AUTOMAKE([-Wno-portability no-dist-gzip dist-xz foreign])
+AM_INIT_AUTOMAKE([-Wno-portability no-dist-gzip dist-xz foreign subdir-objects])
 AC_PROG_CC
 AC_PROG_CC_STDC
 LT_PREREQ(2.2)
@@ -18,10 +18,8 @@ PKG_CHECK_MODULES([GTK3], [gtk+-3.0 >= 3.12.0])
 PKG_CHECK_MODULES([GSTREAMER], [gstreamer-1.0 >= 1.0.10])
 PKG_CHECK_MODULES([GSTREAMER_VIDEO], [gstreamer-video-1.0 >= 1.0.10])
 
-# Use id3tag to check audio tags.
-AC_CHECK_HEADERS([id3.h], [music_player_found_id3_headers=yes; break;])
-AS_IF([test "x$music_player_found_id3_headers" != "xyes"],
-	[AC_MSG_ERROR([Unable to find the id3 headers])])
+# Taglib for .. tags
+PKG_CHECK_MODULES([TAGLIB], [taglib_c >= 1.9.1])
 
 AC_CHECK_HEADERS([gdbm.h], [], [AC_MSG_ERROR([Unable to find gdbm headers])])
 

@@ -23,72 +23,72 @@
 #include <gio/gio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <id3.h>
 
 #include "util.h"
+
+#include <taglib/tag_c.h>
 
 /* Unneeded constants but improve readability */
 #define MINUTE 60
 #define HOUR MINUTE*60
 
-/* Set a field (by pointer) to the requested id3 value */
-static void set_field(char** out, ID3Tag *tag, ID3_FieldID id, ID3_FrameID fid)
-{
-        ID3Frame *frame = NULL;
-        ID3Field *field = NULL;
-        size_t size;
-        char *set;
 
-        frame = ID3Tag_FindFrameWithID(tag, fid);
-        if (frame == NULL)
-                goto end;
-
-        field = ID3Frame_GetField(frame, id);
-        if (field == NULL)
-                goto end;
-
-        size = ID3Field_Size(field);
-        size += 1;
-        set = malloc(size);
-        if (!set)
-                goto end;
-        ID3Field_GetASCII(field, set, size);
-        *out = g_utf8_normalize(set, (gssize)size, G_NORMALIZE_ALL);
-        free(set);
-end:
-        if (!frame || !field)
-                *out = NULL;
-        return;
-}
-
+/**
+ * Using taglib we'll query the relevant tags.
+ */
 static MediaInfo* media_from_file(gchar *path, GFileInfo *file_info, const gchar *file_mime)
 {
-        MediaInfo* media;
-        ID3Tag *tag = NULL;
+        MediaInfo* media = NULL;
+        TagLib_File *tagfile = NULL;
+        TagLib_Tag *tag = NULL;
+        char *ktmp = NULL;
 
         media = malloc(sizeof(MediaInfo));
         memset(media, 0, sizeof(MediaInfo));
 
-        tag = ID3Tag_New();
-        ID3Tag_Link(tag, path);
-        if (tag) {
-                set_field(&(media->title), tag, ID3FN_TEXT, ID3FID_TITLE);
-
-                set_field(&(media->artist), tag, ID3FN_TEXT, ID3FID_LEADARTIST);
-
-                set_field(&(media->album), tag, ID3FN_TEXT, ID3FID_ALBUM);
-
-                set_field(&(media->band), tag, ID3FN_TEXT, ID3FID_BAND);
-
-                set_field(&(media->genre), tag, ID3FN_TEXT, ID3FID_CONTENTTYPE);
+        tagfile = taglib_file_new(path);
+        if (!tagfile) {
+                g_message("%s provides no tag information", path);
+                goto end;
         }
+
+        tag = taglib_file_tag(tagfile);
+        if (!tag) {
+                goto clean;
+        }
+
+        /* Set fields from taglib */
+        ktmp = taglib_tag_title(tag);
+        if (ktmp && strlen(ktmp) != 0) {
+                media->title = g_strdup(ktmp);
+        }
+        ktmp = taglib_tag_album(tag);
+        if (ktmp && strlen(ktmp) != 0) {
+                media->album = g_strdup(ktmp);
+        }
+        ktmp = taglib_tag_artist(tag);
+        if (ktmp && strlen(ktmp) != 0) {
+                media->artist = g_strdup(ktmp);
+        }
+        ktmp = taglib_tag_album(tag);
+        if (ktmp && strlen(ktmp) != 0) {
+                media->album = g_strdup(ktmp);
+        }
+        ktmp = taglib_tag_genre(tag);
+        if (ktmp && strlen(ktmp) != 0) {
+                media->genre = g_strdup(ktmp);
+        }
+
+        taglib_tag_free_strings();
+clean:
+        taglib_file_free(tagfile);
+end:
+
         if (!media->title)
                 media->title = g_strdup(g_file_info_get_display_name(file_info));
         media->path = g_strdup(path);
         media->mime = g_strdup(file_mime);
 
-        if (tag)
-                ID3Tag_Delete(tag);
         return media;
 }
 
