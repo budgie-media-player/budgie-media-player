@@ -43,6 +43,10 @@ struct _BudgieWindowPrivate {
         gboolean force_aspect;
         gboolean full_screen;
         guintptr window_handle;
+
+        /* Error stuffs */
+        GtkWidget *error_revealer;
+        GtkWidget *error_label;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE(BudgieWindow, budgie_window, G_TYPE_OBJECT)
@@ -71,6 +75,7 @@ static void settings_changed(GSettings *settings, gchar *key, gpointer userdata)
 static void toolbar_cb(BudgieControlBar *bar, int action, gboolean toggle, gpointer userdata);
 static void seek_cb(BudgieStatusArea *status, gint64 value, gpointer userdata);
 static void media_selected_cb(BudgieMediaView *view, gpointer info, gpointer userdata);
+static void error_dismiss_cb(GtkWidget *widget, gpointer userdata);
 
 /* GStreamer callbacks */
 static void _gst_eos_cb(GstBus *bus, GstMessage *msg, gpointer userdata);
@@ -112,6 +117,13 @@ static void budgie_window_init(BudgieWindow *self)
         gchar **media_dirs = NULL;
         const gchar *dirs[3];
         gboolean b_value;
+        GtkWidget *overlay;
+        GtkWidget *error_frame;
+        GtkWidget *error_layout;
+        GtkWidget *error_revealer;
+        GtkWidget *error_label;
+        GtkStyleContext *style;
+        GtkWidget *dismiss;
 
         self->priv = budgie_window_get_instance_private(self);
         /* Init our settings */
@@ -200,7 +212,37 @@ static void budgie_window_init(BudgieWindow *self)
 
         /* main layout */
         layout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-        gtk_container_add(GTK_CONTAINER(window), layout);
+        overlay = gtk_overlay_new();
+        gtk_container_add(GTK_CONTAINER(overlay), layout);
+        gtk_container_add(GTK_CONTAINER(window), overlay);
+
+        /* We report errors using this. Epics. */
+        error_revealer = gtk_revealer_new();
+        self->priv->error_revealer = error_revealer;
+        error_label = gtk_label_new("");
+        self->priv->error_label = error_label;
+        error_frame = gtk_event_box_new();
+        error_layout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        gtk_container_set_border_width(GTK_CONTAINER(error_layout), 5);
+        gtk_container_add(GTK_CONTAINER(error_revealer), error_frame);
+        gtk_container_add(GTK_CONTAINER(error_frame), error_layout);
+        gtk_box_pack_start(GTK_BOX(error_layout), error_label, TRUE, TRUE, 5);
+
+        /* Dismiss the error. Coz ya can. */
+        dismiss = gtk_button_new_from_icon_name("window-close-symbolic", GTK_ICON_SIZE_MENU);
+        g_signal_connect(G_OBJECT(dismiss), "clicked", G_CALLBACK(error_dismiss_cb), self);
+        gtk_button_set_relief(GTK_BUTTON(dismiss), GTK_RELIEF_NONE);
+        style = gtk_widget_get_style_context(dismiss);
+        gtk_style_context_add_class(style, "image-button");
+        gtk_box_pack_end(GTK_BOX(error_layout), dismiss, FALSE, FALSE, 5);
+
+        style = gtk_widget_get_style_context(error_frame);
+        gtk_style_context_add_class(style, "app-notification");
+        gtk_style_context_add_class(style, "error");
+        gtk_widget_set_valign(error_revealer, GTK_ALIGN_START);
+        gtk_widget_set_halign(error_revealer, GTK_ALIGN_CENTER);
+        gtk_revealer_set_reveal_child(GTK_REVEALER(error_revealer), FALSE);
+        gtk_overlay_add_overlay(GTK_OVERLAY(overlay), error_revealer);
 
         /* Toolbar revealer */
         south_reveal = gtk_revealer_new();
@@ -374,6 +416,10 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
                 /* Revisit */
                 return;
         }
+
+        /* Dismiss existing errors */
+        error_dismiss_cb(NULL, userdata);
+
         self->priv->current_page = gtk_stack_get_visible_child_name(GTK_STACK(self->stack));
 
         /* Switch to video view for video content */
@@ -558,14 +604,20 @@ static void _gst_error_cb(GstBus *bus, GstMessage *msg, gpointer userdata)
         BudgieWindow *self;
         GError *error = NULL;
         gchar *debug_info = NULL;
+        gchar *label_msg = NULL;
 
         self = BUDGIE_WINDOW(userdata);
 
         gst_message_parse_error(msg, &error, &debug_info);
+
+        label_msg = g_strdup_printf("Encountered the following error:\n%s", error->message);
+        gtk_label_set_markup(GTK_LABEL(self->priv->error_label), label_msg);
+        gtk_revealer_set_reveal_child(GTK_REVEALER(self->priv->error_revealer), TRUE);
         g_message("GStreamer issue: %s", error->message);
         g_message("GStreamer debug info: %s", debug_info);
 
         g_error_free(error);
+        g_free(label_msg);
         if (debug_info) {
                 g_free(debug_info);
         }
@@ -808,4 +860,12 @@ static void media_selected_cb(BudgieMediaView *view, gpointer info, gpointer use
         media = (MediaInfo*)info;
         self->priv->media = media;
         play_cb(NULL, userdata);
+}
+
+static void error_dismiss_cb(GtkWidget *widget, gpointer userdata)
+{
+        BudgieWindow *self;
+
+        self = BUDGIE_WINDOW(userdata);
+        gtk_revealer_set_reveal_child(GTK_REVEALER(self->priv->error_revealer), FALSE);
 }
