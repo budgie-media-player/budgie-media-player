@@ -309,11 +309,11 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_stack_add_named(GTK_STACK(stack), settings_view, "settings");
         self->settings = settings_view;
 
-        /* search entry */
-        search = gtk_search_entry_new();
-        gtk_entry_set_placeholder_text(GTK_ENTRY(search), "Search...");
-        gtk_header_bar_pack_end(GTK_HEADER_BAR(header), search);
-        gtk_widget_set_margin_start(search, 10);
+        /* search button. */
+        search = gtk_button_new_from_icon_name("edit-find-symbolic", GTK_ICON_SIZE_SMALL_TOOLBAR);
+        gtk_button_set_relief(GTK_BUTTON(search), GTK_RELIEF_NONE);
+        /* currently disabled. on account of its not implemeneted.
+         * gtk_header_bar_pack_end(GTK_HEADER_BAR(header), search);*/
         gtk_widget_set_margin_end(search, 10);
         self->search = search;
 

@@ -89,7 +89,7 @@ static void budgie_status_area_init(BudgieStatusArea *self)
         /* Slider */
         slider = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,
             0.0, 1.0, 1.0/100);
-        gtk_box_pack_start(GTK_BOX(bottom), slider, TRUE, TRUE, 2);
+        gtk_box_pack_start(GTK_BOX(bottom), slider, TRUE, TRUE, 0);
         self->slider = slider;
         gtk_scale_set_draw_value(GTK_SCALE(slider), FALSE);
         gtk_widget_set_can_focus(slider, FALSE);
@@ -99,6 +99,9 @@ static void budgie_status_area_init(BudgieStatusArea *self)
         gtk_container_add(GTK_CONTAINER(self), box);
 
         gtk_widget_set_size_request(GTK_WIDGET(self), 400, -1);
+
+        g_object_set(self, "margin-top", 1, NULL);
+        g_object_set(self, "margin-bottom", 1, NULL);
 }
 
 static void budgie_status_area_dispose(GObject *object)
