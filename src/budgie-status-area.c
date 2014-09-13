@@ -150,15 +150,12 @@ void budgie_status_area_set_media_time(BudgieStatusArea *self, gint64 max, gint6
         /* Clear info */
         if (max < 0) {
                 gtk_widget_set_visible(self->slider, FALSE);
+                gtk_label_set_markup(GTK_LABEL(self->time_label), "");
                 return;
         }
         gtk_widget_set_visible(self->slider, TRUE);
         gint elapsed;
 
-        /*
-        __attribute__ ((unused)) gint64 remaining, 
-        remaining = (max - current)/GST_SECOND;
-        */
         elapsed = current/GST_SECOND;
         time_string = format_seconds(elapsed, FALSE);
 
