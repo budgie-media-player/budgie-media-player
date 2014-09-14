@@ -173,6 +173,8 @@ void budgie_status_area_set_media_time(BudgieStatusArea *self, gint64 max, gint6
         lab_string = g_strdup_printf("%s / %s", time_string, total_string);
         gtk_label_set_markup(GTK_LABEL(self->time_label), lab_string);
 
+        gtk_widget_queue_draw(GTK_WIDGET(self));
+
         g_free(lab_string);
         g_free(time_string);
         g_free(total_string);
