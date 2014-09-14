@@ -511,9 +511,10 @@ static gboolean load_media_cb(gpointer userdata)
 
                 /* Populate all songs */
                 if (!budgie_db_search_field(self->db, MEDIA_QUERY_MIME,
-                        MATCH_QUERY_START, "video/", -1, &results))
+                        MATCH_QUERY_START, "video/", -1, &results)) {
                         /** Raise a warning somewhere? */
                         g_warning("No tracks found");
+                }
 
                 row = set_display(self, results);
         }
@@ -532,9 +533,10 @@ static gboolean load_media_cb(gpointer userdata)
         while (gtk_events_pending())
                 gtk_main_iteration();
 
-        if (row)
+        if (row) {
                 gtk_list_box_select_row(GTK_LIST_BOX(self->list),
                         row);
+        }
         return FALSE;
 }
 
@@ -563,8 +565,9 @@ static GtkListBoxRow* set_display(BudgieMediaView *self, GPtrArray *results)
         gchar *info_string = NULL;
 
         /* Do nothing when results is null */
-        if (!results)
+        if (!results) {
                 return NULL;
+        }
 
         gtk_container_foreach(GTK_CONTAINER(self->list),
                 (GtkCallback)gtk_widget_destroy, NULL);
@@ -587,8 +590,9 @@ static GtkListBoxRow* set_display(BudgieMediaView *self, GPtrArray *results)
                 g_object_set(label, "margin-left", 10, NULL);
                 gtk_widget_show(label);
 
-                if (!self->current_path)
+                if (!self->current_path) {
                         continue;
+                }
                 /* If this is already playing, update the appearance */
                 if (g_str_equal(self->current_path, current->path)) {
                         g_object_set(label, "playing", TRUE, NULL);
@@ -603,47 +607,52 @@ static GtkListBoxRow* set_display(BudgieMediaView *self, GPtrArray *results)
                 case MEDIA_MODE_SONGS:
                         gtk_image_set_from_icon_name(GTK_IMAGE(self->image),
                                 "folder-music-symbolic", GTK_ICON_SIZE_INVALID);
-                        if (results->len == 0)
+                        if (results->len == 0) {
                                 info_string = g_strdup_printf("No songs");
-                        else if (results->len == 1)
+                        } else if (results->len == 1) {
                                 info_string = g_strdup_printf("%d song",
                                         results->len);
-                        else
+                        } else {
                                 info_string = g_strdup_printf("%d songs",
                                         results->len);
+                        }
                         break;
                 case MEDIA_MODE_VIDEOS:
                         gtk_image_set_from_icon_name(GTK_IMAGE(self->image),
                                 "folder-videos-symbolic", GTK_ICON_SIZE_INVALID);
-                        if (results->len == 0)
+                        if (results->len == 0) {
                                 info_string = g_strdup_printf("No videos");
-                        else if (results->len == 1)
+                        } else if (results->len == 1) {
                                 info_string = g_strdup_printf("%d video",
                                         results->len);
-                        else
+                        } else {
                                 info_string = g_strdup_printf("%d videos",
                                         results->len);
+                        }
                         break;
                 default:
-                        if (results->len == 0)
+                        if (results->len == 0) {
                                 info_string = g_strdup_printf("No songs");
-                        else if (results->len == 1)
+                        } else if (results->len == 1) {
                                 info_string = g_strdup_printf("%d song",
                                         results->len);
-                        else
+                        } else {
                                 info_string = g_strdup_printf("%d songs",
-                                        results->len);
+                                       results->len);
+                        }
                         break;
         }
 
         gtk_label_set_text(GTK_LABEL(self->count_label), info_string);
-        if (self->mode != MEDIA_MODE_ALBUMS)
+        if (self->mode != MEDIA_MODE_ALBUMS) {
                 gtk_label_set_text(GTK_LABEL(self->current_label), "");
+        }
         g_free(info_string);
         self->results = results;
 
-        while (gtk_events_pending())
+        while (gtk_events_pending()) {
                 gtk_main_iteration();
+        }
         return row;
 }
 
@@ -656,8 +665,9 @@ static void list_selection_cb(GtkListBox *list, GtkListBoxRow *row,
         GList *children;
 
         self = BUDGIE_MEDIA_VIEW(userdata);
-        if (!row)
+        if (!row) {
                 return;
+        }
 
         children = gtk_container_get_children(GTK_CONTAINER(row));
         label = (BudgieMediaLabel*)g_list_nth_data(children, 0);
@@ -733,8 +743,9 @@ MediaInfo* budgie_media_view_get_info(BudgieMediaView *self,
         GRand *rand = NULL;
 
         /* No results yet */
-        if (!self->results)
+        if (!self->results) {
                 return NULL;
+        }
 
         switch (select) {
                 case MEDIA_SELECTION_NEXT:
@@ -753,8 +764,9 @@ MediaInfo* budgie_media_view_get_info(BudgieMediaView *self,
                         break;
         }
         /* Out of bounds */
-        if (index < 0 || index >= self->results->len)
+        if (index < 0 || index >= self->results->len) {
                 return NULL;
+        }
 
         ret = self->results->pdata[index];
         return ret;
@@ -772,9 +784,9 @@ void budgie_media_view_set_active(BudgieMediaView *self,
         for (child = g_list_first(children); child; child = child->next) {
                 row = GTK_LIST_BOX_ROW(child->data);
                 label = (BudgieMediaLabel*)gtk_bin_get_child(GTK_BIN(row));
-                if (label->info != active)
+                if (label->info != active) {
                         g_object_set(label, "playing", FALSE, NULL);
-                else {
+                } else {
                         self->index = gtk_list_box_row_get_index(row);
                         g_object_set(label, "playing", TRUE, NULL);
                         gtk_list_box_select_row(GTK_LIST_BOX(self->list),
@@ -783,8 +795,9 @@ void budgie_media_view_set_active(BudgieMediaView *self,
         }
 
         /* So we can track current item */
-        if (self->current_path)
+        if (self->current_path) {
                 g_free(self->current_path);
+        }
         self->current_path = g_strdup(active->path);
 
         g_list_free(children);
