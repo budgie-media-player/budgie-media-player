@@ -343,6 +343,7 @@ static void budgie_window_init(BudgieWindow *self)
 
         gtk_widget_realize(window);
         gtk_widget_show_all(window);
+        gtk_widget_hide(self->priv->error_revealer);
         budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(toolbar), FALSE);
         budgie_control_bar_set_show_playback(BUDGIE_CONTROL_BAR(toolbar), FALSE);
         budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(toolbar),
@@ -613,6 +614,7 @@ static void _gst_error_cb(GstBus *bus, GstMessage *msg, gpointer userdata)
 
         label_msg = g_strdup_printf("Encountered the following error:\n%s", error->message);
         gtk_label_set_markup(GTK_LABEL(self->priv->error_label), label_msg);
+        gtk_widget_show(self->priv->error_revealer);
         gtk_revealer_set_reveal_child(GTK_REVEALER(self->priv->error_revealer), TRUE);
         g_message("GStreamer issue: %s", error->message);
         g_message("GStreamer debug info: %s", debug_info);
@@ -868,5 +870,6 @@ static void error_dismiss_cb(GtkWidget *widget, gpointer userdata)
         BudgieWindow *self;
 
         self = BUDGIE_WINDOW(userdata);
+        gtk_widget_hide(self->priv->error_revealer);
         gtk_revealer_set_reveal_child(GTK_REVEALER(self->priv->error_revealer), FALSE);
 }
