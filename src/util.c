@@ -48,7 +48,6 @@ static MediaInfo* media_from_file(gchar *path, GFileInfo *file_info, const gchar
 
         tagfile = taglib_file_new(path);
         if (!tagfile) {
-                g_message("%s provides no tag information", path);
                 goto end;
         }
 
@@ -124,7 +123,7 @@ void search_directory(const gchar *path, GList **list, int n_params, const gchar
                                 /* Not exactly a regex but it'll do for now */
                                 file_mime = g_file_info_get_content_type(next_file);
                                 for (i=0; i < n_params; i++) {
-                                        if (g_str_has_prefix(file_mime, mimes[i])) {
+                                        if (g_str_has_prefix(file_mime, mimes[i]) && !g_str_has_suffix(full_path, ".m3u")) {
                                                 media = media_from_file(full_path, next_file, file_mime);
                                                 /* Probably switch to a new struct in the future */
                                                 *list = g_list_append(*list, media);
