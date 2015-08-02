@@ -365,9 +365,15 @@ static gpointer update_db(gpointer userdata)
                 if (current->album == NULL)
                         goto albumfail;
 
-                album_id = albumart_name_for_media(current, "jpeg");
+                album_id = albumart_name_for_media(current, "png");
                 path = g_strdup_printf("%s/media-art/%s", cache, album_id);
-                g_free(album_id);
+                if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
+                        g_free(path);
+                        g_free(album_id);
+                        album_id = albumart_name_for_media(current, "jpeg");
+                        path = g_strdup_printf("%s/media-art/%s", cache, album_id);
+                        g_free(album_id);
+                }
                 pixbuf = gdk_pixbuf_new_from_file(path, NULL);
                 if (!pixbuf)
                         pixbuf = beautify(NULL, base, overlay);
