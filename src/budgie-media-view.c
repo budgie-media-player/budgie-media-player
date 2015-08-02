@@ -530,9 +530,6 @@ static gboolean load_media_cb(gpointer userdata)
                         break;
         }
 
-        while (gtk_events_pending())
-                gtk_main_iteration();
-
         if (row) {
                 gtk_list_box_select_row(GTK_LIST_BOX(self->list),
                         row);
@@ -650,9 +647,6 @@ static GtkListBoxRow* set_display(BudgieMediaView *self, GPtrArray *results)
         g_free(info_string);
         self->results = results;
 
-        while (gtk_events_pending()) {
-                gtk_main_iteration();
-        }
         return row;
 }
 
