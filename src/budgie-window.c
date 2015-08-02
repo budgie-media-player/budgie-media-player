@@ -683,8 +683,10 @@ static gpointer load_media(gpointer data)
         for (i=0; i < length; i++)
                 search_directory(self->media_dirs[i], &tracks, 2, mimes);
 
+        budgie_db_begin_transaction(self->db);
         g_list_foreach(tracks, store_media, self);
         g_list_free_full(tracks, free_media_info);
+        budgie_db_end_transaction(self->db);
 
         budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
                 BUDGIE_ACTION_RELOAD, TRUE);

@@ -24,7 +24,6 @@
 #define budgie_db_h
 
 #include <glib-object.h>
-#include <gdbm.h>
 
 typedef struct _BudgieDB BudgieDB;
 typedef struct _BudgieDBClass   BudgieDBClass;
@@ -37,7 +36,7 @@ typedef struct _BudgieDBPrivate BudgieDBPrivate;
 #define IS_BUDGIE_DB_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), BUDGIE_DB_TYPE))
 #define BUDGIE_DB_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), BUDGIE_DB_TYPE, BudgieDBClass))
 
-#define CONFIG_NAME "budgie-1.db"
+#define CONFIG_NAME "budgie-2.db"
 
 /* BudgieDB object */
 struct _BudgieDB {
@@ -112,15 +111,6 @@ BudgieDB* budgie_db_new(void);
 void budgie_db_store_media(BudgieDB *self, MediaInfo *info);
 
 /**
- * Retrieve media information from BudgieDB by filesystem path
- * You must free the result of this call using free_media_info
- * @param self BudgieDB instance
- * @param path Path to media file on the filesystem
- * @return a MediaInfo if the file is known, or NULL
- */
-MediaInfo* budgie_db_get_media(BudgieDB *self, gchar *path);
-
-/**
  * Get all media known to BudgieDB
  * You must free the result of this call using g_list_free_full
  * @param self BudgieDB instance
@@ -161,4 +151,6 @@ gboolean budgie_db_search_field(BudgieDB *self,
  */
 gint budgie_db_sort(gconstpointer a, gconstpointer b);
 
+void budgie_db_begin_transaction(BudgieDB *self);
+void budgie_db_end_transaction(BudgieDB *self);
 #endif /* budgie_db_h */

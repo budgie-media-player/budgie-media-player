@@ -34,8 +34,9 @@ static void perform_migration(void)
 
         const gchar* paths[] = {
                 "idmp-1.db",
+                "budgie-1.db"
         };
-        path_len = 1;
+        path_len = 2;
 
         /* $HOME/.config/ */
         config = g_get_user_config_dir();

@@ -11,11 +11,12 @@ libbudgiedb_la_SOURCES = \
 
 libbudgiedb_la_CFLAGS = \
 	$(GIO_CFLAGS) \
+	$(SQLITE_CFLAGS) \
 	$(AM_CFLAGS)
 
 libbudgiedb_la_LIBADD = \
 	$(GIO_LIBS) \
-	-lgdbm
+	$(SQLITE_LIBS)
 
 budgie_media_player_SOURCES = \
 	budgie-window.c \

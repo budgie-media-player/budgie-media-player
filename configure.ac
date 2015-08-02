@@ -21,8 +21,9 @@ PKG_CHECK_MODULES([GSTREAMER_VIDEO], [gstreamer-video-1.0 >= 1.0.10])
 # Taglib for .. tags
 PKG_CHECK_MODULES([TAGLIB], [taglib_c >= 1.9.1])
 
-AC_CHECK_HEADERS([gdbm.h], [], [AC_MSG_ERROR([Unable to find gdbm headers])])
 
+# Sqlite for database
+PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.8])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES(Makefile src/Makefile data/Makefile)
 AC_OUTPUT
