@@ -1,4 +1,4 @@
--include $(top_srcdir)/common.mk
+include $(top_srcdir)/common.mk
 
 #@INTLTOOL_XML_NOMERGE_RULE@
 gsettings_SCHEMAS = com.evolve-os.budgie.media-player.gschema.xml
