@@ -122,11 +122,11 @@ MediaInfo* budgie_db_get_media(BudgieDB *self, gchar *path);
 
 /**
  * Get all media known to BudgieDB
- * You must free the result of this call using g_slist_free_full
+ * You must free the result of this call using g_list_free_full
  * @param self BudgieDB instance
- * @return a singly linked list of results, or NULL
+ * @return a linked list of results, or NULL
  */
-GSList* budgie_db_get_all_media(BudgieDB* self);
+GList* budgie_db_get_all_media(BudgieDB* self);
 
 /**
  * Return string values of one field for all MediaInfo in the database

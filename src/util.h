@@ -43,11 +43,11 @@ GtkWidget* new_button_with_icon(GtkIconTheme *theme,
 /**
  * Search a directory for files, and populate the list
  * @param dir The directory to search
- * @param list A singly-linked list to populate with search results
+ * @param list A linked list to populate with search results
  * @param n_params Number of following mime type prefixes
  * @param mimes Array of mime prefixes to find (i.e. audio/)
  */
-void search_directory(const gchar *dir, GSList **list, int n_params, const gchar **mimes);
+void search_directory(const gchar *dir, GList **list, int n_params, const gchar **mimes);
 
 /**
  * Convert seconds into human readable time

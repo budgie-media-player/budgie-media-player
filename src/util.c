@@ -93,7 +93,7 @@ end:
         return media;
 }
 
-void search_directory(const gchar *path, GSList **list, int n_params, const gchar **mimes)
+void search_directory(const gchar *path, GList **list, int n_params, const gchar **mimes)
 {
         GFile *file = NULL;
         GFileInfo *next_file;
@@ -127,7 +127,7 @@ void search_directory(const gchar *path, GSList **list, int n_params, const gcha
                                         if (g_str_has_prefix(file_mime, mimes[i])) {
                                                 media = media_from_file(full_path, next_file, file_mime);
                                                 /* Probably switch to a new struct in the future */
-                                                *list = g_slist_append(*list, media);
+                                                *list = g_list_append(*list, media);
                                         }
                                 }
                         }

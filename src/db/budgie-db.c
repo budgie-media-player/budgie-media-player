@@ -179,10 +179,10 @@ end:
         return ret;
 }
 
-GSList* budgie_db_get_all_media(BudgieDB* self)
+GList* budgie_db_get_all_media(BudgieDB* self)
 {
         datum key, nextkey;
-        GSList* ret = NULL;
+        GList* ret = NULL;
         char *path;
         MediaInfo *cur = NULL;
 
@@ -192,7 +192,7 @@ GSList* budgie_db_get_all_media(BudgieDB* self)
         while (key.dptr) {
                 path = (char*)key.dptr;
                 cur = budgie_db_get_media(self, path);
-                ret = g_slist_append(ret, cur);
+                ret = g_list_append(ret, cur);
                 nextkey = gdbm_nextkey(self->priv->db, key);
                 free(key.dptr);
                 key = nextkey;

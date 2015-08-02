@@ -111,7 +111,7 @@ static void budgie_window_init(BudgieWindow *self)
         GtkWidget *layout;
         GtkWidget *settings_view;
         GstBus *bus;
-        GSList *tracks;
+        GList *tracks;
         GdkVisual *visual;
         guint length;
         gchar **media_dirs = NULL;
@@ -331,8 +331,8 @@ static void budgie_window_init(BudgieWindow *self)
         g_timeout_add(1000, refresh_cb, self);
 
         tracks = budgie_db_get_all_media(self->db);
-        length = g_slist_length(tracks);
-        g_slist_free_full(tracks, free_media_info);
+        length = g_list_length(tracks);
+        g_list_free_full(tracks, free_media_info);
         /* Start thread from idle queue */
         if (length == 0) {
                 g_idle_add(load_media_t, self);
@@ -667,7 +667,7 @@ static gboolean load_media_t(gpointer data)
 static gpointer load_media(gpointer data)
 {
         BudgieWindow *self;
-        GSList *tracks = NULL;
+        GList *tracks = NULL;
         guint length, i;
         const gchar *mimes[2];
 
@@ -683,8 +683,8 @@ static gpointer load_media(gpointer data)
         for (i=0; i < length; i++)
                 search_directory(self->media_dirs[i], &tracks, 2, mimes);
 
-        g_slist_foreach(tracks, store_media, self);
-        g_slist_free_full(tracks, free_media_info);
+        g_list_foreach(tracks, store_media, self);
+        g_list_free_full(tracks, free_media_info);
 
         budgie_control_bar_set_action_enabled(BUDGIE_CONTROL_BAR(self->toolbar),
                 BUDGIE_ACTION_RELOAD, TRUE);
