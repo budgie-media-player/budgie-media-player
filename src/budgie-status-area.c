@@ -74,6 +74,7 @@ static void budgie_status_area_init(BudgieStatusArea *self)
         gtk_box_pack_start(GTK_BOX(top), label, TRUE, TRUE, 0);
         gtk_widget_set_name(label, "title");
         gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
+        gtk_label_set_max_width_chars(GTK_LABEL(label), 35);
         self->label = label;
 
         /* Bottom row */
@@ -135,7 +136,6 @@ void budgie_status_area_set_media(BudgieStatusArea *self, MediaInfo *info)
                 title_string = g_markup_printf_escaped("<b>%s</b>", info->title);
         }
         gtk_label_set_markup(GTK_LABEL(self->label), title_string);
-        gtk_label_set_max_width_chars(GTK_LABEL(self->label), 1);
         gtk_widget_queue_draw(GTK_WIDGET(self));
 
         g_free(title_string);
