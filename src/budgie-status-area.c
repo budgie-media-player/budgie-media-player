@@ -69,7 +69,7 @@ static void budgie_status_area_init(BudgieStatusArea *self)
 
         /* Construct our main label */
         label = gtk_label_new("<b>Budgie Media Player</b>");
-        gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.0);
+        g_object_set(label, "halign", GTK_ALIGN_START, "valign", GTK_ALIGN_START, NULL);
         gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
         gtk_box_pack_start(GTK_BOX(top), label, TRUE, TRUE, 0);
         gtk_widget_set_name(label, "title");

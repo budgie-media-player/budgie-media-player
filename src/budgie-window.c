@@ -288,7 +288,6 @@ static void budgie_window_init(BudgieWindow *self)
         /* Video */
         video = gtk_drawing_area_new();
         self->video = video;
-        gtk_widget_set_double_buffered(video, FALSE);
         self->priv->window_handle = 0;
         gtk_stack_add_named(GTK_STACK(stack), video, "video");
         gtk_widget_set_visual(video, visual);
