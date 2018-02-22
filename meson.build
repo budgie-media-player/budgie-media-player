@@ -1,3 +1,37 @@
+project(
+    'budgie-media-player',
+    ['c'],
+    version: '2.0.0',
+    license: [
+        'GPL-2.0',
+    ],
+    default_options: [
+        'c_std=c11',
+    ],
+)
+
+am_cflags = [
+    '-fstack-protector',
+    '-pedantic',
+    '-Wstrict-prototypes',
+    '-Wundef',
+    '-fno-common',
+    '-Werror-implicit-function-declaration',
+    '-Wformat',
+    '-Wformat-security',
+    '-Werror=format-security',
+    '-Wno-conversion',
+    '-Wunused-variable',
+    '-Wunreachable-code',
+    '-Wall',
+    '-W',
+    '-D_FORTIFY_SOURCE=2',
+]
+
+add_global_arguments(am_cflags, language: 'c')
+
+dep_gtk3 = dependency('gtk+-3.0', version: '>= 3.4.0')
+
 cc = meson.get_compiler('c')
 cdata = configuration_data()
 check_headers = [
