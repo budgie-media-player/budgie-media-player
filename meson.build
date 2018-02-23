@@ -31,6 +31,7 @@ am_cflags = [
 add_global_arguments(am_cflags, language: 'c')
 
 dep_gtk3 = dependency('gtk+-3.0', version: '>= 3.4.0')
+dep_sqlite3 = dependency('sqlite3', version: '>= 3.7.9')
 
 cc = meson.get_compiler('c')
 cdata = configuration_data()
