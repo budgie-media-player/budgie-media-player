@@ -7,6 +7,7 @@ project(
     ],
     default_options: [
         'c_std=c11',
+        'prefix=/usr',
     ],
 )
 
@@ -30,8 +31,21 @@ am_cflags = [
 
 add_global_arguments(am_cflags, language: 'c')
 
+meson.add_install_script('meson_post_install.sh')
+
+dep_glib = dependency('glib-2.0')
+dep_gstreamer = dependency('gstreamer-1.0', version: '>=1.12.0')
 dep_gtk3 = dependency('gtk+-3.0', version: '>= 3.4.0')
 dep_sqlite3 = dependency('sqlite3', version: '>= 3.7.9')
+dep_taglib = dependency('taglib_c', version: '>=1.11.0')
+
+# Get configuration bits together
+path_prefix = get_option('prefix')
+path_sysconfdir = join_paths(path_prefix, get_option('sysconfdir'))
+path_datadir = join_paths(path_prefix, get_option('datadir'))
+path_libexecdir = join_paths(path_prefix, get_option('libexecdir'))
+path_bindir = join_paths(path_prefix, get_option('bindir'))
+path_localedir = join_paths(path_prefix, get_option('localedir'))
 
 cc = meson.get_compiler('c')
 cdata = configuration_data()
@@ -67,5 +81,7 @@ endforeach
 configure_file(input : 'config.h.meson',
   output : 'config.h',
   configuration : cdata)
-subdir('src')
+
+configuration_inc = include_directories('.')
 subdir('data')
+subdir('src')

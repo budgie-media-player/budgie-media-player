@@ -13,5 +13,13 @@ bmp_name = 'budgie-media-player'
 
 bmp = executable(
     bmp_name,
-    sources: bmp_common_sources
+    include_directories : configuration_inc,
+    sources: bmp_common_sources,
+    dependencies: [
+        dep_glib,
+        dep_gstreamer,
+        dep_gtk3,
+        dep_sqlite3,
+        dep_taglib,
+    ],
 )
