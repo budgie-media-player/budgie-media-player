@@ -49,6 +49,9 @@ path_localedir = join_paths(path_prefix, get_option('localedir'))
 
 cc = meson.get_compiler('c')
 cdata = configuration_data()
+cdata.set_quoted('PACKAGE_NAME', meson.project_name())
+cdata.set_quoted('PACKAGE_VERSION', meson.project_version())
+cdata.set_quoted('PACKAGE_URL', 'https://budgiemedia.rocks')
 check_headers = [
   ['HAVE_DLFCN_H', 'dlfcn.h'],
   ['HAVE_INTTYPES_H', 'inttypes.h'],
