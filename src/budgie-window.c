@@ -23,7 +23,13 @@
 #include "config.h"
 
 #include <string.h>
+#if defined (GDK_WINDOWING_X11)
 #include <gdk/gdkx.h>
+#elif defined (GDK_WINDOWING_WIN32)
+#include <gdk/gdkwin32.h>
+#elif defined (GDK_WINDOWING_QUARTZ)
+#include <gdk/gdkquartz.h>
+#endif
 #include <gst/video/videooverlay.h>
 #include <gst/gstbus.h>
 
@@ -715,7 +721,13 @@ static void realize_cb(GtkWidget *widg, gpointer userdata)
         if (!gdk_window_ensure_native(window)) {
                 g_error("Unable to initialize video");
         }
-        self->priv->window_handle = GDK_WINDOW_XID(window);
+        #if defined (GDK_WINDOWING_X11)
+            self->priv->window_handle = GDK_WINDOW_XID(window);
+        #elif defined (GDK_WINDOWING_WIN32)
+            self->priv->window_handle = (guintptr)GDK_WINDOW_HWND(window);
+        #elif defined (GDK_WINDOWING_QUARTZ)
+            self->priv->window_handle = gdk_quartz_window_get_nsview (window);
+        #endif
         gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(self->gst_player), self->priv->window_handle);
         self->video_realized = TRUE;
 }
