@@ -7,7 +7,6 @@ project(
     ],
     default_options: [
         'c_std=c11',
-        'prefix=/usr',
     ],
 )
 
