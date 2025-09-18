@@ -1,6 +1,7 @@
 bmp_common_sources = [
     'budgie-control-bar.c',
     'budgie-media-label.c',
+    'budgie-media-view.c',
     'budgie-settings-view.c',
     'budgie-status-area.c',
     'budgie-window.c',
@@ -17,9 +18,10 @@ bmp = executable(
     sources: bmp_common_sources,
     dependencies: [
         dep_glib,
-        dep_gstreamer,
+        dep_mpv,
         dep_gtk3,
         dep_sqlite3,
         dep_taglib,
+        dep_gl,
     ],
 )

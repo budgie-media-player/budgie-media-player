@@ -20,7 +20,6 @@
  * 
  * 
  */
-#include <gst/gst.h>
 
 #include "budgie-status-area.h"
 #include "util.h"
@@ -156,12 +155,12 @@ void budgie_status_area_set_media_time(BudgieStatusArea *self, gint64 max, gint6
         gtk_widget_set_visible(self->slider, TRUE);
         gint elapsed;
 
-        elapsed = current/GST_SECOND;
+        elapsed = current/1000000000; /* Convert nanoseconds to seconds */
         time_string = format_seconds(elapsed, FALSE);
 
         /* Update slider */
-        current /= GST_SECOND;
-        max /= GST_SECOND;
+        current /= 1000000000; /* Convert nanoseconds to seconds */
+        max /= 1000000000; /* Convert nanoseconds to seconds */
         total_string = format_seconds(max, FALSE);
 
         g_signal_handler_block(self->slider, self->priv->seek_id);
@@ -185,7 +184,7 @@ static void changed_cb(GtkWidget *widget, gdouble value, gpointer userdata)
         BudgieStatusArea *self;
         gint64 num;
 
-        num = gtk_range_get_value(GTK_RANGE(widget)) * GST_SECOND;
+        num = gtk_range_get_value(GTK_RANGE(widget)) * 1000000000; /* Convert seconds to nanoseconds */
 
         self = BUDGIE_STATUS_AREA(userdata);
         g_signal_emit_by_name(self, "seek", num);

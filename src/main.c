@@ -57,7 +57,6 @@ int main(int argc, char **argv)
 {
         BudgieWindow *window;
         gtk_init(&argc, &argv);
-        gst_init(&argc, &argv);
 
         perform_migration();
         window = budgie_window_new();

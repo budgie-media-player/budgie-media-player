@@ -343,8 +343,12 @@ static gpointer update_db(gpointer userdata)
         self = BUDGIE_MEDIA_VIEW(userdata);
 
         /* No albums */
-        if (!budgie_db_get_all_by_field(self->db, MEDIA_QUERY_ALBUM, &albums))
+        if (!budgie_db_get_all_by_field(self->db, MEDIA_QUERY_ALBUM, &albums)) {
+                printf("No albums found in database\n");
                 return NULL;
+        }
+        
+        printf("Found %d albums in database\n", albums->len);
 
         cache = g_get_user_cache_dir();
         model = gtk_list_store_new(ALBUM_COLUMNS, G_TYPE_STRING,
@@ -352,15 +356,25 @@ static gpointer update_db(gpointer userdata)
                 G_TYPE_STRING);
 
         /* base and overlay image for album art */
+        // Try installed location first, then fall back to source directory
         base = gdk_pixbuf_new_from_file(DATADIR "/budgie/album-base.png", NULL);
+        if (!base)
+                base = gdk_pixbuf_new_from_file("../data/album-base.png", NULL);
+        
         overlay = gdk_pixbuf_new_from_file(DATADIR "/budgie/album-overlay.png", NULL);
+        if (!overlay)
+                overlay = gdk_pixbuf_new_from_file("../data/album-overlay.png", NULL);
 
         for (i=0; i < albums->len; i++) {
                 album = (gchar *)albums->pdata[i];
+                printf("Processing album %d: %s\n", i, album ? album : "(null)");
                 /* Try to gain at least one artist */
                 if (!budgie_db_search_field(self->db, MEDIA_QUERY_ALBUM,
-                        MATCH_QUERY_EXACT, album, 1, &results))
+                        MATCH_QUERY_EXACT, album, 1, &results)) {
+                        printf("Failed to find tracks for album: %s\n", album ? album : "(null)");
                         goto fail;
+                }
+                printf("Found %d tracks for album: %s\n", results->len, album ? album : "(null)");
                 current = results->pdata[0];
                 if (current->album == NULL)
                         goto albumfail;
@@ -412,8 +426,10 @@ fail:
         gtk_icon_view_set_model(GTK_ICON_VIEW(self->icon_view),
                 GTK_TREE_MODEL(model));
         g_ptr_array_free(albums, TRUE);
-        g_object_unref(base);
-        g_object_unref(overlay);
+        if (base)
+                g_object_unref(base);
+        if (overlay)
+                g_object_unref(overlay);
 
         return NULL;
 }
@@ -505,21 +521,123 @@ static gboolean load_media_cb(gpointer userdata)
         } else if (widget == self->songs) {
                 self->mode = MEDIA_MODE_SONGS;
 
-                /* Populate all songs */
+                /* Debug: Check what MIME types we have in the database */
+                GList *all_media = budgie_db_get_all_media(self->db);
+                g_print("Checking MIME types in database (first 10 entries):\n");
+                GList *current = all_media;
+                int count = 0;
+                while (current && count < 10) {
+                        MediaInfo *info = (MediaInfo *)current->data;
+                        g_print("  File: %s, MIME: %s\n", 
+                                info->path ? info->path : "(null)", 
+                                info->mime ? info->mime : "(null)");
+                        current = current->next;
+                        count++;
+                }
+                g_list_free_full(all_media, free_media_info);
+
+                /* Populate all songs - try both standard and macOS MIME types */
+                g_print("Searching for audio files with MIME starting with 'audio/'\n");
                 if (!budgie_db_search_field(self->db, MEDIA_QUERY_MIME,
-                        MATCH_QUERY_START, "audio/", -1, &results))
-                        /** Raise a warning somewhere? */
-                        g_warning("No tracks found");
+                        MATCH_QUERY_START, "audio/", -1, &results) || 
+                    !results || results->len == 0) {
+                        /* Try macOS-specific audio MIME types */
+                        g_print("No 'audio/' MIME types found, trying macOS audio MIME types\n");
+                        
+                        /* Clear any empty results */
+                        if (results) {
+                                g_ptr_array_free(results, TRUE);
+                                results = NULL;
+                        }
+                        
+                        /* Search for common macOS audio MIME types */
+                        GPtrArray *flac_results = NULL, *mp3_results = NULL, *aac_results = NULL;
+                        
+                        budgie_db_search_field(self->db, MEDIA_QUERY_MIME, MATCH_QUERY_EXACT, "org.xiph.flac", -1, &flac_results);
+                        g_print("Found %d FLAC files\n", flac_results ? flac_results->len : 0);
+                        
+                        budgie_db_search_field(self->db, MEDIA_QUERY_MIME, MATCH_QUERY_EXACT, "com.apple.quicktime-movie", -1, &mp3_results);
+                        g_print("Found %d quicktime-movie files\n", mp3_results ? mp3_results->len : 0);
+                        
+                        budgie_db_search_field(self->db, MEDIA_QUERY_MIME, MATCH_QUERY_EXACT, "public.mp3", -1, &aac_results);
+                        g_print("Found %d public.mp3 files\n", aac_results ? aac_results->len : 0);
+                        
+                        /* Combine results into one array */
+                        results = g_ptr_array_new();
+                        if (flac_results) {
+                                for (int i = 0; i < flac_results->len; i++) {
+                                        g_ptr_array_add(results, flac_results->pdata[i]);
+                                }
+                                g_ptr_array_free(flac_results, FALSE); /* Don't free the data, just the array */
+                        }
+                        if (mp3_results) {
+                                for (int i = 0; i < mp3_results->len; i++) {
+                                        g_ptr_array_add(results, mp3_results->pdata[i]);
+                                }
+                                g_ptr_array_free(mp3_results, FALSE);
+                        }
+                        if (aac_results) {
+                                for (int i = 0; i < aac_results->len; i++) {
+                                        g_ptr_array_add(results, aac_results->pdata[i]);
+                                }
+                                g_ptr_array_free(aac_results, FALSE);
+                        }
+                        
+                        g_print("Found %d audio tracks using macOS MIME types\n", results ? results->len : 0);
+                } else {
+                        g_print("Found %d audio tracks\n", results ? results->len : 0);
+                }
 
                 row = set_display(self, results);
         } else if (widget == self->videos) {
                 self->mode = MEDIA_MODE_VIDEOS;
 
-                /* Populate all songs */
-                if (!budgie_db_search_field(self->db, MEDIA_QUERY_MIME,
-                        MATCH_QUERY_START, "video/", -1, &results)) {
-                        /** Raise a warning somewhere? */
-                        g_warning("No tracks found");
+                /* Populate all videos - try both standard and macOS MIME types */
+                g_print("Searching for video files with MIME starting with 'video/'\n");
+                budgie_db_search_field(self->db, MEDIA_QUERY_MIME,
+                        MATCH_QUERY_START, "video/", -1, &results);
+                if (!results || results->len == 0) {
+                        /* Try macOS-specific video MIME types */
+                        g_print("No 'video/' MIME types found, trying macOS video MIME types\n");
+                        if (results) {
+                                g_ptr_array_free(results, TRUE);
+                                results = NULL;
+                        }
+                        
+                        /* Search for common macOS video MIME types */
+                        GPtrArray *mkv_results = NULL, *mp4_results = NULL, *avi_results = NULL;
+                        
+                        budgie_db_search_field(self->db, MEDIA_QUERY_MIME, MATCH_QUERY_EXACT, "org.matroska.mkv", -1, &mkv_results);
+                        g_print("Found %d MKV files\n", mkv_results ? mkv_results->len : 0);
+                        budgie_db_search_field(self->db, MEDIA_QUERY_MIME, MATCH_QUERY_EXACT, "com.apple.quicktime-movie", -1, &mp4_results);
+                        g_print("Found %d quicktime-movie files\n", mp4_results ? mp4_results->len : 0);
+                        budgie_db_search_field(self->db, MEDIA_QUERY_MIME, MATCH_QUERY_EXACT, "public.avi", -1, &avi_results);
+                        g_print("Found %d AVI files\n", avi_results ? avi_results->len : 0);
+                        
+                        /* Combine results into one array */
+                        results = g_ptr_array_new();
+                        if (mkv_results) {
+                                for (int i = 0; i < mkv_results->len; i++) {
+                                        g_ptr_array_add(results, mkv_results->pdata[i]);
+                                }
+                                g_ptr_array_free(mkv_results, FALSE); /* Don't free the data, just the array */
+                        }
+                        if (mp4_results) {
+                                for (int i = 0; i < mp4_results->len; i++) {
+                                        g_ptr_array_add(results, mp4_results->pdata[i]);
+                                }
+                                g_ptr_array_free(mp4_results, FALSE);
+                        }
+                        if (avi_results) {
+                                for (int i = 0; i < avi_results->len; i++) {
+                                        g_ptr_array_add(results, avi_results->pdata[i]);
+                                }
+                                g_ptr_array_free(avi_results, FALSE);
+                        }
+                        
+                        g_print("Found %d video tracks using macOS MIME types\n", results ? results->len : 0);
+                } else {
+                        g_print("Found %d video tracks\n", results ? results->len : 0);
                 }
 
                 row = set_display(self, results);
@@ -693,6 +811,10 @@ static GdkPixbuf *beautify(GdkPixbuf **source,
         int y_pad = 6;
         GdkPixbuf *scaled, *ret, *scaled_ret;
 
+        /* Return NULL if we don't have the base image */
+        if (!base)
+                return NULL;
+
         /* Create a new surface to work from */
         width = gdk_pixbuf_get_width(base);
         height = gdk_pixbuf_get_height(base);
@@ -718,8 +840,10 @@ static GdkPixbuf *beautify(GdkPixbuf **source,
         }
 
         /* Draw the overlay */
-        gdk_cairo_set_source_pixbuf(ctx, overlay, 0, 0);
-        cairo_paint(ctx);
+        if (overlay) {
+                gdk_cairo_set_source_pixbuf(ctx, overlay, 0, 0);
+                cairo_paint(ctx);
+        }
 
         /* Create a new image to return from this painting op */
         ret = gdk_pixbuf_get_from_surface(surface, 0, 0, width, height);
@@ -744,8 +868,12 @@ MediaInfo* budgie_media_view_get_info(BudgieMediaView *self,
 
         /* No results yet */
         if (!self->results) {
+                g_print("budgie_media_view_get_info: No results available\n");
                 return NULL;
         }
+
+        g_print("budgie_media_view_get_info: Current index: %d, Total results: %d, Selection: %d\n", 
+                index, self->results->len, select);
 
         switch (select) {
                 case MEDIA_SELECTION_NEXT:
@@ -765,10 +893,17 @@ MediaInfo* budgie_media_view_get_info(BudgieMediaView *self,
         }
         /* Out of bounds */
         if (index < 0 || index >= self->results->len) {
+                g_print("budgie_media_view_get_info: Index %d out of bounds (0-%d)\n", 
+                        index, self->results->len - 1);
                 return NULL;
         }
 
+        /* Update the current index */
+        self->index = index;
+        
         ret = self->results->pdata[index];
+        g_print("budgie_media_view_get_info: Selected track at index %d: %s\n", 
+                index, ret ? ret->path : "(null)");
         return ret;
 }
 

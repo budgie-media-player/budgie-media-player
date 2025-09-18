@@ -104,12 +104,20 @@ void search_directory(const gchar *path, GList **list, int n_params, const gchar
         MediaInfo *media;
         guint i;
 
+        g_print("  Entering directory: %s\n", path);
+        
         file = g_file_new_for_path(path);
         type = g_file_query_file_type(file, G_FILE_QUERY_INFO_NONE, NULL);
         if (type == G_FILE_TYPE_DIRECTORY) {
                 /* Enumerate children (needs less query flags!) */
                 listing = g_file_enumerate_children(file, "standard::*", G_FILE_QUERY_INFO_NONE,
                         NULL, NULL);
+
+                if (!listing) {
+                        g_print("    Failed to enumerate directory: %s\n", path);
+                        g_object_unref(file);
+                        return;
+                }
 
                 /* Lets go through them */
                 while ((next_file = g_file_enumerator_next_file(listing, NULL, NULL)) != NULL) {
@@ -118,16 +126,55 @@ void search_directory(const gchar *path, GList **list, int n_params, const gchar
 
                         /* Recurse if its a directory */
                         if (g_file_info_get_file_type(next_file) == G_FILE_TYPE_DIRECTORY) {
+                                g_print("    Found subdirectory: %s\n", full_path);
                                 search_directory(full_path, list, n_params, mimes);
                         } else {
-                                /* Not exactly a regex but it'll do for now */
+                                /* Check for media files by extension and MIME type */
                                 file_mime = g_file_info_get_content_type(next_file);
-                                for (i=0; i < n_params; i++) {
-                                        if (g_str_has_prefix(file_mime, mimes[i]) && !g_str_has_suffix(full_path, ".m3u")) {
-                                                media = media_from_file(full_path, next_file, file_mime);
-                                                /* Probably switch to a new struct in the future */
-                                                *list = g_list_append(*list, media);
+                                g_print("    Found file: %s (mime: %s)\n", full_path, file_mime ? file_mime : "unknown");
+                                
+                                gboolean is_media = FALSE;
+                                
+                                /* Check by file extension (more reliable on macOS) */
+                                if (g_str_has_suffix(full_path, ".mkv") ||
+                                    g_str_has_suffix(full_path, ".mp4") ||
+                                    g_str_has_suffix(full_path, ".avi") ||
+                                    g_str_has_suffix(full_path, ".mov") ||
+                                    g_str_has_suffix(full_path, ".wmv") ||
+                                    g_str_has_suffix(full_path, ".flv") ||
+                                    g_str_has_suffix(full_path, ".webm") ||
+                                    g_str_has_suffix(full_path, ".m4v") ||
+                                    g_str_has_suffix(full_path, ".mpg") ||
+                                    g_str_has_suffix(full_path, ".mpeg") ||
+                                    g_str_has_suffix(full_path, ".3gp") ||
+                                    g_str_has_suffix(full_path, ".mp3") ||
+                                    g_str_has_suffix(full_path, ".flac") ||
+                                    g_str_has_suffix(full_path, ".ogg") ||
+                                    g_str_has_suffix(full_path, ".m4a") ||
+                                    g_str_has_suffix(full_path, ".aac") ||
+                                    g_str_has_suffix(full_path, ".wav") ||
+                                    g_str_has_suffix(full_path, ".wma") ||
+                                    g_str_has_suffix(full_path, ".opus")) {
+                                    is_media = TRUE;
+                                }
+                                
+                                /* Also check MIME type as fallback */
+                                if (!is_media && file_mime) {
+                                    for (i=0; i < n_params; i++) {
+                                        if (g_str_has_prefix(file_mime, mimes[i]) ||
+                                            strstr(file_mime, "matroska") != NULL ||
+                                            strstr(file_mime, "audio") != NULL ||
+                                            strstr(file_mime, "video") != NULL) {
+                                            is_media = TRUE;
+                                            break;
                                         }
+                                    }
+                                }
+                                
+                                if (is_media && !g_str_has_suffix(full_path, ".m3u")) {
+                                    g_print("      -> Adding media file: %s\n", full_path);
+                                    media = media_from_file(full_path, next_file, file_mime);
+                                    *list = g_list_append(*list, media);
                                 }
                         }
                         g_free(full_path);
@@ -136,6 +183,8 @@ void search_directory(const gchar *path, GList **list, int n_params, const gchar
                 }
                 g_file_enumerator_close(listing, NULL, NULL);
                 g_object_unref(listing);
+        } else {
+                g_print("    Path is not a directory: %s\n", path);
         }
 
         g_object_unref(file);

@@ -33,10 +33,11 @@ add_global_arguments(am_cflags, language: 'c')
 meson.add_install_script('meson_post_install.sh')
 
 dep_glib = dependency('glib-2.0')
-dep_gstreamer = dependency('gstreamer-1.0', version: '>=1.12.0')
+dep_mpv = dependency('mpv', version: '>=0.29.0')
 dep_gtk3 = dependency('gtk+-3.0', version: '>= 3.4.0')
 dep_sqlite3 = dependency('sqlite3', version: '>= 3.7.9')
 dep_taglib = dependency('taglib_c', version: '>=1.11.0')
+dep_gl = dependency('gl')
 
 # Get configuration bits together
 path_prefix = get_option('prefix')
@@ -51,6 +52,7 @@ cdata = configuration_data()
 cdata.set_quoted('PACKAGE_NAME', meson.project_name())
 cdata.set_quoted('PACKAGE_VERSION', meson.project_version())
 cdata.set_quoted('PACKAGE_URL', 'https://budgiemedia.rocks')
+cdata.set_quoted('DATADIR', path_datadir)
 check_headers = [
   ['HAVE_DLFCN_H', 'dlfcn.h'],
   ['HAVE_INTTYPES_H', 'inttypes.h'],

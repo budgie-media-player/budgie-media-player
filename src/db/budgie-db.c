@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-#include <malloc.h>
+#include <malloc/malloc.h>
 
 #include "budgie-db.h"
 

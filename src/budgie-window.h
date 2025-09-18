@@ -27,7 +27,7 @@
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
-#include <gst/gst.h>
+#include <mpv/client.h>
 
 #include "budgie-status-area.h"
 #include "budgie-control-bar.h"
@@ -90,7 +90,7 @@ struct _BudgieWindow {
         GtkWidget *volume;
         GtkWidget *search;
         GtkWidget *settings;
-        GstElement *gst_player;
+        struct mpv_handle *mpv_player;
 
         GtkCssProvider *css_provider;
         BudgieWindowPrivate *priv;
