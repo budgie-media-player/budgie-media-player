@@ -23,6 +23,8 @@
 #include "config.h"
 
 #include <string.h>
+#include <stdlib.h>
+#include <locale.h>
 #include <dlfcn.h>
 #if defined (GDK_WINDOWING_X11)
 #include <gdk/gdkx.h>
@@ -62,6 +64,11 @@ struct _BudgieWindowPrivate {
         /* MPV rendering context */
         mpv_render_context *mpv_gl;
         gboolean using_opengl;  /* Track rendering method */
+        
+        /* Separate video window */
+        GtkWidget *video_window;
+        GtkWidget *video_widget;
+        gboolean video_window_open;
         
         /* Video frame buffer for performance */
         unsigned char *frame_buffer;
@@ -106,6 +113,15 @@ static void error_dismiss_cb(GtkWidget *widget, gpointer userdata);
 /* MPV callbacks */
 static void wakeup_cb(void *ctx);
 static void *get_proc_address(void *ctx, const char *name);
+static void initialize_mpv(BudgieWindow *self);
+
+/* Video window functions */
+static void create_video_window(BudgieWindow *self);
+static void show_video_window(BudgieWindow *self);
+static void hide_video_window(BudgieWindow *self);
+static gboolean video_window_delete_cb(GtkWidget *widget, GdkEvent *event, gpointer userdata);
+static gboolean video_draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata);
+static void video_realize_cb(GtkWidget *widget, gpointer userdata);
 
 /* Boilerplate GObject code */
 static void budgie_window_class_init(BudgieWindowClass *klass);
@@ -342,48 +358,13 @@ static void budgie_window_init(BudgieWindow *self)
         gtk_widget_set_margin_end(search, 10);
         self->search = search;
 
-        /* Initialise MPV */
-        self->mpv_player = mpv_create();
-        if (!self->mpv_player) {
-                g_error("Failed to create MPV instance");
-        }
+        /* MPV will be initialized when the video widget is realized */
+        self->mpv_player = NULL;
         
-        /* Set some MPV options for embedded rendering - cross-platform */
-        mpv_set_option_string(self->mpv_player, "vo", "libmpv");  /* Use libmpv for embedded rendering */
-        mpv_set_option_string(self->mpv_player, "hwdec", "auto");
-        mpv_set_option_string(self->mpv_player, "keep-open", "yes");
-        
-        /* Platform-specific optimizations */
-#if defined(GDK_WINDOWING_QUARTZ)
-        /* macOS optimizations */
-        mpv_set_option_string(self->mpv_player, "video-sync", "audio");  /* Better for macOS */
-        mpv_set_option_string(self->mpv_player, "vd-lavc-threads", "4");
-#elif defined(GDK_WINDOWING_X11)
-        /* Linux X11 optimizations */
-        mpv_set_option_string(self->mpv_player, "video-sync", "display-resample");
-        mpv_set_option_string(self->mpv_player, "x11-bypass-compositor", "yes");
-#elif defined(GDK_WINDOWING_WAYLAND)
-        /* Linux Wayland optimizations */
-        mpv_set_option_string(self->mpv_player, "video-sync", "display-resample");
-#elif defined(GDK_WINDOWING_WIN32)
-        /* Windows optimizations */
-        mpv_set_option_string(self->mpv_player, "video-sync", "display-resample");
-        mpv_set_option_string(self->mpv_player, "d3d11-adapter", "auto");
-#endif
-        
-        mpv_set_option_string(self->mpv_player, "interpolation", "no");  /* Disable frame interpolation for performance */
-        
-        /* Disable album art display in separate window */
-        mpv_set_option_string(self->mpv_player, "audio-display", "no");
-        mpv_set_option_string(self->mpv_player, "force-window", "no");  /* Never create separate window */
-        
-        /* Set wakeup callback for events */
-        mpv_set_wakeup_callback(self->mpv_player, wakeup_cb, self);
-        
-        /* Initialize MPV */
-        if (mpv_initialize(self->mpv_player) < 0) {
-                g_error("Failed to initialize MPV");
-        }
+        /* Initialize video window fields */
+        self->priv->video_window = NULL;
+        self->priv->video_widget = NULL;
+        self->priv->video_window_open = FALSE;
         
         self->priv->duration = 0;
 
@@ -478,13 +459,21 @@ static void budgie_window_dispose(GObject *object)
                 mpv_render_context_free(self->priv->mpv_gl);
                 self->priv->mpv_gl = NULL;
         }
-
+        
+        /* Clean up video window */
+        if (self->priv->video_window) {
+                gtk_widget_destroy(self->priv->video_window);
+                self->priv->video_window = NULL;
+                self->priv->video_widget = NULL;
+        }
+        
         /* Clean up frame buffer */
         if (self->priv->frame_buffer) {
                 g_free(self->priv->frame_buffer);
                 self->priv->frame_buffer = NULL;
                 self->priv->frame_buffer_size = 0;
         }
+        
         /* Destruct */
         G_OBJECT_CLASS(budgie_window_parent_class)->dispose(object);
 }
@@ -521,9 +510,26 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
 
         self = BUDGIE_WINDOW(userdata);
         
-        if (!self || !self->mpv_player) {
-                g_warning("play_cb: Invalid player or self");
+        if (!self) {
+                g_warning("play_cb: Invalid self");
                 return;
+        }
+        
+        /* If MPV isn't available, try to initialize it now */
+        if (!self->mpv_player) {
+                g_print("play_cb: MPV not initialized, initializing now...\n");
+                
+                /* For audio files, we need to ensure the video widget is realized first */
+                if (!self->video_realized) {
+                        g_print("play_cb: Video widget not realized, realizing now...\n");
+                        gtk_widget_realize(self->video);
+                }
+                
+                /* If still not available after realization, show error */
+                if (!self->mpv_player) {
+                        g_warning("play_cb: MPV initialization failed - cannot play media");
+                        return;
+                }
         }
         
         media = self->priv->media;
@@ -549,15 +555,16 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         if (g_str_has_prefix(media->mime, "video/") || 
             g_str_has_prefix(media->mime, "org.matroska.mkv") ||
             g_str_has_prefix(media->mime, "com.apple.quicktime-movie")) {
-                next_child = "video";
-                if (!self->video_realized) {
-                        gtk_widget_realize(self->video);
-                }
+                
+                /* Show video in separate window for better performance */
+                show_video_window(self);
                 budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(self->toolbar), TRUE);
                 
-                /* Keep force-window disabled to prevent separate windows */
-                g_print("Playing video file in embedded mode\n");
+                g_print("Playing video file in separate window\n");
+                next_child = "view"; /* Keep main window on library view */
         } else {
+                /* Hide video window for audio playback */
+                hide_video_window(self);
                 next_child = "view";
                 budgie_control_bar_set_show_video(BUDGIE_CONTROL_BAR(self->toolbar), FALSE);
                 self->priv->full_screen = FALSE;
@@ -571,10 +578,14 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         uri = g_filename_to_uri(media->path, NULL, NULL);
         if (g_strcmp0(uri, self->priv->uri) != 0) {
                 /* Media change between pausing */
-                const char *cmd[] = {"stop", NULL};
-                int result = mpv_command(self->mpv_player, cmd);
-                if (result < 0) {
-                        g_warning("play_cb: mpv stop command failed: %s", mpv_error_string(result));
+                if (self->mpv_player) {
+                        const char *cmd[] = {"stop", NULL};
+                        int result = mpv_command(self->mpv_player, cmd);
+                        if (result < 0) {
+                                g_warning("play_cb: mpv stop command failed: %s", mpv_error_string(result));
+                        }
+                } else {
+                        g_warning("Cannot stop media - MPV not initialized");
                 }
         }
         if (self->priv->uri) {
@@ -583,18 +594,23 @@ static void play_cb(GtkWidget *widget, gpointer userdata)
         self->priv->uri = uri;
         
         /* Load file and play */
-        const char *cmd[] = {"loadfile", media->path, NULL};
-        int result = mpv_command(self->mpv_player, cmd);
-        if (result < 0) {
-                g_warning("play_cb: mpv loadfile command failed: %s", mpv_error_string(result));
+        if (self->mpv_player) {
+                const char *cmd[] = {"loadfile", media->path, NULL};
+                int result = mpv_command(self->mpv_player, cmd);
+                if (result < 0) {
+                        g_warning("play_cb: mpv loadfile command failed: %s", mpv_error_string(result));
+                        return;
+                }
+                
+                /* Set pause property to false (start playing) */
+                int pause = 0;
+                result = mpv_set_property(self->mpv_player, "pause", MPV_FORMAT_FLAG, &pause);
+                if (result < 0) {
+                        g_warning("play_cb: mpv pause property set failed: %s", mpv_error_string(result));
+                }
+        } else {
+                g_warning("Cannot play media - MPV not initialized");
                 return;
-        }
-        
-        /* Set pause property to false (start playing) */
-        int pause = 0;
-        result = mpv_set_property(self->mpv_player, "pause", MPV_FORMAT_FLAG, &pause);
-        if (result < 0) {
-                g_warning("play_cb: mpv pause property set failed: %s", mpv_error_string(result));
         }
 
         /* Update media controls */
@@ -616,6 +632,12 @@ static void pause_cb(GtkWidget *widget, gpointer userdata)
         BudgieWindow *self;
 
         self = BUDGIE_WINDOW(userdata);
+
+        /* Check if MPV is available */
+        if (!self->mpv_player) {
+                g_warning("Cannot pause - MPV not available");
+                return;
+        }
 
         /* Set pause property to true */
         int pause = 1;
@@ -701,6 +723,11 @@ static gboolean refresh_cb(gpointer userdata) {
         double position = 0;
 
         self = BUDGIE_WINDOW(userdata);
+
+        /* Check if MPV is available */
+        if (!self->mpv_player) {
+                return TRUE; /* Continue timer but skip MPV operations */
+        }
 
         /* Get media duration from MPV */
         if (self->priv->duration == 0) {
@@ -940,8 +967,14 @@ static void *get_proc_address(void *ctx, const char *name)
 #elif defined(GDK_WINDOWING_WAYLAND)
         /* Linux Wayland - use eglGetProcAddress */
         return (void*)eglGetProcAddress(name);
-#elif defined(GDK_WINDOWING_WIN32)
         /* Windows - use wglGetProcAddress */
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <GL/gl.h>
+#endif
         return (void*)wglGetProcAddress(name);
 #elif defined(GDK_WINDOWING_QUARTZ)
         /* macOS - use dlsym with OpenGL framework */
@@ -1045,77 +1078,115 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata) {
         return FALSE;
 }
 
+static void initialize_mpv(BudgieWindow *self)
+{
+        /* Ensure C locale for MPV compatibility */
+        setlocale(LC_NUMERIC, "C");
+        
+        /* Initialise MPV */
+        g_print("MPV client API version: %lu\n", mpv_client_api_version());
+        g_print("Attempting to create MPV instance...\n");
+        
+        /* Add some debugging to see where exactly it hangs */
+        g_print("About to call mpv_create()...\n");
+        self->mpv_player = mpv_create();
+        g_print("mpv_create() returned: %p\n", self->mpv_player);
+        
+        if (!self->mpv_player) {
+                g_critical("Failed to create MPV instance. Possible solutions:");
+                g_critical("1. Install missing codecs: pacman -S mingw-w64-clang-x86_64-ffmpeg");
+                g_critical("2. Check MPV dependencies: pacman -S mingw-w64-clang-x86_64-mpv");
+                g_critical("3. Verify graphics drivers are installed");
+                g_critical("4. Try running: mpv --version (to test MPV directly)");
+                
+                /* Try to continue without MPV for now */
+                g_warning("Continuing without MPV - media playback will not work");
+                self->mpv_player = NULL;
+                return;
+        }
+        g_print("MPV instance created successfully\n");
+        
+        /* Set some MPV options for embedded rendering - cross-platform */
+        mpv_set_option_string(self->mpv_player, "vo", "libmpv");  /* Use libmpv for embedded rendering */
+        mpv_set_option_string(self->mpv_player, "hwdec", "auto");
+        mpv_set_option_string(self->mpv_player, "keep-open", "yes");
+        
+        /* Performance optimizations for embedded playback */
+        mpv_set_option_string(self->mpv_player, "profile", "fast");
+        mpv_set_option_string(self->mpv_player, "framedrop", "no");  /* Disable frame dropping to prevent speed-up */
+        mpv_set_option_string(self->mpv_player, "interpolation", "no");
+        mpv_set_option_string(self->mpv_player, "tscale", "oversample");
+        mpv_set_option_string(self->mpv_player, "video-latency-hacks", "no");  /* Disable timing hacks */
+        mpv_set_option_string(self->mpv_player, "audio-buffer", "0.2");  /* Slightly larger audio buffer */
+        
+        /* Platform-specific optimizations */
+#if defined(GDK_WINDOWING_QUARTZ)
+        /* macOS optimizations */
+        mpv_set_option_string(self->mpv_player, "video-sync", "audio");  /* Better for macOS */
+        mpv_set_option_string(self->mpv_player, "vd-lavc-threads", "4");
+#elif defined(GDK_WINDOWING_X11)
+        /* Linux X11 optimizations */
+        mpv_set_option_string(self->mpv_player, "video-sync", "display-resample");
+        mpv_set_option_string(self->mpv_player, "x11-bypass-compositor", "yes");
+#elif defined(GDK_WINDOWING_WAYLAND)
+        /* Linux Wayland optimizations */
+        mpv_set_option_string(self->mpv_player, "video-sync", "display-resample");
+#elif defined(GDK_WINDOWING_WIN32)
+        /* Windows optimizations for embedded playback - fix sync issues */
+        mpv_set_option_string(self->mpv_player, "video-sync", "display-resample");  /* Better sync */
+        mpv_set_option_string(self->mpv_player, "hwdec", "no");  /* Disable hardware decoding for stability */
+        mpv_set_option_string(self->mpv_player, "vo", "libmpv");
+        mpv_set_option_string(self->mpv_player, "vd-lavc-threads", "2");  /* Limited threads */
+        mpv_set_option_string(self->mpv_player, "cache", "no");  /* Disable cache for local files */
+        mpv_set_option_string(self->mpv_player, "scale", "fast");  /* Fastest scaling */
+        mpv_set_option_string(self->mpv_player, "dscale", "fast");
+        mpv_set_option_string(self->mpv_player, "cscale", "fast");
+        mpv_set_option_string(self->mpv_player, "opengl-swapinterval", "1");  /* Enable vsync for stability */
+        mpv_set_option_string(self->mpv_player, "temporal-dither", "no");  /* Disable temporal dithering */
+        mpv_set_option_string(self->mpv_player, "video-timing-offset", "0");  /* No timing offset */
+#endif
+        
+        /* Disable album art display in separate window */
+        mpv_set_option_string(self->mpv_player, "audio-display", "no");
+        mpv_set_option_string(self->mpv_player, "force-window", "no");  /* We manage windows ourselves */
+        
+        /* Initialize MPV first */
+        g_print("About to call mpv_initialize()...\n");
+        if (mpv_initialize(self->mpv_player) < 0) {
+                g_warning("Failed to initialize MPV - continuing without video playback");
+                mpv_terminate_destroy(self->mpv_player);
+                self->mpv_player = NULL;
+                return;
+        }
+        g_print("mpv_initialize() completed successfully\n");
+        
+        /* Skip wakeup callback for now to avoid crashes */
+        g_print("Skipping wakeup callback setup to avoid crashes\n");
+        
+        g_print("MPV initialized successfully\n");
+}
+
 
 static void realize_cb(GtkWidget *widg, gpointer userdata)
 {
         BudgieWindow *self;
-        GdkWindow *window;
-        mpv_render_param params[3];
-        int param_count = 0;
 
         self = BUDGIE_WINDOW(userdata);
-        window = gtk_widget_get_window(self->video);
-        if (!gdk_window_ensure_native(window)) {
-                g_error("Unable to initialize video");
-        }
-
-        /* Try OpenGL first, fallback to software rendering */
-        gboolean use_opengl = FALSE;
         
-#if defined(GDK_WINDOWING_X11) || defined(GDK_WINDOWING_WAYLAND)
-        /* On Linux, try OpenGL first as it's usually well-supported */
-        use_opengl = TRUE;
-#elif defined(GDK_WINDOWING_WIN32)
-        /* On Windows, try OpenGL */
-        use_opengl = TRUE;
-#elif defined(GDK_WINDOWING_QUARTZ)
-        /* On macOS, use software rendering for now due to context issues */
-        use_opengl = FALSE;
-#endif
-
-        if (use_opengl) {
-                /* Try OpenGL rendering first */
-                params[param_count++] = (mpv_render_param){MPV_RENDER_PARAM_API_TYPE, MPV_RENDER_API_TYPE_OPENGL};
-                params[param_count++] = (mpv_render_param){MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &(mpv_opengl_init_params){
-                        .get_proc_address = get_proc_address,
-                        .get_proc_address_ctx = self,
-                }};
-                params[param_count++] = (mpv_render_param){0};
-
-                if (mpv_render_context_create(&self->priv->mpv_gl, self->mpv_player, params) < 0) {
-                        g_warning("OpenGL rendering failed, falling back to software rendering");
-                        use_opengl = FALSE;
-                        self->priv->using_opengl = FALSE;
-                } else {
-                        self->priv->using_opengl = TRUE;
-                }
+        /* Initialize MPV now that the window system is ready */
+        if (!self->mpv_player) {
+                initialize_mpv(self);
         }
         
-        if (!use_opengl) {
-                /* Fallback to software rendering */
-                param_count = 0;
-                params[param_count++] = (mpv_render_param){MPV_RENDER_PARAM_API_TYPE, MPV_RENDER_API_TYPE_SW};
-                params[param_count++] = (mpv_render_param){0};
-
-                if (mpv_render_context_create(&self->priv->mpv_gl, self->mpv_player, params) < 0) {
-                        g_warning("Failed to initialize MPV render context");
-                        self->priv->mpv_gl = NULL;
-                        self->priv->using_opengl = FALSE;
-                } else {
-                        g_print("Using software rendering for video\n");
-                        self->priv->using_opengl = FALSE;
-                }
-        } else {
-                g_print("Using OpenGL rendering for video\n");
+        /* If MPV initialization failed, we can't do video rendering */
+        if (!self->mpv_player) {
+                g_warning("Skipping video setup - MPV not available");
+                self->video_realized = TRUE;
+                return;
         }
-
-        if (self->priv->mpv_gl) {
-                /* Set up update callback for redraws */
-                mpv_render_context_set_update_callback(self->priv->mpv_gl, 
-                                                        (mpv_render_update_fn)gtk_widget_queue_draw,
-                                                        self->video);
-        }
-
+        
+        /* For embedded video, we now use separate windows, so just mark as realized */
+        g_print("Embedded video widget realized - using separate video window approach\n");
         self->video_realized = TRUE;
 }
 
@@ -1249,6 +1320,12 @@ static void seek_cb(BudgieStatusArea *status, gint64 value, gpointer userdata)
 
         self = BUDGIE_WINDOW(userdata);
         
+        /* Check if MPV is available */
+        if (!self->mpv_player) {
+                g_warning("Cannot seek - MPV not available");
+                return;
+        }
+        
         /* Convert nanoseconds to seconds for MPV */
         seek_time = (double)value / 1000000000.0;
         
@@ -1277,4 +1354,184 @@ static void error_dismiss_cb(GtkWidget *widget, gpointer userdata)
         self = BUDGIE_WINDOW(userdata);
         gtk_widget_hide(self->priv->error_revealer);
         gtk_revealer_set_reveal_child(GTK_REVEALER(self->priv->error_revealer), FALSE);
+}
+
+/* Video window functions */
+static void create_video_window(BudgieWindow *self)
+{
+        if (self->priv->video_window) {
+                return; /* Already created */
+        }
+        
+        /* Create the video window */
+        self->priv->video_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+        gtk_window_set_title(GTK_WINDOW(self->priv->video_window), "Video Player");
+        gtk_window_set_default_size(GTK_WINDOW(self->priv->video_window), 800, 600);
+        gtk_window_set_position(GTK_WINDOW(self->priv->video_window), GTK_WIN_POS_CENTER);
+        
+        /* Create the video widget */
+        self->priv->video_widget = gtk_drawing_area_new();
+        gtk_widget_set_size_request(self->priv->video_widget, 800, 600);
+        gtk_widget_set_can_focus(self->priv->video_widget, TRUE);
+        
+        /* Set up the video widget for rendering */
+        gtk_widget_set_double_buffered(self->priv->video_widget, FALSE);
+        
+        /* Connect signals */
+        g_signal_connect(self->priv->video_widget, "realize", G_CALLBACK(video_realize_cb), self);
+        g_signal_connect(self->priv->video_widget, "draw", G_CALLBACK(video_draw_cb), self);
+        g_signal_connect(self->priv->video_window, "delete-event", G_CALLBACK(video_window_delete_cb), self);
+        
+        /* Add widget to window */
+        gtk_container_add(GTK_CONTAINER(self->priv->video_window), self->priv->video_widget);
+        
+        self->priv->video_window_open = FALSE;
+}
+
+static void show_video_window(BudgieWindow *self)
+{
+        if (!self->priv->video_window) {
+                create_video_window(self);
+        }
+        
+        gtk_widget_show_all(self->priv->video_window);
+        self->priv->video_window_open = TRUE;
+        
+        /* Realize the video widget if not already done */
+        if (!gtk_widget_get_realized(self->priv->video_widget)) {
+                gtk_widget_realize(self->priv->video_widget);
+        }
+}
+
+static void hide_video_window(BudgieWindow *self)
+{
+        if (self->priv->video_window && self->priv->video_window_open) {
+                gtk_widget_hide(self->priv->video_window);
+                self->priv->video_window_open = FALSE;
+        }
+}
+
+static gboolean video_window_delete_cb(GtkWidget *widget, GdkEvent *event, gpointer userdata)
+{
+        BudgieWindow *self = BUDGIE_WINDOW(userdata);
+        
+        /* Hide the window instead of destroying it */
+        hide_video_window(self);
+        
+        /* Stop playback when video window is closed */
+        if (self->mpv_player) {
+                const char* cmd[] = {"stop", NULL};
+                mpv_command(self->mpv_player, cmd);
+        }
+        
+        return TRUE; /* Prevent default destroy behavior */
+}
+
+static gboolean video_draw_cb(GtkWidget *widget, cairo_t *cr, gpointer userdata)
+{
+        BudgieWindow *self = BUDGIE_WINDOW(userdata);
+        
+        if (self->priv->mpv_gl) {
+                /* Get widget dimensions */
+                int width = gtk_widget_get_allocated_width(widget);
+                int height = gtk_widget_get_allocated_height(widget);
+                
+                if (width > 0 && height > 0) {
+                        if (self->priv->using_opengl) {
+                                /* Use OpenGL rendering */
+                                mpv_render_param gl_params[] = {
+                                        {MPV_RENDER_PARAM_OPENGL_FBO, &(mpv_opengl_fbo){
+                                                .fbo = 0,  /* Default framebuffer */
+                                                .w = width,
+                                                .h = height,
+                                        }},
+                                        {MPV_RENDER_PARAM_FLIP_Y, &(int){1}},
+                                        {0}
+                                };
+                                
+                                mpv_render_context_render(self->priv->mpv_gl, gl_params);
+                        } else {
+                                /* Use software rendering with cairo */
+                                mpv_render_param sw_params[] = {
+                                        {MPV_RENDER_PARAM_SW_SIZE, &(int[2]){width, height}},
+                                        {MPV_RENDER_PARAM_SW_FORMAT, "rgb0"},
+                                        {0}
+                                };
+                                
+                                /* Allocate frame buffer if needed */
+                                size_t needed_size = width * height * 4;
+                                if (self->priv->frame_buffer_size < needed_size) {
+                                        g_free(self->priv->frame_buffer);
+                                        self->priv->frame_buffer = g_malloc(needed_size);
+                                        self->priv->frame_buffer_size = needed_size;
+                                }
+                                
+                                sw_params[2] = (mpv_render_param){MPV_RENDER_PARAM_SW_STRIDE, &(size_t){width * 4}};
+                                sw_params[3] = (mpv_render_param){MPV_RENDER_PARAM_SW_POINTER, self->priv->frame_buffer};
+                                sw_params[4] = (mpv_render_param){0};
+                                
+                                if (mpv_render_context_render(self->priv->mpv_gl, sw_params) >= 0) {
+                                        /* Draw the frame to cairo */
+                                        cairo_surface_t *surface = cairo_image_surface_create_for_data(
+                                                self->priv->frame_buffer, CAIRO_FORMAT_RGB24, width, height, width * 4);
+                                        cairo_set_source_surface(cr, surface, 0, 0);
+                                        cairo_paint(cr);
+                                        cairo_surface_destroy(surface);
+                                }
+                        }
+                }
+        }
+        
+        return FALSE;
+}
+
+static void video_realize_cb(GtkWidget *widget, gpointer userdata)
+{
+        BudgieWindow *self = BUDGIE_WINDOW(userdata);
+        GdkWindow *window;
+        
+        /* Initialize MPV if not already done */
+        if (!self->mpv_player) {
+                initialize_mpv(self);
+        }
+        
+        if (!self->mpv_player) {
+                g_warning("Cannot set up video rendering - MPV not available");
+                return;
+        }
+        
+        window = gtk_widget_get_window(widget);
+        if (!gdk_window_ensure_native(window)) {
+                g_warning("Unable to create native window for video");
+                return;
+        }
+        
+        /* Only create render context if it doesn't exist */
+        if (!self->priv->mpv_gl) {
+                /* Set up MPV rendering context for the separate window */
+                mpv_render_param params[3];
+                int param_count = 0;
+                
+                /* Use software rendering for better compatibility in separate window */
+                params[param_count++] = (mpv_render_param){MPV_RENDER_PARAM_API_TYPE, MPV_RENDER_API_TYPE_SW};
+                params[param_count++] = (mpv_render_param){0};
+                
+                if (mpv_render_context_create(&self->priv->mpv_gl, self->mpv_player, params) < 0) {
+                        g_warning("Failed to create MPV render context for video window");
+                        self->priv->mpv_gl = NULL;
+                        self->priv->using_opengl = FALSE;
+                } else {
+                        g_print("Video window render context created successfully\n");
+                        self->priv->using_opengl = FALSE;
+                        
+                        /* Set up update callback */
+                        mpv_render_context_set_update_callback(self->priv->mpv_gl, 
+                                (mpv_render_update_fn)gtk_widget_queue_draw, widget);
+                }
+        } else {
+                g_print("Using existing render context for video window\n");
+                /* Update the callback to point to the video window */
+                mpv_render_context_set_update_callback(self->priv->mpv_gl, 
+                        (mpv_render_update_fn)gtk_widget_queue_draw, widget);
+        }
 }

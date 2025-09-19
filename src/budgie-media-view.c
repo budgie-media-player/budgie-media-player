@@ -342,6 +342,12 @@ static gpointer update_db(gpointer userdata)
 
         self = BUDGIE_MEDIA_VIEW(userdata);
 
+        /* Check if database is available */
+        if (!self->db) {
+                printf("No database available - cannot load albums\n");
+                return NULL;
+        }
+
         /* No albums */
         if (!budgie_db_get_all_by_field(self->db, MEDIA_QUERY_ALBUM, &albums)) {
                 printf("No albums found in database\n");

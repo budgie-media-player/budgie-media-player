@@ -43,19 +43,29 @@ static MediaInfo* media_from_file(gchar *path, GFileInfo *file_info, const gchar
         TagLib_Tag *tag = NULL;
         char *ktmp = NULL;
 
+        g_print("      -> Creating MediaInfo for: %s\n", path);
+
         media = malloc(sizeof(MediaInfo));
+        if (!media) {
+                g_error("Failed to allocate memory for MediaInfo");
+                return NULL;
+        }
         memset(media, 0, sizeof(MediaInfo));
 
+        g_print("      -> Attempting to read tags with TagLib\n");
         tagfile = taglib_file_new(path);
         if (!tagfile) {
+                g_warning("TagLib failed to open file: %s", path);
                 goto end;
         }
 
         tag = taglib_file_tag(tagfile);
         if (!tag) {
+                g_warning("TagLib failed to get tags for: %s", path);
                 goto clean;
         }
 
+        g_print("      -> Reading metadata tags\n");
         /* Set fields from taglib */
         ktmp = taglib_tag_title(tag);
         if (ktmp && strlen(ktmp) != 0) {
@@ -78,6 +88,7 @@ static MediaInfo* media_from_file(gchar *path, GFileInfo *file_info, const gchar
                 media->genre = g_strdup(ktmp);
         }
 
+        g_print("      -> Cleaning up TagLib resources\n");
         taglib_tag_free_strings();
 clean:
         taglib_file_free(tagfile);
@@ -89,7 +100,83 @@ end:
         media->path = g_strdup(path);
         media->mime = g_strdup(file_mime);
 
+        g_print("      -> MediaInfo created successfully for: %s\n", media->title ? media->title : "Unknown");
         return media;
+}
+
+/* Platform-specific MIME type detection */
+static const gchar* get_platform_mime_type(const gchar* filename, GFileInfo *file_info) {
+        if (!filename) return NULL;
+        
+        const gchar* detected_mime = NULL;
+        
+        /* Try to get MIME type from GFileInfo first */
+        if (file_info) {
+                detected_mime = g_file_info_get_content_type(file_info);
+        }
+        
+#ifdef G_OS_WIN32
+        /* Windows often returns file extensions instead of MIME types */
+        if (!detected_mime || g_str_has_prefix(detected_mime, ".")) {
+                gchar *lowercase = g_ascii_strdown(filename, -1);
+                
+                /* Audio types */
+                if (g_str_has_suffix(lowercase, ".flac")) {
+                        detected_mime = "audio/flac";
+                } else if (g_str_has_suffix(lowercase, ".mp3")) {
+                        detected_mime = "audio/mpeg";
+                } else if (g_str_has_suffix(lowercase, ".ogg")) {
+                        detected_mime = "audio/ogg";
+                } else if (g_str_has_suffix(lowercase, ".aac")) {
+                        detected_mime = "audio/aac";
+                } else if (g_str_has_suffix(lowercase, ".wav")) {
+                        detected_mime = "audio/wav";
+                } else if (g_str_has_suffix(lowercase, ".m4a")) {
+                        detected_mime = "audio/mp4";
+                /* Video types */
+                } else if (g_str_has_suffix(lowercase, ".mp4")) {
+                        detected_mime = "video/mp4";
+                } else if (g_str_has_suffix(lowercase, ".mkv")) {
+                        detected_mime = "video/x-matroska";
+                } else if (g_str_has_suffix(lowercase, ".avi")) {
+                        detected_mime = "video/x-msvideo";
+                } else if (g_str_has_suffix(lowercase, ".mov")) {
+                        detected_mime = "video/quicktime";
+                } else if (g_str_has_suffix(lowercase, ".webm")) {
+                        detected_mime = "video/webm";
+                }
+                
+                g_free(lowercase);
+        }
+#elif defined(__APPLE__)
+        /* macOS specific MIME type handling */
+        if (!detected_mime) {
+                gchar *lowercase = g_ascii_strdown(filename, -1);
+                
+                /* macOS might use different MIME types */
+                if (g_str_has_suffix(lowercase, ".flac")) {
+                        detected_mime = "audio/flac";
+                } else if (g_str_has_suffix(lowercase, ".mp3")) {
+                        detected_mime = "audio/mpeg";
+                } else if (g_str_has_suffix(lowercase, ".m4a")) {
+                        detected_mime = "audio/mp4";
+                } else if (g_str_has_suffix(lowercase, ".mp4")) {
+                        detected_mime = "video/mp4";
+                } else if (g_str_has_suffix(lowercase, ".mov")) {
+                        detected_mime = "video/quicktime";
+                }
+                
+                g_free(lowercase);
+        }
+#else
+        /* Linux/Unix - usually has better MIME detection */
+        if (!detected_mime) {
+                /* Try g_content_type_guess as fallback */
+                detected_mime = g_content_type_guess(filename, NULL, 0, NULL);
+        }
+#endif
+
+        return detected_mime;
 }
 
 void search_directory(const gchar *path, GList **list, int n_params, const gchar **mimes)
@@ -129,8 +216,9 @@ void search_directory(const gchar *path, GList **list, int n_params, const gchar
                                 g_print("    Found subdirectory: %s\n", full_path);
                                 search_directory(full_path, list, n_params, mimes);
                         } else {
-                                /* Check for media files by extension and MIME type */
-                                file_mime = g_file_info_get_content_type(next_file);
+                                /* Use platform-specific MIME type detection */
+                                file_mime = get_platform_mime_type(full_path, next_file);
+                                
                                 g_print("    Found file: %s (mime: %s)\n", full_path, file_mime ? file_mime : "unknown");
                                 
                                 gboolean is_media = FALSE;

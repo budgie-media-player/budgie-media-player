@@ -23,7 +23,12 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#if defined(__APPLE__)
 #include <malloc/malloc.h>
+#else
+#include <stdlib.h>
+#endif
 
 #include "budgie-db.h"
 
@@ -114,12 +119,42 @@ static void budgie_db_init(BudgieDB *self)
 
         self->priv->db = db;
 
+        /* Test if database is valid by trying a simple query */
+        const char *test_sql = "SELECT name FROM sqlite_master WHERE type='table';";
+        sqlite3_stmt *test_stmt;
+        rc = sqlite3_prepare_v2(db, test_sql, -1, &test_stmt, NULL);
+        if (rc != SQLITE_OK) {
+                g_warning("Database appears corrupted (%s), attempting to recreate", sqlite3_errmsg(db));
+                sqlite3_close(db);
+                
+                /* Remove corrupted database file */
+                if (g_file_test(self->priv->storage_path, G_FILE_TEST_EXISTS)) {
+                        if (unlink(self->priv->storage_path) != 0) {
+                                g_warning("Failed to remove corrupted database file");
+                        }
+                }
+                
+                /* Try to create new database */
+                rc = sqlite3_open(self->priv->storage_path, &db);
+                if (rc != SQLITE_OK) {
+                        g_critical("Unable to create new database after corruption recovery");
+                        return;
+                }
+                self->priv->db = db;
+        } else {
+                sqlite3_finalize(test_stmt);
+        }
+
         /* rep */
-        sql = "CREATE TABLE IF NOT EXISTS MEDIA (ID PATH UNIQUE, TITLE TEXT, ARTIST TEXT, ALBUM TEXT, BAND TEXT, GENRE TEXT, MIME TEXT);";
+        sql = "CREATE TABLE IF NOT EXISTS MEDIA (ID TEXT UNIQUE, TITLE TEXT, ARTIST TEXT, ALBUM TEXT, BAND TEXT, GENRE TEXT, MIME TEXT);";
         rc = sqlite3_exec(db, sql, NULL, NULL, &err);
         if (rc != SQLITE_OK) {
-                g_critical("Unable to initialise database");
-                free(err);
+                g_critical("Unable to initialise database: %s", err ? err : "unknown error");
+                if (err) {
+                        free(err);
+                }
+                sqlite3_close(db);
+                self->priv->db = NULL;
                 return;
         }
 
@@ -243,9 +278,17 @@ BudgieDB* budgie_db_new(void)
 
 void budgie_db_store_media(BudgieDB *self, MediaInfo *info)
 {
-        sqlite3_stmt *stm = self->priv->insert;
+        sqlite3_stmt *stm;
         gboolean dwarn = TRUE;
         int rc;
+        
+        /* Check if database is properly initialized */
+        if (!self->priv->db || !self->priv->insert) {
+                g_warning("Database not initialized - cannot store media");
+                return;
+        }
+        
+        stm = self->priv->insert;
         sqlite3_reset(stm);
 
         /* (ID PATH UNIQUE, TITLE TEXT, ALBUM TEXT, BAND TEXT, GENRE TEXT, MIME TEXT) */
@@ -312,9 +355,20 @@ gboolean budgie_db_get_all_by_field(BudgieDB *self,
         const char *select = NULL;
         GPtrArray *res = NULL;
 
+        /* Check if database is properly initialized */
+        if (!self->priv->db || !self->priv->field_table) {
+                g_warning("Database not initialized - cannot query fields");
+                *results = g_ptr_array_new();
+                return FALSE;
+        }
 
         select = name_for_field(query);
         stm = g_hash_table_lookup(self->priv->field_table, select);
+        if (!stm) {
+                g_warning("No prepared statement found for field query");
+                *results = g_ptr_array_new();
+                return FALSE;
+        }
         sqlite3_reset(stm);
 
         res = g_ptr_array_new();

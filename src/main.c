@@ -22,6 +22,7 @@
  */
 
 #include <stdlib.h>
+#include <locale.h>
 #include "budgie-window.h"
 
 static void perform_migration(void)
@@ -56,6 +57,10 @@ static void perform_migration(void)
 int main(int argc, char **argv)
 {
         BudgieWindow *window;
+        
+        /* Set locale to fix MPV initialization issues */
+        setlocale(LC_NUMERIC, "C");
+        
         gtk_init(&argc, &argv);
 
         perform_migration();
